@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,8 +11,9 @@ namespace EMS_TEST_SIMULATOR
     public partial class UserControl2 : UserControl
     {
         private DispatcherTimer _timer;
-        private double _currentX = 50;
-        private int direction = 0; // 0: 전진, 1: 후진
+        private double _currentX = 50;   // 실제 표시 위치 (부드럽게 보간)
+        private double _targetX = 50;    // EMS 현재 섹션에 따른 목표 X
+        private const double LerpFactor = 0.14; // 0~1, 클수록 빠르게 따라감
 
         private List<Rectangle> _sensors = new List<Rectangle>();
         private const int SensorCount = 13;
@@ -80,17 +81,20 @@ namespace EMS_TEST_SIMULATOR
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // SR150 특유의 이동 속도 (1.5px) 및 왕복 로직 적용
-            if (direction == 0)
+            // EMS 현재 위치로 목표 X만 갱신
+            if (!string.IsNullOrEmpty(RailStatus.CurrentSectionCount) && int.TryParse(RailStatus.CurrentSectionCount, out int sectionNum) && sectionNum >= 101 && sectionNum <= 113)
             {
-                _currentX += 1.5;
-                if (_currentX >= EndPos) direction = 1;
+                int index = sectionNum - 101;
+                double interval = (EndPos - StartPos) / (SensorCount - 1);
+                _targetX = StartPos + (index * interval);
             }
+
+            // 현재 위치를 목표로 부드럽게 보간 (휙휙 점프 방지)
+            double diff = _targetX - _currentX;
+            if (Math.Abs(diff) < 0.5)
+                _currentX = _targetX;
             else
-            {
-                _currentX -= 1.5;
-                if (_currentX <= StartPos) direction = 0;
-            }
+                _currentX += diff * LerpFactor;
 
             if (RavTransform_SR150 != null) RavTransform_SR150.X = _currentX;
 

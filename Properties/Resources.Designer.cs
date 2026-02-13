@@ -83,6 +83,16 @@ namespace EMS_TEST_SIMULATOR.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
         /// </summary>
+        internal static System.Drawing.Bitmap AUTO_FINAL_Photoroom {
+            get {
+                object obj = ResourceManager.GetObject("AUTO_FINAL-Photoroom", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
         internal static System.Drawing.Bitmap AUTO_SW {
             get {
                 object obj = ResourceManager.GetObject("AUTO_SW", resourceCulture);
@@ -106,6 +116,16 @@ namespace EMS_TEST_SIMULATOR.Properties {
         internal static System.Drawing.Bitmap EMO_BACKGROUND_ERASE {
             get {
                 object obj = ResourceManager.GetObject("EMO_BACKGROUND_ERASE", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap EMO_FINAL_Photoroom {
+            get {
+                object obj = ResourceManager.GetObject("EMO FINAL-Photoroom", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

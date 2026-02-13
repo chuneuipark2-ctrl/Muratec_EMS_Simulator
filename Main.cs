@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,8 +26,15 @@ namespace EMS_TEST_SIMULATOR
 
         // [추가] 엔코더 설정을 전담할 매니저 생성
         public Encoder_Setting_Manager _encManager = new Encoder_Setting_Manager();
+        public Encoder_Setting_Manager _EncManager => _encManager;
+
         private EMS_TCP_UDP_Connect SKY_RAV_CONNECT_FORM;
         public IDeviceComm GlobalComm; // 통신 객체를 담아둘 공용 보관함
+        public EMS_Protocol GlobalEmsProto => (SKY_RAV_CONNECT_FORM != null && !SKY_RAV_CONNECT_FORM.IsDisposed) ? SKY_RAV_CONNECT_FORM.EmsProto : null;
+
+        private System.Threading.CancellationTokenSource _autoCts;
+        private bool _autoRunning = false;
+        private bool _cycleStopRequestedByUser = false;
 
 
 
@@ -41,6 +48,11 @@ namespace EMS_TEST_SIMULATOR
             InitializeComponent();
         }
 
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            ApplyDarkTheme();
+        }
 
         public class ErrorItem
         {
@@ -97,6 +109,9 @@ namespace EMS_TEST_SIMULATOR
 
 
 
+        // 테이블레이아웃 패널과 동일한 어두운 색으로 폼 본배경·탭·패널 전부 통일
+        private static readonly Color _darkPanel = Color.FromArgb(62, 62, 66);
+
         private void Form1_Load(object sender, EventArgs e)
         {
          
@@ -107,7 +122,37 @@ namespace EMS_TEST_SIMULATOR
             UploadCodeList();//에러 리스트뷰
             _encManager.Initialize(this);
 
+            ApplyDarkTheme();
 
+            // 다크 테마: 엔코더 패널 라벨 흰색 Bold
+            foreach (Control c in tableLayoutPanel3.Controls)
+            {
+                if (c is Label lb) { lb.ForeColor = Color.White; lb.Font = new Font("맑은 고딕", 9F, FontStyle.Bold); }
+            }
+            // 코드 리스트 ListView 다크 스타일 (VisualStyleElement.ListView와 구분 위해 전체 이름 사용)
+            foreach (System.Windows.Forms.ListView lv in new System.Windows.Forms.ListView[] { listView4, listView3, listView1, listView2 })
+            {
+                if (lv != null) { lv.BackColor = _darkPanel; lv.ForeColor = Color.White; lv.Font = new Font("맑은 고딕", 9F, FontStyle.Bold); }
+            }
+        }
+
+        /// <summary>테이블레이아웃 패널과 같은 어두운 색(62,62,66)을 폼 본배경·탭·패널 전부에 적용</summary>
+        private void ApplyDarkTheme()
+        {
+            this.BackColor = _darkPanel;
+            if (tableLayoutPanel2 != null) tableLayoutPanel2.BackColor = _darkPanel;
+            if (tabControl1 != null) { tabControl1.BackColor = _darkPanel; tabControl1.ForeColor = Color.White; }
+            if (tabControl2 != null) { tabControl2.BackColor = _darkPanel; tabControl2.ForeColor = Color.White; }
+            if (tabControl3 != null) { tabControl3.BackColor = _darkPanel; tabControl3.ForeColor = Color.White; }
+            if (Communication_log != null) Communication_log.BackColor = _darkPanel;
+            var darkPages = new TabPage[] { 통신로그, 코드리스트, 엔코더설정, tabPage1, tabPage2, tabPage3, tabPage4, 응답코드, 목적동작코드, 동작코드, 에러코드 };
+            foreach (var p in darkPages)
+                if (p != null) { p.BackColor = _darkPanel; p.UseVisualStyleBackColor = false; }
+            if (tableLayoutPanel1 != null) tableLayoutPanel1.BackColor = _darkPanel;
+            if (tableLayoutPanel3 != null) tableLayoutPanel3.BackColor = _darkPanel;
+            if (tBox1 != null) { tBox1.BackColor = _darkPanel; tBox1.ForeColor = Color.White; }
+            if (richTextBox1 != null) { richTextBox1.BackColor = _darkPanel; richTextBox1.ForeColor = Color.White; }
+            if (event_log_listview != null) { event_log_listview.BackColor = _darkPanel; event_log_listview.ForeColor = Color.White; }
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -170,7 +215,8 @@ namespace EMS_TEST_SIMULATOR
             }
             else
             {
-                Rail_io.BackColor = Color.DarkGray; // 기본 색상
+                Rail_io.BackColor = Color.FromArgb(37, 99, 235); // 끊김 시 파란색(기본 버튼색) 복귀
+                Rail_io.ForeColor = Color.White;
             }
         }
 
@@ -192,8 +238,9 @@ namespace EMS_TEST_SIMULATOR
             }
             else
             {
-                // 연결 실패/해제 시: 기본색(회색)
-                Rail_io.BackColor = Color.FromKnownColor(KnownColor.Control);
+                // 연결 실패/해제 시: 파란색(기본 버튼색) 복귀
+                Rail_io.BackColor = Color.FromArgb(37, 99, 235);
+                Rail_io.ForeColor = Color.White;
                 Rail_io.Text = "Rail I.O (Disconnected)";
             }
         }
@@ -822,30 +869,56 @@ namespace EMS_TEST_SIMULATOR
 
         private void button7_Click(object sender, EventArgs e)
         {
-            // 메세지 박스 띄우기(문구, 제목, 버튼 종류, 아이콘)
-            DialogResult result = MessageBox.Show("자동모드를 실행하시겠습니까?","상태확인",MessageBoxButtons.YesNo,MessageBoxIcon.Question);
-           
-
-
-
-            if (result == DialogResult.Yes)
+            if (_autoRunning)
             {
-                //반자동 완료 FLAG 확인, 안전하게 사용하기 위해서 반자동모드가 완료되고, 플래그 비트가 1이되어야만 시작할 수 있는 조건을 건다.
-
-                EMS_Mode_Sequence emsSeq = new EMS_Mode_Sequence();
-
-                MessageBox.Show("레일 주변에 장애물이 없는지 확인한후 진행하시기 바랍니다.");
-
-                //emsSeq.ProcessMode(3);//자동모드 실행
-
-                
-
+                _cycleStopRequestedByUser = true;
+                EMS_Mode_Sequence.CycleStopRequested = true;
+                MessageBox.Show("사이클 정지 요청되었습니다. 현재 동작을 마친 뒤 101번 위치로 복귀하여 타이어를 내려놓은 후 정지합니다.");
+                return;
             }
-            else
+
+            DialogResult result = MessageBox.Show("자동모드를 실행하시겠습니까?", "상태확인", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result != DialogResult.Yes)
             {
                 MessageBox.Show("취소하였습니다.");
+                return;
             }
 
+            if (GlobalComm == null)
+            {
+                MessageBox.Show("먼저 연결을 완료해 주세요.");
+                return;
+            }
+
+            MessageBox.Show("레일 주변에 장애물이 없는지 확인한 후 진행하시기 바랍니다.");
+
+            Command_Form command_Form = new Command_Form();
+            command_Form.Owner = this;
+            command_Form._comm = GlobalComm;
+            command_Form._emsProto = GlobalEmsProto ?? new EMS_Protocol();
+            command_Form.currentData.command_alloc = 3;
+            command_Form.currentData.EMS_NO = Line_Setup.SavedVehicleNo ?? "1호기";
+
+            _autoCts = new System.Threading.CancellationTokenSource();
+            _autoRunning = true;
+            button7.Text = "자동 정지";
+
+            EMS_Mode_Sequence emsSeq = new EMS_Mode_Sequence();
+            var autoTask = emsSeq.RunAutoSequenceAsync(command_Form, this, _autoCts.Token);
+            autoTask.ContinueWith(_ =>
+            {
+                if (!this.IsDisposed && this.InvokeRequired)
+                    this.Invoke(new Action(() =>
+                    {
+                        _autoRunning = false;
+                        button7.Text = "자동모드";
+                        if (_cycleStopRequestedByUser)
+                        {
+                            _cycleStopRequestedByUser = false;
+                            MessageBox.Show("자동모드를 정지하였습니다. (101번 위치, 타이어 하차 완료)");
+                        }
+                    }));
+            }, System.Threading.Tasks.TaskScheduler.Default);
         }
 
         private void button8_Click(object sender, EventArgs e)//비상정지 버튼을 눌렀을때, 평상시 모드전환
@@ -910,11 +983,14 @@ namespace EMS_TEST_SIMULATOR
                 return;
             }
 
-            button2.BackColor = SystemColors.Control; // 기본 회색으로 복구
-            button2.ForeColor = Color.Black;
+            button2.BackColor = Color.FromArgb(37, 99, 235); // 끊김 시 파란색(기본 버튼색) 복귀
+            button2.ForeColor = Color.White;
             button2.Text = "Connect"; // 원래 텍스트로 복구
         }
 
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
 
+        }
     }
 }

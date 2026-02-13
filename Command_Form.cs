@@ -71,7 +71,7 @@ namespace EMS_TEST_SIMULATOR
                 int.TryParse(comboBox5.Text, out currentData.Start_count);
                 int.TryParse(comboBox2.Text, out currentData.End_count);
                 int.TryParse(comboBox1.Text, out currentData.command_alloc);
-                int.TryParse(textBox1.Text, out currentData.loop_command);
+               // int.TryParse(textBox1.Text, out currentData.loop_command);
 
                 EMS_Mode_Sequence seq = new EMS_Mode_Sequence();
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
@@ -14,6 +14,7 @@ namespace EMS_TEST_SIMULATOR
         public IDeviceComm _comm;
         private EMS_Protocol _emsProto;
         public IDeviceComm Comm => _comm;
+        public EMS_Protocol EmsProto => _emsProto;
 
         // 2. UI 상태 제어용 변수
         private bool _isHostActive = false;
@@ -95,6 +96,7 @@ namespace EMS_TEST_SIMULATOR
                 {
                     _emsProto.ReceiveFromDevice(data);
                     _isSkyRavActive = true;
+                    RailStatus.CurrentSectionCount = _emsProto.Parser.CurrentStatus?.CurrentSectionCount ?? "";
                     responseTcs.TrySetResult(true);
                 };
 

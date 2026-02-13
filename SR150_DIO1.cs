@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,6 +24,7 @@ namespace EMS_TEST_SIMULATOR
         public SR150_DIO1()
         {
             InitializeComponent();
+            ApplyCommandStyle();
             InitLedArrays(); // 컨트롤 배열 초기화 함수 호출
 
 
@@ -38,7 +39,35 @@ namespace EMS_TEST_SIMULATOR
             this.FormClosed += (s, e) => Rail_DIO.Instance.OnOutputUpdated -= UpdateOutputLedDisplay;
         }
 
+        private static readonly Color TitleOrange = Color.FromArgb(255, 128, 0);
+        private static readonly Color PanelDark = Color.FromArgb(62, 62, 66);
 
+        private void ApplyCommandStyle()
+        {
+            ApplyDioStyleToControls(this.Controls);
+        }
+
+        private void ApplyDioStyleToControls(Control.ControlCollection controls)
+        {
+            foreach (Control c in controls)
+            {
+                if (c is Label lb)
+                {
+                    lb.ForeColor = (lb.Name == "label1") ? TitleOrange : Color.White;
+                    lb.Font = new Font(lb.Font.FontFamily, lb.Font.Size, FontStyle.Bold);
+                }
+                if (c is Button btn)
+                {
+                    btn.ForeColor = Color.White;
+                    btn.BackColor = PanelDark;
+                    btn.UseVisualStyleBackColor = false;
+                    btn.Font = new Font(btn.Font.FontFamily, btn.Font.Size, FontStyle.Bold);
+                }
+                if (c.HasChildren) ApplyDioStyleToControls(c.Controls);
+            }
+        }
+
+        private static readonly Color LedOffBackColor = Color.FromArgb(90, 90, 90);
 
         private void InitLedArrays()
         {
@@ -52,6 +81,14 @@ namespace EMS_TEST_SIMULATOR
             DO6, DO7, DO8, DO9, DO10,
             DO11, DO12, DO13, DO14, DO15, DO16 };
 
+            foreach (Control p in ledControls)
+            {
+                if (p is Panel panel) { panel.BorderStyle = BorderStyle.FixedSingle; panel.BackColor = LedOffBackColor; }
+            }
+            foreach (Control p in outputLeds)
+            {
+                if (p is Panel panel) { panel.BorderStyle = BorderStyle.FixedSingle; panel.BackColor = LedOffBackColor; }
+            }
         }
 
 
@@ -126,7 +163,7 @@ namespace EMS_TEST_SIMULATOR
                 if (status[i] != 0) // 비트값이 0이 아니면 ON
                     ledControls[i].BackColor = Color.Lime;
                 else
-                    ledControls[i].BackColor = Color.Gray;
+                    ledControls[i].BackColor = LedOffBackColor;
             }
         }
 
@@ -154,7 +191,7 @@ namespace EMS_TEST_SIMULATOR
             for (int i = 0; i < 16; i++)
             {
                 bool isOn = (status & (0x00010000u << i)) != 0;
-                outputLeds[i].BackColor = isOn ? Color.Red : Color.DimGray;
+                outputLeds[i].BackColor = isOn ? Color.Red : LedOffBackColor;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,8 +11,9 @@ namespace EMS_TEST_SIMULATOR
     public partial class UserControl1 : UserControl
     {
         private DispatcherTimer _timer;
-        private double _currentX = 50;
-        private int direction = 0; // 0: 전진, 1: 후진
+        private double _currentX = 50;   // 실제 표시 위치 (부드럽게 보간)
+        private double _targetX = 50;    // EMS 현재 섹션에 따른 목표 X
+        private const double LerpFactor = 0.14; // 0~1, 클수록 빠르게 따라감
 
         // 센서들을 관리할 리스트
         private List<Rectangle> _sensors = new List<Rectangle>();
@@ -100,25 +101,24 @@ namespace EMS_TEST_SIMULATOR
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // 1. 방향 및 위치 로직
-            if (direction == 0)
+            // EMS 현재 위치로 목표 X만 갱신
+            if (!string.IsNullOrEmpty(RailStatus.CurrentSectionCount) && int.TryParse(RailStatus.CurrentSectionCount, out int sectionNum) && sectionNum >= 101 && sectionNum <= 113)
             {
-                _currentX += 5; // 속도를 조금 올렸습니다
-                if (_currentX >= EndPos) direction = 1;
+                int index = sectionNum - 101;
+                double interval = (EndPos - StartPos) / (SensorCount - 1);
+                _targetX = StartPos + (index * interval);
             }
+
+            // 현재 위치를 목표로 부드럽게 보간 (휙휙 점프 방지)
+            double diff = _targetX - _currentX;
+            if (Math.Abs(diff) < 0.5)
+                _currentX = _targetX;
             else
-            {
-                _currentX -= 5;
-                if (_currentX <= StartPos) direction = 0;
-            }
+                _currentX += diff * LerpFactor;
 
-            // 2. UI 반영
             if (MovingTransform != null)
-            {
                 MovingTransform.X = _currentX;
-            }
 
-            // 3. 센서 감지 로직 (현재 위치와 센서 위치 비교)
             UpdateSensors();
         }
 

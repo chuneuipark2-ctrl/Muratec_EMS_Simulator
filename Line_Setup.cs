@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -33,6 +33,8 @@ namespace EMS_TEST_SIMULATOR
         Save_status savestatus = new Save_status();//클래스 인스턴스 생성
         Load_status loadstatus = new Load_status();//클래스 인스턴스 생성
 
+        /// <summary>Line_Setup 호기선택 박스에서 [상태저장] 시 저장된 호기 (반자동 명령 호기 일치 검사용)</summary>
+        public static string SavedVehicleNo { get; set; } = "";
 
         public Line_Setup()
         {
@@ -46,6 +48,7 @@ namespace EMS_TEST_SIMULATOR
             savestatus.Save_LineName = line_sel_box.SelectedItem?.ToString() ?? "";
             savestatus.Save_NoSelBox = no_sel_box.SelectedItem?.ToString() ?? "";
             savestatus.Save_TypeSelBox = type_sel_box.SelectedItem?.ToString() ?? "";
+            SavedVehicleNo = savestatus.Save_NoSelBox;
             //Console.WriteLine(savestatus.Save_LineName);
         }
 

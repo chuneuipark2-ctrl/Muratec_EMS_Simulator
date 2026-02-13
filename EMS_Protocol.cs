@@ -14,6 +14,18 @@ namespace EMS_TEST_SIMULATOR
         public string EncoderValue { get; set; }  // 승강 엔코더값 (4바이트)
     }
 
+    public class OpratingOrder
+    {
+       public string OrderMode { get; set; }     // 지시모드 (1바이트)
+                                                 // 1: 자동
+                                                 // 2: 00
+                                                 // 3: 00
+                                                 // 4: 00
+                                                 // 5: 기체 이상 정지
+                                                 // 6: 기체 이상 리셋
+    }
+
+
     // 2. 상태 보고 데이터 모델 (29바이트 규격)
     public class SKY_RAV_Status
     {
@@ -104,11 +116,11 @@ namespace EMS_TEST_SIMULATOR
         // [H4] 작업 지시
         public byte[] EMS_Item_order(string instructionMode)
         {
-            return Host_Packet(GetNextSeq(), "H4", instructionMode, true);
+            return Host_Packet(GetNextSeq(), "H4", instructionMode, true);//작업번호, 작업명령(h4면 동작지시임), 지시모드, 체크섬 넘겨줌
         }
 
         // 메시지 순번 생성 (000~999)
-        private string GetNextSeq()
+        private string GetNextSeq() 
         {
             string seq = (msg_seq % 1000).ToString("D3");
             msg_seq++;

@@ -1,4 +1,4 @@
-﻿namespace EMS_TEST_SIMULATOR
+namespace EMS_TEST_SIMULATOR
 {
     partial class Form2
     {
@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Text = "Form2";
         }

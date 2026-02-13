@@ -121,6 +121,9 @@
   <data name="EMO" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\EMO.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AUTO_FINAL-Photoroom" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AUTO_FINAL-Photoroom.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="01. 제목" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\01. 제목.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -142,10 +145,13 @@
   <data name="02. 레이아웃" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\02. 레이아웃.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AUTO_SW" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AUTO_SW.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="승강한 형태" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\승강한 형태.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="AUTO_SW" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AUTO_SW.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="EMO FINAL-Photoroom" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\EMO FINAL-Photoroom.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +14,8 @@ namespace EMS_TEST_SIMULATOR
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
+            // EnableVisualStyles()를 쓰면 탭/패널이 Windows 테마로 하얗게 덮어씌워짐. 다크 테마를 쓰려면 비활성화.
+            // Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Main());
         }
