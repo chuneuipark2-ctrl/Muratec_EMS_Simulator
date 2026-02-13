@@ -1,0 +1,213 @@
+================================================================================
+통신 로그 + EMS 상태 실시간 반영 - 참고용 코드 (이미 Main/Designer/Connect에 반영됨)
+================================================================================
+
+---- 1. Main.cs 필드 추가 (클래스 상단) ----
+        private System.Windows.Forms.Timer _emsStatusUpdateTimer;
+        private const int _commLogMaxRows = 3000;
+        private bool _commLogPaused = false;
+
+---- 2. Main.cs Form1_Load 안쪽 (ApplyDarkTheme() 호출 다음) ----
+            // EMS 상태 패널 실시간 갱신
+            _emsStatusUpdateTimer = new System.Windows.Forms.Timer();
+            _emsStatusUpdateTimer.Interval = 300;
+            _emsStatusUpdateTimer.Tick += (s, ev) => RefreshEmsStatusPanel();
+            _emsStatusUpdateTimer.Start();
+
+            // 통신 로그 그리드 컬럼
+            if (dgvCommLog != null && dgvCommLog.Columns.Count == 0)
+            {
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTime", HeaderText = "시간", Width = 90, ReadOnly = true });
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDirection", HeaderText = "방향", Width = 60, ReadOnly = true });
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colData", HeaderText = "데이터(HEX)", Width = 220, ReadOnly = true });
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc", HeaderText = "해석", Width = 200, ReadOnly = true });
+            }
+            btn_log_stop.Click += Btn_log_stop_Click;
+            btn_log_save.Click += Btn_log_save_Click;
+
+---- 3. Main.cs 버튼/로그 메서드 ----
+        private void Btn_log_stop_Click(object sender, EventArgs e)
+        {
+            _commLogPaused = !_commLogPaused;
+            btn_log_stop.Text = _commLogPaused ? "Resume" : "Stop";
+        }
+
+        private void Btn_log_save_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "CSV 파일|*.csv|텍스트 파일|*.txt|모든 파일|*.*";
+                dlg.DefaultExt = "csv";
+                dlg.FileName = "CommLog_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                if (dlg.ShowDialog() != DialogResult.OK) return;
+                try
+                {
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine("시간\t방향\t데이터(HEX)\t해석");
+                    if (dgvCommLog.Rows != null)
+                        foreach (DataGridViewRow row in dgvCommLog.Rows)
+                        {
+                            if (row.IsNewRow) continue;
+                            var c = row.Cells;
+                            sb.AppendLine((c.Count > 0 ? c[0].Value?.ToString() : "") + "\t" + (c.Count > 1 ? c[1].Value?.ToString() : "") + "\t" + (c.Count > 2 ? c[2].Value?.ToString() : "") + "\t" + (c.Count > 3 ? c[3].Value?.ToString() : ""));
+                        }
+                    System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
+                    MessageBox.Show("저장 완료: " + dlg.FileName);
+                }
+                catch (Exception ex) { MessageBox.Show("저장 실패: " + ex.Message); }
+            }
+        }
+
+        public void AddCommLog(string direction, byte[] data, string description)
+        {
+            if (data == null) data = Array.Empty<byte>();
+            string time = DateTime.Now.ToString("HH:mm:ss.fff");
+            string hex = BitConverter.ToString(data).Replace("-", " ");
+            if (hex.Length > 200) hex = hex.Substring(0, 200) + "...";
+            string desc = description ?? "";
+            void DoAdd()
+            {
+                if (_commLogPaused || dgvCommLog == null) return;
+                if (dgvCommLog.Columns.Count < 4) return;
+                dgvCommLog.Rows.Add(time, direction, hex, desc);
+                while (dgvCommLog.Rows.Count > _commLogMaxRows && dgvCommLog.Rows.Count > 0)
+                    dgvCommLog.Rows.RemoveAt(0);
+            }
+            if (dgvCommLog.InvokeRequired)
+                dgvCommLog.Invoke(new Action(DoAdd));
+            else
+                DoAdd();
+        }
+
+        private void RefreshEmsStatusPanel()
+        {
+            var status = GlobalEmsProto?.Parser?.CurrentStatus;
+            string na = "-";
+            if (status == null)
+            {
+                lbl_response_code_text.Text = na;
+                lbl_operating_code_text.Text = na;
+                lbl_error_code_text.Text = na;
+                lbl_transfer_data_no_text.Text = na;
+                lbl_target_mode_text.Text = na;
+                lbl_vehicle_mode_text.Text = na;
+                lbl_current_point_text.Text = na;
+                lbl_load_status_text.Text = na;
+                lbl_transfer_command_Received_text.Text = na;
+                lbl_target_point_text.Text = na;
+                lbl_error_point_text.Text = na;
+                return;
+            }
+            lbl_response_code_text.Text = string.IsNullOrEmpty(status.ResponseCode) ? na : status.ResponseCode;
+            lbl_operating_code_text.Text = string.IsNullOrEmpty(status.ActionCode) ? na : status.ActionCode;
+            lbl_error_code_text.Text = string.IsNullOrEmpty(status.ErrorCode) ? na : status.ErrorCode;
+            lbl_transfer_data_no_text.Text = string.IsNullOrEmpty(status.TransferDataNo) ? na : status.TransferDataNo;
+            lbl_target_mode_text.Text = string.IsNullOrEmpty(status.TargetActionMode) ? na : status.TargetActionMode;
+            lbl_vehicle_mode_text.Text = FormatMachineMode(status.MachineMode);
+            lbl_current_point_text.Text = string.IsNullOrEmpty(status.CurrentSectionCount) ? na : status.CurrentSectionCount;
+            lbl_load_status_text.Text = FormatCargoStatus(status.CargoStatus);
+            lbl_transfer_command_Received_text.Text = FormatCommandAcceptStatus(status.CommandAcceptStatus);
+            lbl_target_point_text.Text = string.IsNullOrEmpty(status.TargetSectionCount) ? na : status.TargetSectionCount;
+            lbl_error_point_text.Text = string.IsNullOrEmpty(status.ErrorSectionCount) ? na : status.ErrorSectionCount;
+        }
+
+        private static string FormatMachineMode(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "-";
+            if (value == "1") return "수동";
+            if (value == "2") return "자동";
+            return value;
+        }
+
+        private static string FormatCargoStatus(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "-";
+            if (value == "0") return "없음";
+            if (value == "1") return "있음";
+            return value;
+        }
+
+        private static string FormatCommandAcceptStatus(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "-";
+            if (value == "0") return "불가";
+            if (value == "1") return "가능";
+            return value;
+        }
+
+---- 4. Main.cs ApplyDarkTheme() 안 - richTextBox1 대신 dgvCommLog ----
+            if (dgvCommLog != null)
+            {
+                dgvCommLog.BackgroundColor = _darkPanel;
+                dgvCommLog.DefaultCellStyle = new DataGridViewCellStyle { BackColor = _darkPanel, ForeColor = Color.White };
+                dgvCommLog.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.White };
+            }
+
+---- 5. Main.Designer.cs - tabPage4에는 groupBox1 + dgvCommLog (richTextBox1 제거) ----
+            this.dgvCommLog = new System.Windows.Forms.DataGridView();
+            ...
+            this.tabPage4.Controls.Add(this.groupBox1);
+            this.tabPage4.Controls.Add(this.dgvCommLog);
+            ...
+            // dgvCommLog 속성: AllowUserToAddRows=false, ReadOnly=true, Dock=Fill, RowHeadersVisible=false
+
+---- 6. EMS_TCP_UDP_Connect.cs - 연결 시 래퍼 적용 ----
+            if (radioButton1.Checked) _comm = new TcpComm();
+            else if (radioButton2.Checked) _comm = new UdpComm();
+            else { MessageBox.Show("TCP 또는 UDP를 선택해주세요."); return; }
+
+            var inner = _comm;
+            _comm = new CommLoggingWrapper(inner, (dir, data, desc) => Main.Instance?.AddCommLog(dir, data, desc));
+
+            _comm.OnDataReceived = (data) => { ... };
+
+---- 7. EMS_TCP_UDP_Connect.cs - CommLoggingWrapper 클래스 (파일 끝, namespace 안) ----
+    public class CommLoggingWrapper : IDeviceComm
+    {
+        private readonly IDeviceComm _inner;
+        private readonly Action<string, byte[], string> _onLog;
+        private Action<byte[]> _userReceived;
+
+        public CommLoggingWrapper(IDeviceComm inner, Action<string, byte[], string> onLog)
+        {
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+            _onLog = onLog;
+        }
+
+        public Action<byte[]> OnDataReceived
+        {
+            get => _userReceived;
+            set
+            {
+                _userReceived = value;
+                _inner.OnDataReceived = (data) =>
+                {
+                    _onLog?.Invoke("수신", data, "");
+                    _userReceived?.Invoke(data);
+                };
+            }
+        }
+
+        public Task Connect(string ip, int port) => _inner.Connect(ip, port);
+
+        public async Task SendData(string message)
+        {
+            byte[] data = Encoding.ASCII.GetBytes(message);
+            _onLog?.Invoke("송신", data, GetShortDesc(message));
+            await _inner.SendData(message);
+        }
+
+        public void Disconnect() => _inner.Disconnect();
+
+        private static string GetShortDesc(string msg)
+        {
+            if (string.IsNullOrEmpty(msg)) return "";
+            if (msg.Contains("F1")) return "F1 링크연결";
+            if (msg.Contains("H1")) return "H1 상태문의";
+            if (msg.Contains("H2")) return "H2 반송지시";
+            if (msg.Contains("H4")) return "H4";
+            return msg.Length > 24 ? msg.Substring(0, 24) + "…" : msg;
+        }
+    }
+
+================================================================================

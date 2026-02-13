@@ -36,6 +36,13 @@ namespace EMS_TEST_SIMULATOR
         private bool _autoRunning = false;
         private bool _cycleStopRequestedByUser = false;
 
+        /// <summary>EMS 상태 패널 실시간 갱신용 타이머 (UI 스레드에서만 라벨 갱신 → 스레드 안전)</summary>
+        private System.Windows.Forms.Timer _emsStatusUpdateTimer;
+
+        /// <summary>통신 로그: 최대 행 수 제한(초과 시 오래된 행 삭제), 뻑남 방지</summary>
+        private const int _commLogMaxRows = 3000;
+        private bool _commLogPaused = false;
+
 
 
 
@@ -114,8 +121,6 @@ namespace EMS_TEST_SIMULATOR
 
         private void Form1_Load(object sender, EventArgs e)
         {
-         
-            
             ResponseCodeList();//응답코드 리스트뷰
             taget_operating_code_list(); // 타겟동작 코드리스트
             Operating_Code_list(); // 동작 코드리스트
@@ -129,11 +134,271 @@ namespace EMS_TEST_SIMULATOR
             {
                 if (c is Label lb) { lb.ForeColor = Color.White; lb.Font = new Font("맑은 고딕", 9F, FontStyle.Bold); }
             }
-            // 코드 리스트 ListView 다크 스타일 (VisualStyleElement.ListView와 구분 위해 전체 이름 사용)
+            // 코드 리스트 ListView 다크 스타일
             foreach (System.Windows.Forms.ListView lv in new System.Windows.Forms.ListView[] { listView4, listView3, listView1, listView2 })
             {
                 if (lv != null) { lv.BackColor = _darkPanel; lv.ForeColor = Color.White; lv.Font = new Font("맑은 고딕", 9F, FontStyle.Bold); }
             }
+
+            // EMS 상태 패널 실시간 갱신
+            _emsStatusUpdateTimer = new System.Windows.Forms.Timer();
+            _emsStatusUpdateTimer.Interval = 300;
+            _emsStatusUpdateTimer.Tick += (s, ev) => RefreshEmsStatusPanel();
+            _emsStatusUpdateTimer.Start();
+
+            // ★ 통신 로그: 그리드 준비 + 정적 이벤트 구독 (Connect 폼 참조 없이 로그 수신)
+            InitializeCommLogGrid();
+            InitializeMainLog();
+            CommLogBridge.OnLog += (dir, data, desc) => this.AddCommLog(dir, data, desc);
+        }
+
+        private const int _mainLogMaxItems = 1000;
+
+        /// <summary>주요로그(ListView): H2·H4·EMS 상태응답 기록, 응답코드 != 00이면 해당 행 빨간색.</summary>
+        private void InitializeMainLog()
+        {
+            if (event_log_listview == null) return;
+            event_log_listview.View = View.Details;
+            event_log_listview.FullRowSelect = true;
+            if (event_log_listview.Columns.Count == 0)
+            {
+                event_log_listview.Columns.Add("시간", 90);
+                event_log_listview.Columns.Add("방향", 55);
+                event_log_listview.Columns.Add("데이터(HEX)", 220);
+                event_log_listview.Columns.Add("해석", 180);
+            }
+            event_log_listview.OwnerDraw = true;
+            event_log_listview.DrawColumnHeader += Event_log_listview_DrawColumnHeader;
+            event_log_listview.DrawSubItem += Event_log_listview_DrawSubItem;
+            event_log_listview.DrawItem += Event_log_listview_DrawItem;
+        }
+
+        private void Event_log_listview_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+        {
+            e.DrawBackground();
+            using (var sf = new StringFormat { Alignment = StringAlignment.Near })
+            using (var br = new SolidBrush(Color.White))
+                e.Graphics.DrawString(e.Header.Text, e.Font, br, e.Bounds, sf);
+        }
+
+        private void Event_log_listview_DrawItem(object sender, DrawListViewItemEventArgs e)
+        {
+            bool isError = e.Item.Tag is bool b && b;
+            Color fore = isError ? Color.Red : Color.White;
+            e.DrawBackground();
+            using (var br = new SolidBrush(fore))
+                e.Graphics.DrawString(e.Item?.Text ?? "", e.Item.Font ?? event_log_listview.Font, br, e.Bounds, StringFormat.GenericDefault);
+        }
+
+        private void Event_log_listview_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            bool isError = e.Item.Tag is bool b && b;
+            Color fore = isError ? Color.Red : Color.White;
+            e.DrawBackground();
+            using (var br = new SolidBrush(fore))
+                e.Graphics.DrawString(e.SubItem?.Text ?? "", e.Item.Font ?? event_log_listview.Font, br, e.Bounds, StringFormat.GenericDefault);
+        }
+
+        /// <summary>EMS 상태 응답 형식인지 (@TXT240 + body 26자 이상).</summary>
+        private static bool IsEmsStatusResponse(byte[] data)
+        {
+            if (data == null || data.Length < 38) return false;
+            try
+            {
+                string res = Encoding.ASCII.GetString(data);
+                int idx = res.IndexOf("@TXT240");
+                if (idx < 0) return false;
+                string body = res.Substring(idx + 12);
+                return body.Length >= 26;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>EMS 상태 응답에서 응답코드(ResponseCode)가 00이 아니면 에러 → 해당 행 빨간색.</summary>
+        private static bool IsEmsStatusResponseError(byte[] data)
+        {
+            if (data == null || data.Length < 38) return false;
+            try
+            {
+                string res = Encoding.ASCII.GetString(data);
+                int idx = res.IndexOf("@TXT240");
+                if (idx < 0) return false;
+                string body = res.Substring(idx + 12);
+                if (body.Length < 2) return false;
+                string responseCode = body.Substring(0, 2);
+                return responseCode != "00";
+            }
+            catch { return false; }
+        }
+
+        /// <summary>통신 로그 그리드 초기화 (Form1_Load에서 호출). 컬럼 구성·버튼 연결·표시 설정.</summary>
+        private void InitializeCommLogGrid()
+        {
+            if (dgvCommLog == null) return;
+            if (dgvCommLog.Columns.Count == 0)
+            {
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTime", HeaderText = "시간", Width = 90, ReadOnly = true });
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDirection", HeaderText = "방향", Width = 60, ReadOnly = true });
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colData", HeaderText = "데이터(HEX)", Width = 220, ReadOnly = true });
+                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc", HeaderText = "해석", Width = 200, ReadOnly = true });
+            }
+            dgvCommLog.Visible = true;
+            dgvCommLog.BringToFront();
+            btn_log_stop.Click += Btn_log_stop_Click;
+            btn_log_save.Click += Btn_log_save_Click;
+            if (Communication_log != null)
+            {
+                Communication_log.SelectedIndexChanged += (s, ev) => { if (dgvCommLog != null && !dgvCommLog.IsDisposed) dgvCommLog.BringToFront(); };
+                if (Communication_log.TabCount > 1) Communication_log.SelectedIndex = 1;
+            }
+        }
+
+        private void Btn_log_stop_Click(object sender, EventArgs e)
+        {
+            _commLogPaused = !_commLogPaused;
+            btn_log_stop.Text = _commLogPaused ? "Resume" : "Stop";
+        }
+
+        private void Btn_log_save_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "CSV 파일|*.csv|텍스트 파일|*.txt|모든 파일|*.*";
+                dlg.DefaultExt = "csv";
+                dlg.FileName = $"CommLog_{DateTime.Now:yyyyMMdd_HHmmss}";
+                if (dlg.ShowDialog() != DialogResult.OK) return;
+                try
+                {
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine("시간\t방향\t데이터(HEX)\t해석");
+                    if (dgvCommLog.Rows != null)
+                        foreach (DataGridViewRow row in dgvCommLog.Rows)
+                        {
+                            if (row.IsNewRow) continue;
+                            var c = row.Cells;
+                            sb.AppendLine($"{(c.Count > 0 ? c[0].Value : "")}\t{(c.Count > 1 ? c[1].Value : "")}\t{(c.Count > 2 ? c[2].Value : "")}\t{(c.Count > 3 ? c[3].Value : "")}");
+                        }
+                    System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
+                    MessageBox.Show("저장 완료: " + dlg.FileName);
+                }
+                catch (Exception ex) { MessageBox.Show("저장 실패: " + ex.Message); }
+            }
+        }
+
+        /// <summary>통신 로그 추가. 통신 스레드에서 호출 가능(Invoke로 UI 스레드에서 갱신). 최대 행 수 초과 시 오래된 행 삭제.</summary>
+        public void AddCommLog(string direction, byte[] data, string description)
+        {
+            if (data == null) data = Array.Empty<byte>();
+            string time = DateTime.Now.ToString("HH:mm:ss.fff");
+            string hex = BitConverter.ToString(data).Replace("-", " ");
+            if (hex.Length > 200) hex = hex.Substring(0, 200) + "...";
+            string desc = description ?? "";
+            void DoAdd()
+            {
+                if (_commLogPaused) return;
+                if (dgvCommLog == null || dgvCommLog.IsDisposed) return;
+                if (dgvCommLog.Columns.Count < 4)
+                {
+                    try
+                    {
+                        dgvCommLog.Columns.Clear();
+                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTime", HeaderText = "시간", Width = 90, ReadOnly = true });
+                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDirection", HeaderText = "방향", Width = 60, ReadOnly = true });
+                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colData", HeaderText = "데이터(HEX)", Width = 220, ReadOnly = true });
+                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc", HeaderText = "해석", Width = 200, ReadOnly = true });
+                    }
+                    catch { return; }
+                }
+                try
+                {
+                    dgvCommLog.Rows.Add(time, direction, hex, desc);
+                    while (dgvCommLog.Rows.Count > _commLogMaxRows && dgvCommLog.Rows.Count > 0)
+                        dgvCommLog.Rows.RemoveAt(0);
+                }
+                catch { }
+                bool addToMainLog = desc.Contains("H4") || desc.Contains("H2") || (direction == "수신" && IsEmsStatusResponse(data));
+                if (addToMainLog && event_log_listview != null && !event_log_listview.IsDisposed)
+                {
+                    try
+                    {
+                        bool isError = direction == "수신" && IsEmsStatusResponseError(data);
+                        var li = new ListViewItem(time);
+                        li.SubItems.Add(direction);
+                        li.SubItems.Add(hex);
+                        li.SubItems.Add(desc);
+                        li.Tag = isError;
+                        event_log_listview.Items.Add(li);
+                        while (event_log_listview.Items.Count > _mainLogMaxItems)
+                            event_log_listview.Items.RemoveAt(0);
+                    }
+                    catch { }
+                }
+            }
+            try
+            {
+                if (InvokeRequired)
+                    BeginInvoke(new Action(DoAdd));
+                else
+                    DoAdd();
+            }
+            catch { }
+        }
+
+        /// <summary>EMS 수신 상태를 상태 패널 라벨에 반영. 타이머 Tick에서만 호출되므로 UI 스레드에서 실행됨.</summary>
+        private void RefreshEmsStatusPanel()
+        {
+            var status = GlobalEmsProto?.Parser?.CurrentStatus;
+            string na = "-";
+            if (status == null)
+            {
+                lbl_response_code_text.Text = na;
+                lbl_operating_code_text.Text = na;
+                lbl_error_code_text.Text = na;
+                lbl_transfer_data_no_text.Text = na;
+                lbl_target_mode_text.Text = na;
+                lbl_vehicle_mode_text.Text = na;
+                lbl_current_point_text.Text = na;
+                lbl_load_status_text.Text = na;
+                lbl_transfer_command_Received_text.Text = na;
+                lbl_target_point_text.Text = na;
+                lbl_error_point_text.Text = na;
+                return;
+            }
+            lbl_response_code_text.Text = string.IsNullOrEmpty(status.ResponseCode) ? na : status.ResponseCode;
+            lbl_operating_code_text.Text = string.IsNullOrEmpty(status.ActionCode) ? na : status.ActionCode;
+            lbl_error_code_text.Text = string.IsNullOrEmpty(status.ErrorCode) ? na : status.ErrorCode;
+            lbl_transfer_data_no_text.Text = string.IsNullOrEmpty(status.TransferDataNo) ? na : status.TransferDataNo;
+            lbl_target_mode_text.Text = string.IsNullOrEmpty(status.TargetActionMode) ? na : status.TargetActionMode;
+            lbl_vehicle_mode_text.Text = FormatMachineMode(status.MachineMode);
+            lbl_current_point_text.Text = string.IsNullOrEmpty(status.CurrentSectionCount) ? na : status.CurrentSectionCount;
+            lbl_load_status_text.Text = FormatCargoStatus(status.CargoStatus);
+            lbl_transfer_command_Received_text.Text = FormatCommandAcceptStatus(status.CommandAcceptStatus);
+            lbl_target_point_text.Text = string.IsNullOrEmpty(status.TargetSectionCount) ? na : status.TargetSectionCount;
+            lbl_error_point_text.Text = string.IsNullOrEmpty(status.ErrorSectionCount) ? na : status.ErrorSectionCount;
+        }
+
+        private static string FormatMachineMode(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "-";
+            if (value == "1") return "수동";
+            if (value == "2") return "자동";
+            return value;
+        }
+
+        private static string FormatCargoStatus(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "-";
+            if (value == "0") return "없음";
+            if (value == "1") return "있음";
+            return value;
+        }
+
+        private static string FormatCommandAcceptStatus(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "-";
+            if (value == "0") return "불가";
+            if (value == "1") return "가능";
+            return value;
         }
 
         /// <summary>테이블레이아웃 패널과 같은 어두운 색(62,62,66)을 폼 본배경·탭·패널 전부에 적용</summary>
@@ -151,7 +416,7 @@ namespace EMS_TEST_SIMULATOR
             if (tableLayoutPanel1 != null) tableLayoutPanel1.BackColor = _darkPanel;
             if (tableLayoutPanel3 != null) tableLayoutPanel3.BackColor = _darkPanel;
             if (tBox1 != null) { tBox1.BackColor = _darkPanel; tBox1.ForeColor = Color.White; }
-            if (richTextBox1 != null) { richTextBox1.BackColor = _darkPanel; richTextBox1.ForeColor = Color.White; }
+            if (dgvCommLog != null) { dgvCommLog.BackgroundColor = _darkPanel; dgvCommLog.DefaultCellStyle = new DataGridViewCellStyle { BackColor = _darkPanel, ForeColor = Color.White }; dgvCommLog.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.White }; }
             if (event_log_listview != null) { event_log_listview.BackColor = _darkPanel; event_log_listview.ForeColor = Color.White; }
         }
 
@@ -840,6 +1105,7 @@ namespace EMS_TEST_SIMULATOR
             {
                 SKY_RAV_CONNECT_FORM = new EMS_TCP_UDP_Connect();
                 SKY_RAV_CONNECT_FORM.Owner = this;
+                SKY_RAV_CONNECT_FORM.SetMainFormForLog(this);
 
                 // [수정 포인트] VisibleChanged 이벤트에서 색상 변경 조건을 확인합니다.
                 SKY_RAV_CONNECT_FORM.VisibleChanged += (s, args) =>
@@ -992,5 +1258,12 @@ namespace EMS_TEST_SIMULATOR
         {
 
         }
+    }
+
+    /// <summary>통신 로그를 Connect 폼 참조 없이 Main으로 전달하는 정적 브릿지. Main이 Form_Load에서 구독.</summary>
+    public static class CommLogBridge
+    {
+        public static event Action<string, byte[], string> OnLog;
+        public static void Raise(string direction, byte[] data, string description) => OnLog?.Invoke(direction, data, description);
     }
 }

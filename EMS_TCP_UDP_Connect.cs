@@ -22,6 +22,8 @@ namespace EMS_TEST_SIMULATOR
         private bool _isClosing = false;
         private Timer _blinkTimer;
         private Timer _statusTimer;
+        /// <summary>통신 로그를 찍을 Main 폼 (Main에서 열 때 명시적으로 설정)</summary>
+        private Main _mainFormForLog;
 
         public EMS_TCP_UDP_Connect()
         {
@@ -39,6 +41,8 @@ namespace EMS_TEST_SIMULATOR
             _statusTimer.Interval = 300;
             _statusTimer.Tick += StatusTimer_Tick;
         }
+
+        public void SetMainFormForLog(Main main) { _mainFormForLog = main; }
 
         private void EMS_TCP_UDP_Connect_Load(object sender, EventArgs e)
         {
@@ -79,6 +83,10 @@ namespace EMS_TEST_SIMULATOR
             else if (radioButton2.Checked) _comm = new UdpComm();
             else { MessageBox.Show("TCP 또는 UDP를 선택해주세요."); return; }
 
+            // 통신 로그: 래퍼가 CommLogBridge.Raise 호출 → Main이 Form_Load에서 구독한 이벤트로 수신
+            var inner = _comm;
+            _comm = new CommLoggingWrapper(inner);
+
             // 데이터 수신 시 프로토콜 파서로 전달
             _comm.OnDataReceived = (data) =>
             {
@@ -115,6 +123,7 @@ namespace EMS_TEST_SIMULATOR
                         {
                             mainForm.GlobalComm = this._comm;
                         }
+                        CommLogBridge.Raise("송신", Encoding.ASCII.GetBytes("연결 성공 - 통신 로그 테스트"), "Connect OK");
 
                         _statusTimer.Start(); // H1 폴링 시작
 
@@ -273,6 +282,53 @@ namespace EMS_TEST_SIMULATOR
         public void Disconnect()
         {
             try { _udpClient?.Dispose(); _udpClient = null; } catch { }
+        }
+    }
+
+    /// <summary>송/수신 시 CommLogBridge.Raise로 통신 로그 전달 (Main이 정적 이벤트로 수신)</summary>
+    public class CommLoggingWrapper : IDeviceComm
+    {
+        private readonly IDeviceComm _inner;
+        private Action<byte[]> _userReceived;
+
+        public CommLoggingWrapper(IDeviceComm inner)
+        {
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        }
+
+        public Action<byte[]> OnDataReceived
+        {
+            get => _userReceived;
+            set
+            {
+                _userReceived = value;
+                _inner.OnDataReceived = (data) =>
+                {
+                    CommLogBridge.Raise("수신", data, "");
+                    _userReceived?.Invoke(data);
+                };
+            }
+        }
+
+        public Task Connect(string ip, int port) => _inner.Connect(ip, port);
+
+        public async Task SendData(string message)
+        {
+            byte[] data = Encoding.ASCII.GetBytes(message);
+            CommLogBridge.Raise("송신", data, GetShortDesc(message));
+            await _inner.SendData(message);
+        }
+
+        public void Disconnect() => _inner.Disconnect();
+
+        private static string GetShortDesc(string msg)
+        {
+            if (string.IsNullOrEmpty(msg)) return "";
+            if (msg.Contains("F1")) return "F1 링크연결";
+            if (msg.Contains("H1")) return "H1 상태문의";
+            if (msg.Contains("H2")) return "H2 반송지시";
+            if (msg.Contains("H4")) return "H4";
+            return msg.Length > 24 ? msg.Substring(0, 24) + "…" : msg;
         }
     }
 }
