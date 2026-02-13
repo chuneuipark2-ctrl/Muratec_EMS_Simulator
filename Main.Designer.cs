@@ -102,7 +102,11 @@ namespace EMS_TEST_SIMULATOR
             this.label6 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl11 = new EMS_TEST_SIMULATOR.UserControl1();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl21 = new EMS_TEST_SIMULATOR.UserControl2();
             this.label3 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.lbl_error_point_text = new System.Windows.Forms.Label();
@@ -134,17 +138,13 @@ namespace EMS_TEST_SIMULATOR
             this.tBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.button10 = new System.Windows.Forms.Button();
             this.btn_Command = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label5 = new System.Windows.Forms.Label();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl11 = new EMS_TEST_SIMULATOR.UserControl1();
-            this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl21 = new EMS_TEST_SIMULATOR.UserControl2();
-            this.button10 = new System.Windows.Forms.Button();
             this.tabControl2.SuspendLayout();
             this.통신로그.SuspendLayout();
             this.Communication_log.SuspendLayout();
@@ -188,12 +188,12 @@ namespace EMS_TEST_SIMULATOR
             this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl2.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.tabControl2.ForeColor = System.Drawing.Color.White;
-            this.tabControl2.Location = new System.Drawing.Point(455, 493);
+            this.tabControl2.Location = new System.Drawing.Point(466, 493);
             this.tabControl2.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.Padding = new System.Drawing.Point(14, 8);
             this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(628, 175);
+            this.tabControl2.Size = new System.Drawing.Size(613, 175);
             this.tabControl2.TabIndex = 21;
             // 
             // 통신로그
@@ -205,7 +205,7 @@ namespace EMS_TEST_SIMULATOR
             this.통신로그.Margin = new System.Windows.Forms.Padding(2);
             this.통신로그.Name = "통신로그";
             this.통신로그.Padding = new System.Windows.Forms.Padding(4, 3, 4, 4);
-            this.통신로그.Size = new System.Drawing.Size(620, 137);
+            this.통신로그.Size = new System.Drawing.Size(605, 137);
             this.통신로그.TabIndex = 0;
             this.통신로그.Text = "통신로그";
             // 
@@ -219,7 +219,7 @@ namespace EMS_TEST_SIMULATOR
             this.Communication_log.Margin = new System.Windows.Forms.Padding(2);
             this.Communication_log.Name = "Communication_log";
             this.Communication_log.SelectedIndex = 0;
-            this.Communication_log.Size = new System.Drawing.Size(612, 130);
+            this.Communication_log.Size = new System.Drawing.Size(597, 130);
             this.Communication_log.TabIndex = 0;
             // 
             // tabPage3
@@ -231,7 +231,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage3.Size = new System.Drawing.Size(604, 102);
+            this.tabPage3.Size = new System.Drawing.Size(589, 102);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "주요로그";
             // 
@@ -247,7 +247,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox2.Size = new System.Drawing.Size(600, 24);
+            this.groupBox2.Size = new System.Drawing.Size(585, 24);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "주요 로그";
@@ -292,7 +292,7 @@ namespace EMS_TEST_SIMULATOR
             this.event_log_listview.Location = new System.Drawing.Point(-1, 22);
             this.event_log_listview.Margin = new System.Windows.Forms.Padding(2);
             this.event_log_listview.Name = "event_log_listview";
-            this.event_log_listview.Size = new System.Drawing.Size(842, 91);
+            this.event_log_listview.Size = new System.Drawing.Size(827, 91);
             this.event_log_listview.TabIndex = 0;
             this.event_log_listview.UseCompatibleStateImageBehavior = false;
             this.event_log_listview.SelectedIndexChanged += new System.EventHandler(this.event_log_listview_SelectedIndexChanged);
@@ -306,7 +306,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage4.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage4.Size = new System.Drawing.Size(607, 102);
+            this.tabPage4.Size = new System.Drawing.Size(604, 102);
             this.tabPage4.TabIndex = 1;
             this.tabPage4.Text = "통신로그";
             // 
@@ -322,7 +322,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(603, 24);
+            this.groupBox1.Size = new System.Drawing.Size(600, 24);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "통신 로그";
@@ -366,7 +366,7 @@ namespace EMS_TEST_SIMULATOR
             this.richTextBox1.Location = new System.Drawing.Point(2, 29);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(2);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(1514, 160);
+            this.richTextBox1.Size = new System.Drawing.Size(1511, 160);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
@@ -378,7 +378,7 @@ namespace EMS_TEST_SIMULATOR
             this.코드리스트.Margin = new System.Windows.Forms.Padding(2);
             this.코드리스트.Name = "코드리스트";
             this.코드리스트.Padding = new System.Windows.Forms.Padding(4, 3, 4, 4);
-            this.코드리스트.Size = new System.Drawing.Size(623, 137);
+            this.코드리스트.Size = new System.Drawing.Size(620, 137);
             this.코드리스트.TabIndex = 1;
             this.코드리스트.Text = "코드리스트";
             // 
@@ -395,7 +395,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabControl3.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl3.Name = "tabControl3";
             this.tabControl3.SelectedIndex = 0;
-            this.tabControl3.Size = new System.Drawing.Size(615, 130);
+            this.tabControl3.Size = new System.Drawing.Size(612, 130);
             this.tabControl3.TabIndex = 0;
             // 
             // 응답코드
@@ -406,7 +406,7 @@ namespace EMS_TEST_SIMULATOR
             this.응답코드.Margin = new System.Windows.Forms.Padding(2);
             this.응답코드.Name = "응답코드";
             this.응답코드.Padding = new System.Windows.Forms.Padding(2);
-            this.응답코드.Size = new System.Drawing.Size(607, 102);
+            this.응답코드.Size = new System.Drawing.Size(604, 102);
             this.응답코드.TabIndex = 0;
             this.응답코드.Text = "응답코드";
             // 
@@ -420,7 +420,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView4.Location = new System.Drawing.Point(2, 2);
             this.listView4.Margin = new System.Windows.Forms.Padding(2);
             this.listView4.Name = "listView4";
-            this.listView4.Size = new System.Drawing.Size(603, 98);
+            this.listView4.Size = new System.Drawing.Size(600, 98);
             this.listView4.TabIndex = 0;
             this.listView4.UseCompatibleStateImageBehavior = false;
             this.listView4.SelectedIndexChanged += new System.EventHandler(this.listView4_SelectedIndexChanged_1);
@@ -557,7 +557,7 @@ namespace EMS_TEST_SIMULATOR
             this.엔코더설정.Margin = new System.Windows.Forms.Padding(2);
             this.엔코더설정.Name = "엔코더설정";
             this.엔코더설정.Padding = new System.Windows.Forms.Padding(4, 3, 4, 4);
-            this.엔코더설정.Size = new System.Drawing.Size(623, 137);
+            this.엔코더설정.Size = new System.Drawing.Size(620, 137);
             this.엔코더설정.TabIndex = 2;
             this.엔코더설정.Text = "엔코더설정";
             // 
@@ -1028,11 +1028,11 @@ namespace EMS_TEST_SIMULATOR
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.ForeColor = System.Drawing.Color.White;
-            this.tabControl1.Location = new System.Drawing.Point(129, 289);
+            this.tabControl1.Location = new System.Drawing.Point(128, 289);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(954, 200);
+            this.tabControl1.Size = new System.Drawing.Size(951, 200);
             this.tabControl1.TabIndex = 14;
             // 
             // tabPage1
@@ -1043,9 +1043,20 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage1.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(946, 174);
+            this.tabPage1.Size = new System.Drawing.Size(943, 174);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "SR50-RAIL";
+            // 
+            // elementHost1
+            // 
+            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost1.Location = new System.Drawing.Point(3, 3);
+            this.elementHost1.Margin = new System.Windows.Forms.Padding(2);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(937, 168);
+            this.elementHost1.TabIndex = 0;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.userControl11;
             // 
             // tabPage2
             // 
@@ -1055,9 +1066,20 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage2.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(950, 174);
+            this.tabPage2.Size = new System.Drawing.Size(946, 174);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "SR150-RAIL";
+            // 
+            // elementHost2
+            // 
+            this.elementHost2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost2.Location = new System.Drawing.Point(3, 3);
+            this.elementHost2.Margin = new System.Windows.Forms.Padding(2);
+            this.elementHost2.Name = "elementHost2";
+            this.elementHost2.Size = new System.Drawing.Size(940, 168);
+            this.elementHost2.TabIndex = 0;
+            this.elementHost2.Text = "elementHost2";
+            this.elementHost2.Child = this.userControl21;
             // 
             // label3
             // 
@@ -1065,10 +1087,10 @@ namespace EMS_TEST_SIMULATOR
             this.label3.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label3.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(546, 32);
+            this.label3.Location = new System.Drawing.Point(543, 32);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(279, 15);
+            this.label3.Size = new System.Drawing.Size(278, 15);
             this.label3.TabIndex = 20;
             this.label3.Text = "Rail DIO 통신현황";
             // 
@@ -1105,7 +1127,7 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel1.Controls.Add(this.lbl_response_code_text, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.lbl_respons_code, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(130, 494);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(129, 494);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
@@ -1115,7 +1137,7 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(320, 173);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(332, 173);
             this.tableLayoutPanel1.TabIndex = 0;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
             // 
@@ -1124,7 +1146,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_point_text.AutoSize = true;
             this.lbl_error_point_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_error_point_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_error_point_text.Location = new System.Drawing.Point(257, 144);
+            this.lbl_error_point_text.Location = new System.Drawing.Point(267, 144);
             this.lbl_error_point_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_error_point_text.Name = "lbl_error_point_text";
             this.lbl_error_point_text.Size = new System.Drawing.Size(12, 15);
@@ -1137,7 +1159,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_point.AutoSize = true;
             this.lbl_error_point.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_error_point.ForeColor = System.Drawing.Color.White;
-            this.lbl_error_point.Location = new System.Drawing.Point(167, 144);
+            this.lbl_error_point.Location = new System.Drawing.Point(173, 144);
             this.lbl_error_point.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_error_point.Name = "lbl_error_point";
             this.lbl_error_point.Size = new System.Drawing.Size(59, 15);
@@ -1149,7 +1171,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_transfer_command_Received_text.AutoSize = true;
             this.lbl_transfer_command_Received_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_transfer_command_Received_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_transfer_command_Received_text.Location = new System.Drawing.Point(111, 144);
+            this.lbl_transfer_command_Received_text.Location = new System.Drawing.Point(115, 144);
             this.lbl_transfer_command_Received_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_transfer_command_Received_text.Name = "lbl_transfer_command_Received_text";
             this.lbl_transfer_command_Received_text.Size = new System.Drawing.Size(12, 15);
@@ -1174,7 +1196,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_target_point_text.AutoSize = true;
             this.lbl_target_point_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_target_point_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_target_point_text.Location = new System.Drawing.Point(257, 120);
+            this.lbl_target_point_text.Location = new System.Drawing.Point(267, 120);
             this.lbl_target_point_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_target_point_text.Name = "lbl_target_point_text";
             this.lbl_target_point_text.Size = new System.Drawing.Size(12, 15);
@@ -1187,7 +1209,7 @@ namespace EMS_TEST_SIMULATOR
             this.label26.AutoSize = true;
             this.label26.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label26.ForeColor = System.Drawing.Color.White;
-            this.label26.Location = new System.Drawing.Point(167, 120);
+            this.label26.Location = new System.Drawing.Point(173, 120);
             this.label26.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(59, 15);
@@ -1199,7 +1221,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_load_status_text.AutoSize = true;
             this.lbl_load_status_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_load_status_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_load_status_text.Location = new System.Drawing.Point(111, 120);
+            this.lbl_load_status_text.Location = new System.Drawing.Point(115, 120);
             this.lbl_load_status_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_load_status_text.Name = "lbl_load_status_text";
             this.lbl_load_status_text.Size = new System.Drawing.Size(12, 15);
@@ -1224,7 +1246,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_current_point_text.AutoSize = true;
             this.lbl_current_point_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_current_point_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_current_point_text.Location = new System.Drawing.Point(257, 96);
+            this.lbl_current_point_text.Location = new System.Drawing.Point(267, 96);
             this.lbl_current_point_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_current_point_text.Name = "lbl_current_point_text";
             this.lbl_current_point_text.Size = new System.Drawing.Size(12, 15);
@@ -1237,7 +1259,7 @@ namespace EMS_TEST_SIMULATOR
             this.label22.AutoSize = true;
             this.label22.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label22.ForeColor = System.Drawing.Color.White;
-            this.label22.Location = new System.Drawing.Point(167, 96);
+            this.label22.Location = new System.Drawing.Point(173, 96);
             this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(59, 15);
@@ -1249,7 +1271,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_vehicle_mode_text.AutoSize = true;
             this.lbl_vehicle_mode_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_vehicle_mode_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_vehicle_mode_text.Location = new System.Drawing.Point(111, 96);
+            this.lbl_vehicle_mode_text.Location = new System.Drawing.Point(115, 96);
             this.lbl_vehicle_mode_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_vehicle_mode_text.Name = "lbl_vehicle_mode_text";
             this.lbl_vehicle_mode_text.Size = new System.Drawing.Size(12, 15);
@@ -1274,7 +1296,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_target_mode_text.AutoSize = true;
             this.lbl_target_mode_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_target_mode_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_target_mode_text.Location = new System.Drawing.Point(257, 72);
+            this.lbl_target_mode_text.Location = new System.Drawing.Point(267, 72);
             this.lbl_target_mode_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_target_mode_text.Name = "lbl_target_mode_text";
             this.lbl_target_mode_text.Size = new System.Drawing.Size(12, 15);
@@ -1287,10 +1309,10 @@ namespace EMS_TEST_SIMULATOR
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label18.ForeColor = System.Drawing.Color.White;
-            this.label18.Location = new System.Drawing.Point(167, 72);
+            this.label18.Location = new System.Drawing.Point(173, 72);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(75, 24);
+            this.label18.Size = new System.Drawing.Size(87, 15);
             this.label18.TabIndex = 27;
             this.label18.Text = "목적 동작 코드";
             // 
@@ -1299,7 +1321,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_transfer_data_no_text.AutoSize = true;
             this.lbl_transfer_data_no_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_transfer_data_no_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_transfer_data_no_text.Location = new System.Drawing.Point(111, 72);
+            this.lbl_transfer_data_no_text.Location = new System.Drawing.Point(115, 72);
             this.lbl_transfer_data_no_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_transfer_data_no_text.Name = "lbl_transfer_data_no_text";
             this.lbl_transfer_data_no_text.Size = new System.Drawing.Size(12, 15);
@@ -1324,7 +1346,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_code_text.AutoSize = true;
             this.lbl_error_code_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_error_code_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_error_code_text.Location = new System.Drawing.Point(111, 48);
+            this.lbl_error_code_text.Location = new System.Drawing.Point(115, 48);
             this.lbl_error_code_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_error_code_text.Name = "lbl_error_code_text";
             this.lbl_error_code_text.Size = new System.Drawing.Size(12, 15);
@@ -1349,7 +1371,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_operating_code_text.AutoSize = true;
             this.lbl_operating_code_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_operating_code_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_operating_code_text.Location = new System.Drawing.Point(111, 24);
+            this.lbl_operating_code_text.Location = new System.Drawing.Point(115, 24);
             this.lbl_operating_code_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_operating_code_text.Name = "lbl_operating_code_text";
             this.lbl_operating_code_text.Size = new System.Drawing.Size(12, 15);
@@ -1374,7 +1396,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_response_code_text.AutoSize = true;
             this.lbl_response_code_text.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_response_code_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lbl_response_code_text.Location = new System.Drawing.Point(111, 0);
+            this.lbl_response_code_text.Location = new System.Drawing.Point(115, 0);
             this.lbl_response_code_text.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_response_code_text.Name = "lbl_response_code_text";
             this.lbl_response_code_text.Size = new System.Drawing.Size(12, 15);
@@ -1402,7 +1424,7 @@ namespace EMS_TEST_SIMULATOR
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button2.ForeColor = System.Drawing.Color.White;
-            this.button2.Location = new System.Drawing.Point(830, 58);
+            this.button2.Location = new System.Drawing.Point(826, 58);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(113, 25);
             this.button2.TabIndex = 2;
@@ -1418,7 +1440,7 @@ namespace EMS_TEST_SIMULATOR
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(956, 18);
+            this.button1.Location = new System.Drawing.Point(952, 18);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(104, 26);
             this.button1.TabIndex = 1;
@@ -1445,7 +1467,7 @@ namespace EMS_TEST_SIMULATOR
             this.Rail_io.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Rail_io.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.Rail_io.ForeColor = System.Drawing.Color.White;
-            this.Rail_io.Location = new System.Drawing.Point(830, 18);
+            this.Rail_io.Location = new System.Drawing.Point(826, 18);
             this.Rail_io.Name = "Rail_io";
             this.Rail_io.Size = new System.Drawing.Size(113, 26);
             this.Rail_io.TabIndex = 17;
@@ -1460,12 +1482,12 @@ namespace EMS_TEST_SIMULATOR
             this.tBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tBox1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.tBox1.ForeColor = System.Drawing.Color.White;
-            this.tBox1.Location = new System.Drawing.Point(546, 49);
+            this.tBox1.Location = new System.Drawing.Point(543, 49);
             this.tBox1.Margin = new System.Windows.Forms.Padding(2);
             this.tBox1.Multiline = true;
             this.tBox1.Name = "tBox1";
             this.tableLayoutPanel2.SetRowSpan(this.tBox1, 4);
-            this.tBox1.Size = new System.Drawing.Size(279, 105);
+            this.tBox1.Size = new System.Drawing.Size(278, 105);
             this.tBox1.TabIndex = 12;
             // 
             // label1
@@ -1474,9 +1496,9 @@ namespace EMS_TEST_SIMULATOR
             this.label1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(130, 272);
+            this.label1.Location = new System.Drawing.Point(129, 272);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(320, 15);
+            this.label1.Size = new System.Drawing.Size(332, 15);
             this.label1.TabIndex = 19;
             this.label1.Text = "LAYOUT";
             // 
@@ -1485,15 +1507,15 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.tableLayoutPanel2.ColumnCount = 10;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 9.123307F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.37848F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.534091F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24.33405F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 5.543557F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20.29808F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 8.587651F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.5559416F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7.9489F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.632363F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.14336F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 45F));
             this.tableLayoutPanel2.Controls.Add(this.button10, 4, 4);
             this.tableLayoutPanel2.Controls.Add(this.btn_Command, 6, 3);
             this.tableLayoutPanel2.Controls.Add(this.label1, 1, 7);
@@ -1532,6 +1554,22 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel2.TabIndex = 1;
             this.tableLayoutPanel2.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel2_Paint);
             // 
+            // button10
+            // 
+            this.button10.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.button10.Dock = System.Windows.Forms.DockStyle.Top;
+            this.button10.FlatAppearance.BorderSize = 0;
+            this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button10.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.button10.ForeColor = System.Drawing.Color.White;
+            this.button10.Location = new System.Drawing.Point(826, 125);
+            this.button10.Name = "button10";
+            this.tableLayoutPanel2.SetRowSpan(this.button10, 2);
+            this.button10.Size = new System.Drawing.Size(113, 28);
+            this.button10.TabIndex = 28;
+            this.button10.Text = "EMS I.O";
+            this.button10.UseVisualStyleBackColor = false;
+            // 
             // btn_Command
             // 
             this.btn_Command.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
@@ -1540,7 +1578,7 @@ namespace EMS_TEST_SIMULATOR
             this.btn_Command.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Command.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btn_Command.ForeColor = System.Drawing.Color.White;
-            this.btn_Command.Location = new System.Drawing.Point(956, 58);
+            this.btn_Command.Location = new System.Drawing.Point(952, 58);
             this.btn_Command.Name = "btn_Command";
             this.btn_Command.Size = new System.Drawing.Size(104, 25);
             this.btn_Command.TabIndex = 23;
@@ -1555,11 +1593,11 @@ namespace EMS_TEST_SIMULATOR
             this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label4.Font = new System.Drawing.Font("맑은 고딕", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label4.ForeColor = System.Drawing.Color.White;
-            this.label4.Location = new System.Drawing.Point(129, 15);
+            this.label4.Location = new System.Drawing.Point(128, 15);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.tableLayoutPanel2.SetRowSpan(this.label4, 2);
-            this.label4.Size = new System.Drawing.Size(413, 40);
+            this.label4.Size = new System.Drawing.Size(411, 40);
             this.label4.TabIndex = 22;
             this.label4.Text = "SKY-RAV GHC Simulator";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1568,10 +1606,10 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Image = global::EMS_TEST_SIMULATOR.Properties.Resources.승강_GIF;
-            this.pictureBox1.Location = new System.Drawing.Point(130, 151);
+            this.pictureBox1.Location = new System.Drawing.Point(129, 151);
             this.pictureBox1.Name = "pictureBox1";
             this.tableLayoutPanel2.SetRowSpan(this.pictureBox1, 2);
-            this.pictureBox1.Size = new System.Drawing.Size(320, 116);
+            this.pictureBox1.Size = new System.Drawing.Size(332, 116);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 24;
             this.pictureBox1.TabStop = false;
@@ -1584,9 +1622,9 @@ namespace EMS_TEST_SIMULATOR
             this.label5.Font = new System.Drawing.Font("맑은 고딕", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label5.ForeColor = System.Drawing.Color.White;
             this.label5.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
-            this.label5.Location = new System.Drawing.Point(130, 122);
+            this.label5.Location = new System.Drawing.Point(129, 122);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(320, 26);
+            this.label5.Size = new System.Drawing.Size(332, 26);
             this.label5.TabIndex = 25;
             this.label5.Text = "EMS 현재상태";
             this.label5.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -1599,7 +1637,7 @@ namespace EMS_TEST_SIMULATOR
             this.button7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.button7.FlatAppearance.BorderSize = 0;
             this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button7.Location = new System.Drawing.Point(840, 158);
+            this.button7.Location = new System.Drawing.Point(836, 158);
             this.button7.Margin = new System.Windows.Forms.Padding(2);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(104, 107);
@@ -1614,51 +1652,13 @@ namespace EMS_TEST_SIMULATOR
             this.button8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.button8.FlatAppearance.BorderSize = 0;
             this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button8.Location = new System.Drawing.Point(955, 158);
+            this.button8.Location = new System.Drawing.Point(951, 158);
             this.button8.Margin = new System.Windows.Forms.Padding(2);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(106, 110);
             this.button8.TabIndex = 27;
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
-            // 
-            // elementHost1
-            // 
-            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(3, 3);
-            this.elementHost1.Margin = new System.Windows.Forms.Padding(2);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(940, 168);
-            this.elementHost1.TabIndex = 0;
-            this.elementHost1.Text = "elementHost1";
-            this.elementHost1.Child = this.userControl11;
-            // 
-            // elementHost2
-            // 
-            this.elementHost2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost2.Location = new System.Drawing.Point(3, 3);
-            this.elementHost2.Margin = new System.Windows.Forms.Padding(2);
-            this.elementHost2.Name = "elementHost2";
-            this.elementHost2.Size = new System.Drawing.Size(944, 168);
-            this.elementHost2.TabIndex = 0;
-            this.elementHost2.Text = "elementHost2";
-            this.elementHost2.Child = this.userControl21;
-            // 
-            // button10
-            // 
-            this.button10.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-            this.button10.Dock = System.Windows.Forms.DockStyle.Top;
-            this.button10.FlatAppearance.BorderSize = 0;
-            this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button10.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.button10.ForeColor = System.Drawing.Color.White;
-            this.button10.Location = new System.Drawing.Point(830, 125);
-            this.button10.Name = "button10";
-            this.tableLayoutPanel2.SetRowSpan(this.button10, 2);
-            this.button10.Size = new System.Drawing.Size(113, 28);
-            this.button10.TabIndex = 28;
-            this.button10.Text = "EMS I.O";
-            this.button10.UseVisualStyleBackColor = false;
             // 
             // Main
             // 
