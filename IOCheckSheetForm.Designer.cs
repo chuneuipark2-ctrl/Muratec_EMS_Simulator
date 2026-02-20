@@ -113,6 +113,228 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft.Size = new System.Drawing.Size(280, 865);
             this.panelLeft.TabIndex = 1;
             // 
+            // labelOptionTitle
+            // 
+            this.labelOptionTitle = new System.Windows.Forms.Label();
+            this.labelOptionTitle.AutoSize = true;
+            this.labelOptionTitle.Font = new System.Drawing.Font("맑은 고딕", 11F, System.Drawing.FontStyle.Bold);
+            this.labelOptionTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(255)))));
+            this.labelOptionTitle.Location = new System.Drawing.Point(12, 12);
+            this.labelOptionTitle.Name = "labelOptionTitle";
+            this.labelOptionTitle.Size = new System.Drawing.Size(124, 30);
+            this.labelOptionTitle.TabIndex = 0;
+            this.labelOptionTitle.Text = "I/O 옵션 설정";
+            // 
+            // labelHoistType
+            // 
+            this.labelHoistType = new System.Windows.Forms.Label();
+            this.labelHoistType.AutoSize = true;
+            this.labelHoistType.ForeColor = System.Drawing.Color.White;
+            this.labelHoistType.Location = new System.Drawing.Point(12, 55);
+            this.labelHoistType.Name = "labelHoistType";
+            this.labelHoistType.Size = new System.Drawing.Size(79, 25);
+            this.labelHoistType.TabIndex = 1;
+            this.labelHoistType.Text = "승강대 :";
+            // 
+            // comboHoistType
+            // 
+            this.comboHoistType = new System.Windows.Forms.ComboBox();
+            this.comboHoistType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboHoistType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboHoistType.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboHoistType.ForeColor = System.Drawing.Color.White;
+            this.comboHoistType.FormattingEnabled = true;
+            this.comboHoistType.Items.AddRange(new object[] { "CHUCK", "CAGE", "컨베이어" });
+            this.comboHoistType.Location = new System.Drawing.Point(12, 83);
+            this.comboHoistType.Name = "comboHoistType";
+            this.comboHoistType.Size = new System.Drawing.Size(250, 33);
+            this.comboHoistType.TabIndex = 2;
+            // 
+            // labelCommType
+            // 
+            this.labelCommType = new System.Windows.Forms.Label();
+            this.labelCommType.AutoSize = true;
+            this.labelCommType.ForeColor = System.Drawing.Color.White;
+            this.labelCommType.Location = new System.Drawing.Point(12, 130);
+            this.labelCommType.Name = "labelCommType";
+            this.labelCommType.Size = new System.Drawing.Size(97, 25);
+            this.labelCommType.TabIndex = 3;
+            this.labelCommType.Text = "통신방식 :";
+            // 
+            // comboCommType
+            // 
+            this.comboCommType = new System.Windows.Forms.ComboBox();
+            this.comboCommType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboCommType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboCommType.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboCommType.ForeColor = System.Drawing.Color.White;
+            this.comboCommType.FormattingEnabled = true;
+            this.comboCommType.Items.AddRange(new object[] { "없음", "ROP", "8bit", "SS무선" });
+            this.comboCommType.Location = new System.Drawing.Point(12, 158);
+            this.comboCommType.Name = "comboCommType";
+            this.comboCommType.Size = new System.Drawing.Size(250, 33);
+            this.comboCommType.TabIndex = 4;
+            // 
+            // labelCollision
+            // 
+            this.labelCollision = new System.Windows.Forms.Label();
+            this.labelCollision.AutoSize = true;
+            this.labelCollision.ForeColor = System.Drawing.Color.White;
+            this.labelCollision.Location = new System.Drawing.Point(12, 205);
+            this.labelCollision.Name = "labelCollision";
+            this.labelCollision.Size = new System.Drawing.Size(133, 25);
+            this.labelCollision.TabIndex = 5;
+            this.labelCollision.Text = "충돌방지센서 :";
+            // 
+            // comboCollision
+            // 
+            this.comboCollision = new System.Windows.Forms.ComboBox();
+            this.comboCollision.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboCollision.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboCollision.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboCollision.ForeColor = System.Drawing.Color.White;
+            this.comboCollision.FormattingEnabled = true;
+            this.comboCollision.Items.AddRange(new object[] { "없음", "1개소 전측", "1개소 후측", "2개소" });
+            this.comboCollision.Location = new System.Drawing.Point(12, 233);
+            this.comboCollision.Name = "comboCollision";
+            this.comboCollision.Size = new System.Drawing.Size(250, 33);
+            this.comboCollision.TabIndex = 6;
+            // 
+            // labelLayout
+            // 
+            this.labelLayout = new System.Windows.Forms.Label();
+            this.labelLayout.AutoSize = true;
+            this.labelLayout.ForeColor = System.Drawing.Color.White;
+            this.labelLayout.Location = new System.Drawing.Point(12, 280);
+            this.labelLayout.Name = "labelLayout";
+            this.labelLayout.Size = new System.Drawing.Size(115, 25);
+            this.labelLayout.TabIndex = 7;
+            this.labelLayout.Text = "레이아웃 :";
+            // 
+            // comboLayout
+            // 
+            this.comboLayout = new System.Windows.Forms.ComboBox();
+            this.comboLayout.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboLayout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboLayout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboLayout.ForeColor = System.Drawing.Color.White;
+            this.comboLayout.FormattingEnabled = true;
+            this.comboLayout.Items.AddRange(new object[] { "직선형", "분기장치" });
+            this.comboLayout.Location = new System.Drawing.Point(12, 308);
+            this.comboLayout.Name = "comboLayout";
+            this.comboLayout.Size = new System.Drawing.Size(250, 33);
+            this.comboLayout.TabIndex = 8;
+            // 
+            // labelCargoProtrusion
+            // 
+            this.labelCargoProtrusion = new System.Windows.Forms.Label();
+            this.labelCargoProtrusion.AutoSize = true;
+            this.labelCargoProtrusion.ForeColor = System.Drawing.Color.White;
+            this.labelCargoProtrusion.Location = new System.Drawing.Point(12, 355);
+            this.labelCargoProtrusion.Name = "labelCargoProtrusion";
+            this.labelCargoProtrusion.Size = new System.Drawing.Size(115, 25);
+            this.labelCargoProtrusion.TabIndex = 9;
+            this.labelCargoProtrusion.Text = "화물돌출센서 :";
+            // 
+            // comboCargoProtrusion
+            // 
+            this.comboCargoProtrusion = new System.Windows.Forms.ComboBox();
+            this.comboCargoProtrusion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboCargoProtrusion.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboCargoProtrusion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboCargoProtrusion.ForeColor = System.Drawing.Color.White;
+            this.comboCargoProtrusion.FormattingEnabled = true;
+            this.comboCargoProtrusion.Items.AddRange(new object[] { "없음", "우측", "좌측", "좌/우" });
+            this.comboCargoProtrusion.Location = new System.Drawing.Point(12, 383);
+            this.comboCargoProtrusion.Name = "comboCargoProtrusion";
+            this.comboCargoProtrusion.Size = new System.Drawing.Size(250, 33);
+            this.comboCargoProtrusion.TabIndex = 10;
+            // 
+            // labelLiftStop
+            // 
+            this.labelLiftStop = new System.Windows.Forms.Label();
+            this.labelLiftStop.AutoSize = true;
+            this.labelLiftStop.ForeColor = System.Drawing.Color.White;
+            this.labelLiftStop.Location = new System.Drawing.Point(12, 430);
+            this.labelLiftStop.Name = "labelLiftStop";
+            this.labelLiftStop.Size = new System.Drawing.Size(115, 25);
+            this.labelLiftStop.TabIndex = 11;
+            this.labelLiftStop.Text = "승강정지센서 :";
+            // 
+            // comboLiftStop
+            // 
+            this.comboLiftStop = new System.Windows.Forms.ComboBox();
+            this.comboLiftStop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboLiftStop.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboLiftStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboLiftStop.ForeColor = System.Drawing.Color.White;
+            this.comboLiftStop.FormattingEnabled = true;
+            this.comboLiftStop.Items.AddRange(new object[] { "없음", "우측", "좌측", "좌/우" });
+            this.comboLiftStop.Location = new System.Drawing.Point(12, 458);
+            this.comboLiftStop.Name = "comboLiftStop";
+            this.comboLiftStop.Size = new System.Drawing.Size(250, 33);
+            this.comboLiftStop.TabIndex = 12;
+            // 
+            // labelOption
+            // 
+            this.labelOption = new System.Windows.Forms.Label();
+            this.labelOption.AutoSize = true;
+            this.labelOption.ForeColor = System.Drawing.Color.White;
+            this.labelOption.Location = new System.Drawing.Point(12, 505);
+            this.labelOption.Name = "labelOption";
+            this.labelOption.Size = new System.Drawing.Size(133, 25);
+            this.labelOption.TabIndex = 13;
+            this.labelOption.Text = "추가옵션(8bit) :";
+            // 
+            // comboOption
+            // 
+            this.comboOption = new System.Windows.Forms.ComboBox();
+            this.comboOption.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.comboOption.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboOption.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboOption.ForeColor = System.Drawing.Color.White;
+            this.comboOption.FormattingEnabled = true;
+            this.comboOption.Items.AddRange(new object[] { "없음", "있음" });
+            this.comboOption.Location = new System.Drawing.Point(12, 533);
+            this.comboOption.Name = "comboOption";
+            this.comboOption.Size = new System.Drawing.Size(250, 33);
+            this.comboOption.TabIndex = 14;
+            // 
+            // buttonApplyOptions
+            // 
+            this.buttonApplyOptions = new System.Windows.Forms.Button();
+            this.buttonApplyOptions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.buttonApplyOptions.FlatAppearance.BorderSize = 0;
+            this.buttonApplyOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonApplyOptions.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.buttonApplyOptions.ForeColor = System.Drawing.Color.White;
+            this.buttonApplyOptions.Location = new System.Drawing.Point(12, 585);
+            this.buttonApplyOptions.Name = "buttonApplyOptions";
+            this.buttonApplyOptions.Size = new System.Drawing.Size(250, 38);
+            this.buttonApplyOptions.TabIndex = 15;
+            this.buttonApplyOptions.Text = "I/O 표 적용";
+            this.buttonApplyOptions.UseVisualStyleBackColor = false;
+            this.buttonApplyOptions.Click += new System.EventHandler(this.buttonApplyOptions_Click);
+            // 
+            // panelLeft controls (must be added after initialization)
+            // 
+            this.panelLeft.Controls.Add(this.buttonApplyOptions);
+            this.panelLeft.Controls.Add(this.comboOption);
+            this.panelLeft.Controls.Add(this.labelOption);
+            this.panelLeft.Controls.Add(this.comboLiftStop);
+            this.panelLeft.Controls.Add(this.labelLiftStop);
+            this.panelLeft.Controls.Add(this.comboCargoProtrusion);
+            this.panelLeft.Controls.Add(this.labelCargoProtrusion);
+            this.panelLeft.Controls.Add(this.comboLayout);
+            this.panelLeft.Controls.Add(this.labelLayout);
+            this.panelLeft.Controls.Add(this.comboCollision);
+            this.panelLeft.Controls.Add(this.labelCollision);
+            this.panelLeft.Controls.Add(this.comboCommType);
+            this.panelLeft.Controls.Add(this.labelCommType);
+            this.panelLeft.Controls.Add(this.comboHoistType);
+            this.panelLeft.Controls.Add(this.labelHoistType);
+            this.panelLeft.Controls.Add(this.labelOptionTitle);
+            // 
             // panelRight
             // 
             this.panelRight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
@@ -290,5 +512,21 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.Label labelLegend;
         private System.Windows.Forms.Label labelLegendInput;
         private System.Windows.Forms.Label labelLegendOutput;
+        private System.Windows.Forms.Label labelOptionTitle;
+        private System.Windows.Forms.Label labelHoistType;
+        private System.Windows.Forms.ComboBox comboHoistType;
+        private System.Windows.Forms.Label labelCommType;
+        private System.Windows.Forms.ComboBox comboCommType;
+        private System.Windows.Forms.Label labelCollision;
+        private System.Windows.Forms.ComboBox comboCollision;
+        private System.Windows.Forms.Label labelLayout;
+        private System.Windows.Forms.ComboBox comboLayout;
+        private System.Windows.Forms.Label labelCargoProtrusion;
+        private System.Windows.Forms.ComboBox comboCargoProtrusion;
+        private System.Windows.Forms.Label labelLiftStop;
+        private System.Windows.Forms.ComboBox comboLiftStop;
+        private System.Windows.Forms.Label labelOption;
+        private System.Windows.Forms.ComboBox comboOption;
+        private System.Windows.Forms.Button buttonApplyOptions;
     }
 }
