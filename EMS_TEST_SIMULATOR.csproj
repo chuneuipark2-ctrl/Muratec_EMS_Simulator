@@ -69,6 +69,12 @@
       <DependentUpon>EMS_TCP_UDP_Connect.cs</DependentUpon>
     </Compile>
     <Compile Include="Encoder_Setting.cs" />
+    <Compile Include="IOCheckSheetForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IOCheckSheetForm.Designer.cs">
+      <DependentUpon>IOCheckSheetForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Line_Setup.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -134,6 +140,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EMS_TCP_UDP_Connect.resx">
       <DependentUpon>EMS_TCP_UDP_Connect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IOCheckSheetForm.resx">
+      <DependentUpon>IOCheckSheetForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Line_Setup.resx">
       <DependentUpon>Line_Setup.cs</DependentUpon>

@@ -989,7 +989,7 @@ namespace EMS_TEST_SIMULATOR
 
             List<Operating_Code_Items> operating_Code_Items = new List<Operating_Code_Items>();
 
-            operating_Code_Items.Add(new Operating_Code_Items("0","수동운전모드"));
+            operating_Code_Items.Add(new Operating_Code_Items("0","수동 운전 모드"));
             operating_Code_Items.Add(new Operating_Code_Items("1", "초기주행 전진"));
             operating_Code_Items.Add(new Operating_Code_Items("2", "초기주행 후진"));
             operating_Code_Items.Add(new Operating_Code_Items("3", "-"));
@@ -1406,7 +1406,10 @@ namespace EMS_TEST_SIMULATOR
 
         private void button10_Click(object sender, EventArgs e)
         {
-
+            using (var form = new IOCheckSheetForm())
+            {
+                form.ShowDialog(this);
+            }
         }
     }
 
