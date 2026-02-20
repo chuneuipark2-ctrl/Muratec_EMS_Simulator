@@ -35,20 +35,87 @@ namespace EMS_TEST_SIMULATOR
 
         /// <summary>Line_Setup 호기선택 박스에서 [상태저장] 시 저장된 호기 (반자동 명령 호기 일치 검사용)</summary>
         public static string SavedVehicleNo { get; set; } = "";
+        /// <summary>Line_Setup 라인선택에서 [상태저장] 시 저장된 라인명 (반자동 명령 라인 일치 검사용)</summary>
+        public static string SavedLineName { get; set; } = "";
+        /// <summary>Line_Setup 타입선택에서 [상태저장] 시 저장된 레일 타입 (SR50 레일 / SR150 레일). RIO 주소 2·3번 vs 4·5번 구분용.</summary>
+        public static string SavedRailType { get; set; } = "";
 
         public Line_Setup()
         {
             InitializeComponent();
+            line_sel_box.SelectedIndexChanged += Line_sel_box_SelectedIndexChanged;
+            this.Load += Line_Setup_Load;
+        }
+
+        private void Line_Setup_Load(object sender, EventArgs e)
+        {
+            RefreshTypeListByLine();
+        }
+
+        private void Line_sel_box_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            RefreshTypeListByLine();
+        }
+
+        /// <summary>라인선택에 따라 타입선택 콤보를 SR50/SR50-H 또는 SR150/SR150-H만 보이도록 갱신</summary>
+        private void RefreshTypeListByLine()
+        {
+            string line = line_sel_box.SelectedItem?.ToString() ?? "";
+            object prevType = type_sel_box.SelectedItem;
+
+            type_sel_box.Items.Clear();
+            if (line.Contains("SR50") && !line.Contains("SR150"))
+            {
+                type_sel_box.Items.Add("SR50");
+                type_sel_box.Items.Add("SR50-H");
+            }
+            else if (line.Contains("SR150"))
+            {
+                type_sel_box.Items.Add("SR150");
+                type_sel_box.Items.Add("SR150-H");
+            }
+
+            if (type_sel_box.Items.Count > 0)
+            {
+                bool valid = false;
+                if (prevType != null)
+                {
+                    string s = prevType.ToString();
+                    valid = (line.Contains("SR50") && !line.Contains("SR150") && (s == "SR50" || s == "SR50-H"))
+                         || (line.Contains("SR150") && (s == "SR150" || s == "SR150-H" || s == "S150"));
+                }
+                type_sel_box.SelectedIndex = valid ? type_sel_box.Items.IndexOf(prevType) : 0;
+            }
+        }
+
+        /// <summary>현재 라인과 타입 조합이 허용된지 검사 (SR50 레일 → SR50/SR50-H, SR150 레일 → SR150/SR150-H)</summary>
+        private bool IsLineTypeCombinationValid()
+        {
+            string line = line_sel_box.SelectedItem?.ToString() ?? "";
+            string type = type_sel_box.SelectedItem?.ToString() ?? "";
+            if (string.IsNullOrEmpty(line) || string.IsNullOrEmpty(type)) return true;
+            if (line.Contains("SR50") && !line.Contains("SR150"))
+                return type == "SR50" || type == "SR50-H";
+            if (line.Contains("SR150"))
+                return type == "SR150" || type == "SR150-H" || type == "S150";
+            return true;
         }
 
 
 
         private void button1_Click(object sender, EventArgs e)// 상태저장
         {
+            if (!IsLineTypeCombinationValid())
+            {
+                MessageBox.Show("라인과 타입이 맞지 않습니다.\r\nSR50 레일은 SR50, SR50-H만 / SR150 레일은 SR150, SR150-H만 선택 가능합니다.", "라인·타입 불일치", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             savestatus.Save_LineName = line_sel_box.SelectedItem?.ToString() ?? "";
             savestatus.Save_NoSelBox = no_sel_box.SelectedItem?.ToString() ?? "";
             savestatus.Save_TypeSelBox = type_sel_box.SelectedItem?.ToString() ?? "";
             SavedVehicleNo = savestatus.Save_NoSelBox;
+            SavedLineName = savestatus.Save_LineName;
+            SavedRailType = savestatus.Save_TypeSelBox;
             //Console.WriteLine(savestatus.Save_LineName);
         }
 

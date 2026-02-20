@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -111,6 +111,12 @@ namespace EMS_TEST_SIMULATOR
                 content.Append("0000");
             }
             return Host_Packet(GetNextSeq(), "H2", content.ToString(), true);
+        }
+
+        // [H3] 반송데이터 클리어 지시
+        public byte[] EMS_TransferDataClear()
+        {
+            return Host_Packet(GetNextSeq(), "H3", "", true);
         }
 
         // [H4] 작업 지시

@@ -35,6 +35,8 @@ namespace EMS_TEST_SIMULATOR
         private System.Threading.CancellationTokenSource _autoCts;
         private bool _autoRunning = false;
         private bool _cycleStopRequestedByUser = false;
+        /// <summary>EMO로 인해 AUTO가 즉시 중단된 경우, 완료 시 '사이클 정지 실패' 경고 표시용</summary>
+        private bool _autoStoppedByEmo = false;
 
         /// <summary>EMS 상태 패널 실시간 갱신용 타이머 (UI 스레드에서만 라벨 갱신 → 스레드 안전)</summary>
         private System.Windows.Forms.Timer _emsStatusUpdateTimer;
@@ -42,6 +44,18 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>통신 로그: 최대 행 수 제한(초과 시 오래된 행 삭제), 뻑남 방지</summary>
         private const int _commLogMaxRows = 3000;
         private bool _commLogPaused = false;
+        /// <summary>주요로그 에러 행 적시용: 직전 송신 데이터(내 프로그램)</summary>
+        private string _lastSentHex = "";
+        private string _lastSentDesc = "";
+
+        /// <summary>EMO 버튼: 한번째 터치(초록띄+1번 시퀀스) / 두번째 터치(띄 제거+2번 시퀀스) 상태</summary>
+        private bool _emoGreenBorderOn = false;
+
+        /// <summary>AUTO 버튼: 클릭 시 초록 띄 토글만 (한번 누르면 띄, 두번째 누르면 띄 제거, 무한 반복)</summary>
+        private bool _autoGreenBorderOn = false;
+
+        /// <summary>EMO 눌려 있는 동안 기체 이상정지 H4(05) 주기 전송용 타이머. 해제 시 중지 후 H4(06) 1회 전송.</summary>
+        private System.Windows.Forms.Timer _emoH4AbnormalStopTimer;
 
 
 
@@ -152,9 +166,41 @@ namespace EMS_TEST_SIMULATOR
             CommLogBridge.OnLog += (dir, data, desc) => this.AddCommLog(dir, data, desc);
         }
 
+        /// <summary>EMO 버튼 테두리: true = 초록색 띄, false = 테두리 제거.</summary>
+        private void ApplyEmoButtonGreenBorder(bool green)
+        {
+            if (button8 == null) return;
+            if (green)
+            {
+                button8.FlatAppearance.BorderSize = 4;
+                button8.FlatAppearance.BorderColor = Color.Lime;
+            }
+            else
+            {
+                button8.FlatAppearance.BorderSize = 0;
+            }
+            button8.Invalidate();
+        }
+
+        /// <summary>AUTO 버튼 테두리: true = 초록색 띄, false = 테두리 제거. (기존 로직 무관)</summary>
+        private void ApplyAutoButtonGreenBorder(bool green)
+        {
+            if (button7 == null) return;
+            if (green)
+            {
+                button7.FlatAppearance.BorderSize = 4;
+                button7.FlatAppearance.BorderColor = Color.Lime;
+            }
+            else
+            {
+                button7.FlatAppearance.BorderSize = 0;
+            }
+            button7.Invalidate();
+        }
+
         private const int _mainLogMaxItems = 1000;
 
-        /// <summary>주요로그(ListView): H2·H4·EMS 상태응답 기록, 응답코드 != 00이면 해당 행 빨간색.</summary>
+        /// <summary>주요로그(ListView): 에러 시에만 기록. EMS 상태보고 응답코드 != 00일 때 직전 송신+수신 데이터·해석 적시.</summary>
         private void InitializeMainLog()
         {
             if (event_log_listview == null) return;
@@ -163,9 +209,9 @@ namespace EMS_TEST_SIMULATOR
             if (event_log_listview.Columns.Count == 0)
             {
                 event_log_listview.Columns.Add("시간", 90);
-                event_log_listview.Columns.Add("방향", 55);
-                event_log_listview.Columns.Add("데이터(HEX)", 220);
-                event_log_listview.Columns.Add("해석", 180);
+                event_log_listview.Columns.Add("직전 송신(내 프로그램)", 220);
+                event_log_listview.Columns.Add("수신 데이터(EMS)", 220);
+                event_log_listview.Columns.Add("해석", 200);
             }
             event_log_listview.OwnerDraw = true;
             event_log_listview.DrawColumnHeader += Event_log_listview_DrawColumnHeader;
@@ -214,7 +260,7 @@ namespace EMS_TEST_SIMULATOR
             catch { return false; }
         }
 
-        /// <summary>EMS 상태 응답에서 응답코드(ResponseCode)가 00이 아니면 에러 → 해당 행 빨간색.</summary>
+        /// <summary>EMS 상태 응답에서 응답코드(ResponseCode)가 00이 아니면 에러.</summary>
         private static bool IsEmsStatusResponseError(byte[] data)
         {
             if (data == null || data.Length < 38) return false;
@@ -229,6 +275,23 @@ namespace EMS_TEST_SIMULATOR
                 return responseCode != "00";
             }
             catch { return false; }
+        }
+
+        /// <summary>EMS 수신 데이터에서 응답코드 추출 후 "응답코드 XX 에러" 문자열 반환.</summary>
+        private static string GetEmsResponseCodeErrorDesc(byte[] data)
+        {
+            if (data == null || data.Length < 38) return "응답코드 ??: 에러";
+            try
+            {
+                string res = Encoding.ASCII.GetString(data);
+                int idx = res.IndexOf("@TXT240");
+                if (idx < 0) return "응답코드 ??: 에러";
+                string body = res.Substring(idx + 12);
+                if (body.Length < 2) return "응답코드 ??: 에러";
+                string responseCode = body.Substring(0, 2);
+                return "응답코드 " + responseCode + " 에러";
+            }
+            catch { return "응답코드 ??: 에러"; }
         }
 
         /// <summary>통신 로그 그리드 초기화 (Form1_Load에서 호출). 컬럼 구성·버튼 연결·표시 설정.</summary>
@@ -316,17 +379,22 @@ namespace EMS_TEST_SIMULATOR
                         dgvCommLog.Rows.RemoveAt(0);
                 }
                 catch { }
-                bool addToMainLog = desc.Contains("H4") || desc.Contains("H2") || (direction == "수신" && IsEmsStatusResponse(data));
-                if (addToMainLog && event_log_listview != null && !event_log_listview.IsDisposed)
+                if (direction == "송신")
+                {
+                    _lastSentHex = hex;
+                    _lastSentDesc = desc;
+                }
+                bool isEmsError = direction == "수신" && IsEmsStatusResponse(data) && IsEmsStatusResponseError(data);
+                if (isEmsError && event_log_listview != null && !event_log_listview.IsDisposed)
                 {
                     try
                     {
-                        bool isError = direction == "수신" && IsEmsStatusResponseError(data);
+                        string errorDesc = GetEmsResponseCodeErrorDesc(data);
                         var li = new ListViewItem(time);
-                        li.SubItems.Add(direction);
+                        li.SubItems.Add(string.IsNullOrEmpty(_lastSentHex) ? "-" : _lastSentHex);
                         li.SubItems.Add(hex);
-                        li.SubItems.Add(desc);
-                        li.Tag = isError;
+                        li.SubItems.Add(errorDesc);
+                        li.Tag = true;
                         event_log_listview.Items.Add(li);
                         while (event_log_listview.Items.Count > _mainLogMaxItems)
                             event_log_listview.Items.RemoveAt(0);
@@ -1135,8 +1203,15 @@ namespace EMS_TEST_SIMULATOR
 
         private void button7_Click(object sender, EventArgs e)
         {
+            if (_emoGreenBorderOn)
+            {
+                MessageBox.Show("EMO가 눌려 있습니다. 해제 후 자동모드를 실행하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             if (_autoRunning)
             {
+                _autoGreenBorderOn = false;
+                ApplyAutoButtonGreenBorder(false);
                 _cycleStopRequestedByUser = true;
                 EMS_Mode_Sequence.CycleStopRequested = true;
                 MessageBox.Show("사이클 정지 요청되었습니다. 현재 동작을 마친 뒤 101번 위치로 복귀하여 타이어를 내려놓은 후 정지합니다.");
@@ -1156,7 +1231,27 @@ namespace EMS_TEST_SIMULATOR
                 return;
             }
 
+            // AUTO 실행 조건 (AND): (1) Line_Setup 상태저장 호기 존재 (2) 그 동일 호기에 대한 엔코더(101,110,113) 설정 존재
+            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
+            {
+                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string vehicleID = Line_Setup.SavedVehicleNo;
+            int v101 = _encManager.GetStoredValue(vehicleID, "101");
+            int v110 = _encManager.GetStoredValue(vehicleID, "110");
+            int v113 = _encManager.GetStoredValue(vehicleID, "113");
+            if (v101 < 0 || v101 > 500 || v110 < 0 || v110 > 500 || v113 < 0 || v113 > 500)
+            {
+                MessageBox.Show("Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             MessageBox.Show("레일 주변에 장애물이 없는지 확인한 후 진행하시기 바랍니다.");
+
+            _autoGreenBorderOn = true;
+            ApplyAutoButtonGreenBorder(true);
 
             Command_Form command_Form = new Command_Form();
             command_Form.Owner = this;
@@ -1167,7 +1262,6 @@ namespace EMS_TEST_SIMULATOR
 
             _autoCts = new System.Threading.CancellationTokenSource();
             _autoRunning = true;
-            button7.Text = "자동 정지";
 
             EMS_Mode_Sequence emsSeq = new EMS_Mode_Sequence();
             var autoTask = emsSeq.RunAutoSequenceAsync(command_Form, this, _autoCts.Token);
@@ -1177,8 +1271,15 @@ namespace EMS_TEST_SIMULATOR
                     this.Invoke(new Action(() =>
                     {
                         _autoRunning = false;
-                        button7.Text = "자동모드";
-                        if (_cycleStopRequestedByUser)
+                        _autoGreenBorderOn = false;
+                        ApplyAutoButtonGreenBorder(false);
+                        button7.Text = "";
+                        if (_autoStoppedByEmo)
+                        {
+                            _autoStoppedByEmo = false;
+                            MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        else if (_cycleStopRequestedByUser)
                         {
                             _cycleStopRequestedByUser = false;
                             MessageBox.Show("자동모드를 정지하였습니다. (101번 위치, 타이어 하차 완료)");
@@ -1187,13 +1288,57 @@ namespace EMS_TEST_SIMULATOR
             }, System.Threading.Tasks.TaskScheduler.Default);
         }
 
-        private void button8_Click(object sender, EventArgs e)//비상정지 버튼을 눌렀을때, 평상시 모드전환
+        private void button8_Click(object sender, EventArgs e)//EMO: 한번째 터치 → 초록띄 + 1번 시퀀스, 두번째 터치 → 띄 제거 + 2번 시퀀스
         {
-            EMS_Mode_Sequence emsProcMode = new EMS_Mode_Sequence();
-            //emsProcMode.ProcessMode(0);//에러시 모드로 전환
-            
-       
+            if (!_emoGreenBorderOn)
+            {
+                if (_autoRunning)
+                {
+                    _autoStoppedByEmo = true;
+                    _autoCts?.Cancel();
+                }
+                _autoGreenBorderOn = false;
+                ApplyAutoButtonGreenBorder(false); // EMO 눌림 = AUTO 꺼짐 → 초록 띄 즉시 제거
+                ApplyEmoButtonGreenBorder(true);
+                _emoGreenBorderOn = true;
+                EmoFirstTapSequence();
+            }
+            else
+            {
+                ApplyEmoButtonGreenBorder(false);
+                _emoGreenBorderOn = false;
+                EmoSecondTapSequence();
+            }
+        }
 
+        /// <summary>EMO 한번째 터치 시 실행할 시퀀스: EMO 해제 전까지 기체 이상정지 H4(05) 주기 전송.</summary>
+        private void EmoFirstTapSequence()
+        {
+            if (_emoH4AbnormalStopTimer == null)
+            {
+                _emoH4AbnormalStopTimer = new System.Windows.Forms.Timer();
+                _emoH4AbnormalStopTimer.Interval = 500; // 500ms 주기
+                _emoH4AbnormalStopTimer.Tick += (s, ev) =>
+                {
+                    if (GlobalComm == null || GlobalEmsProto == null) return;
+                    byte[] h4 = GlobalEmsProto.EMS_Item_order("5"); // 05: 기체 이상정지
+                    if (h4 != null)
+                        _ = GlobalComm.SendData(Encoding.ASCII.GetString(h4));
+                };
+            }
+            _emoH4AbnormalStopTimer.Start();
+        }
+
+        /// <summary>EMO 두번째 터치 시 실행할 시퀀스: 주기 전송 중지 후 기체 이상리셋 H4(06) 1회 전송.</summary>
+        private void EmoSecondTapSequence()
+        {
+            _emoH4AbnormalStopTimer?.Stop();
+            if (GlobalComm != null && GlobalEmsProto != null)
+            {
+                byte[] h4 = GlobalEmsProto.EMS_Item_order("6"); // 06: 기체 이상리셋
+                if (h4 != null)
+                    _ = GlobalComm.SendData(Encoding.ASCII.GetString(h4));
+            }
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -1211,7 +1356,7 @@ namespace EMS_TEST_SIMULATOR
             string pos = comboBox2.Text;
 
             int val = _encManager.GetStoredValue(vID, pos);
-            textBox1.Text = val.ToString();
+            textBox1.Text = val < 0 ? "" : val.ToString(); // 미설정(-1)이면 빈칸, 0 포함 설정값이면 숫자
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -1228,7 +1373,7 @@ namespace EMS_TEST_SIMULATOR
 
             // 2. 현재 선택된 포지션의 값만 텍스트박스(입력창)에도 표시
             int currentVal = _encManager.GetStoredValue(selectedVehicle, comboBox2.Text);
-            textBox1.Text = currentVal.ToString();
+            textBox1.Text = currentVal < 0 ? "" : currentVal.ToString(); // 미설정(-1)이면 빈칸
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -1255,6 +1400,11 @@ namespace EMS_TEST_SIMULATOR
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button10_Click(object sender, EventArgs e)
         {
 
         }

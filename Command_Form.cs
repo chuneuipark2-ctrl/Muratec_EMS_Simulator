@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -58,6 +58,20 @@ namespace EMS_TEST_SIMULATOR
             if (_comm == null)
             {
                 MessageBox.Show("통신 연결 객체(_comm)가 없습니다. 메인폼에서 연결을 먼저 확인하세요.");
+                return;
+            }
+
+            // Line_Setup에서 저장된 호기·라인과 일치하는지 검사 (저장 안 했거나 다르면 동작 불가)
+            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo) || string.IsNullOrEmpty(Line_Setup.SavedLineName))
+            {
+                MessageBox.Show("저장된 정보가 없습니다.\r\nLine_Setup에서 라인·호기를 선택한 뒤 [상태저장]을 실행해 주세요.", "저장된 정보 없음", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            string currentRail = (comboBox4?.Text ?? "").Trim();
+            string currentNo = (comboBox3?.Text ?? "").Trim();
+            if (currentNo != Line_Setup.SavedVehicleNo || currentRail != Line_Setup.SavedLineName)
+            {
+                MessageBox.Show("저장된 정보가 없습니다.\r\n현재 선택한 레일·호기가 Line_Setup에 저장된 값과 일치하지 않습니다.", "저장된 정보 없음", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 

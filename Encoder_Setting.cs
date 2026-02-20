@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
@@ -59,9 +59,9 @@ namespace EMS_TEST_SIMULATOR
             foreach (var pos in _displayLabels.Keys)
             {
                 string dataKey = $"{vehicleID}_{pos}";
-                int val = vehicle_enc_datas.ContainsKey(dataKey) ? vehicle_enc_datas[dataKey] : 0;
+                int val = vehicle_enc_datas.ContainsKey(dataKey) ? vehicle_enc_datas[dataKey] : -1;
 
-                _displayLabels[pos].Text = val == 0 ? "-" : val.ToString(); // 값이 0이면 -로 표시 가능
+                _displayLabels[pos].Text = val < 0 ? "-" : val.ToString(); // 미설정(-1)이면 -, 0 포함 설정값이면 숫자
                 _displayLabels[pos].ForeColor = Color.Blue;
             }
         }
@@ -78,10 +78,11 @@ namespace EMS_TEST_SIMULATOR
             MessageBox.Show("모든 호기의 엔코더 설정 데이터가 초기화되었습니다.");
         }
 
+        /// <summary>저장된 엔코더값 반환. 미설정이면 -1, 설정했으면 0~530(0 포함).</summary>
         public int GetStoredValue(string vehicleID, string pos)
         {
             string dataKey = $"{vehicleID}_{pos}";
-            return vehicle_enc_datas.ContainsKey(dataKey) ? vehicle_enc_datas[dataKey] : 0;
+            return vehicle_enc_datas.ContainsKey(dataKey) ? vehicle_enc_datas[dataKey] : -1;
         }
     }
 }

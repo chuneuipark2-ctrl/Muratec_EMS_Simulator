@@ -1,3 +1,4 @@
+
 namespace EMS_TEST_SIMULATOR
 {
     partial class Command_Form

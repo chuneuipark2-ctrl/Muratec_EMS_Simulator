@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Threading;
 using System.Net;
@@ -159,33 +159,38 @@ namespace EMS_TEST_SIMULATOR
                     break;
                 }
 
-                // 테스트 모드가 아닐 때의 기본 출력 제어 로직
+                // 테스트 모드가 아닐 때의 기본 출력 제어 로직. SR50=주소 3·4번만, SR150=5·6번만
                 if (!io_test_flag)
                 {
-                    // FASTECH.EziMOTIONPlusELib.FAS_SetOutput(targetId, 0x00000000, 0x00000000); //TEST용
-
+                    bool sr50 = IsSr50Rail();
                     switch (targetId)
                     {
                         case 2:
-                            gcp_dio(); // 2번 전용 (별도 구현)
+                            gcp_dio(); // 2번은 레일 타입 무관 (기존 동작)
                             break;
 
-                        case 3: // 센서 2개 독립 작동
-                            bit_interlock(index, 1, 0); // 1번 센서 (ID 3, 타이머 1번, 오프셋 0)
-                            bit_interlock(index, 2, 8); // 2번 센서 (ID 3, 타이머 2번, 오프셋 8)
+                        case 3:
+                            if (sr50)
+                            {
+                                bit_interlock(index, 1, 0);
+                                bit_interlock(index, 2, 8);
+                            }
                             break;
 
-                        case 4: // 센서 1개 작동
-                            bit_interlock(index, 3, 0); // 1번 센서 (ID 4, 타이머 3번, 오프셋 0)
+                        case 4:
+                            if (sr50) bit_interlock(index, 3, 0); // SR50일 때만 4번
                             break;
 
-                        case 5: // 센서 2개 독립 작동
-                            bit_interlock(index, 4, 0); // 1번 센서 (ID 5, 타이머 4번, 오프셋 0)
-                            bit_interlock(index, 5, 8); // 2번 센서 (ID 5, 타이머 5번, 오프셋 8)
+                        case 5:
+                            if (!sr50)
+                            {
+                                bit_interlock(index, 4, 0);
+                                bit_interlock(index, 5, 8);
+                            }
                             break;
 
-                        case 6: // 센서 1개 작동
-                            bit_interlock(index, 6, 0); // 1번 센서 (ID 6, 타이머 6번, 오프셋 0)
+                        case 6:
+                            if (!sr50) bit_interlock(index, 6, 0); // SR150일 때만 6번
                             break;
                     }
                 }
@@ -296,6 +301,38 @@ namespace EMS_TEST_SIMULATOR
                     FASTECH.EziMOTIONPlusELib.FAS_Close(targetId); // 응답 없으면 다시 해제
                 }
             }
+        }
+
+        /// <summary>Line_Setup 선택 레일에 따라 RIO 주소: SR50=3·4번만, SR150=5·6번만 사용</summary>
+        private static bool IsSr50Rail()
+        {
+            string t = Line_Setup.SavedRailType ?? "";
+            return t.Contains("SR50") || string.IsNullOrEmpty(t);
+        }
+
+        /// <summary>AUTO 시퀀스 시 레일 8비트 센서 인터록 충족 여부. SR50=주소 3·4번만, SR150=5·6번만 검사</summary>
+        public bool Is8BitSensorInterlockOkForAuto()
+        {
+            if (io_test_flag) return false;
+            uint input_raw = 0, latch = 0;
+            bool sr50 = IsSr50Rail();
+            if (sr50)
+            {
+                for (int i = 1; i <= 2; i++)
+                {
+                    if (!fastech_connects[i]) return false;
+                    if (FASTECH.EziMOTIONPlusELib.FAS_GetInput(slaveIds[i], ref input_raw, ref latch) != FASTECH.EziMOTIONPlusELib.FMM_OK) return false;
+                }
+            }
+            else
+            {
+                for (int i = 3; i <= 4; i++)
+                {
+                    if (!fastech_connects[i]) return false;
+                    if (FASTECH.EziMOTIONPlusELib.FAS_GetInput(slaveIds[i], ref input_raw, ref latch) != FASTECH.EziMOTIONPlusELib.FMM_OK) return false;
+                }
+            }
+            return true;
         }
 
         public void bit_interlock(int index, int seqIndex, int offset)

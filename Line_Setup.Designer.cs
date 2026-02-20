@@ -197,6 +197,7 @@ namespace EMS_TEST_SIMULATOR
             this.button2.Size = new System.Drawing.Size(174, 53);
             this.button2.TabIndex = 40;
             this.button2.Text = "상태갱신";
+            this.button2.ForeColor = System.Drawing.Color.White;
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -744,6 +745,7 @@ namespace EMS_TEST_SIMULATOR
             this.button1.Size = new System.Drawing.Size(174, 53);
             this.button1.TabIndex = 39;
             this.button1.Text = "상태저장";
+            this.button1.ForeColor = System.Drawing.Color.White;
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 

@@ -56,6 +56,7 @@ namespace EMS_TEST_SIMULATOR
             this.radioButton1.TabIndex = 0;
             this.radioButton1.TabStop = true;
             this.radioButton1.Text = "TCP";
+            this.radioButton1.ForeColor = System.Drawing.Color.White;
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
             // radioButton2
@@ -68,6 +69,7 @@ namespace EMS_TEST_SIMULATOR
             this.radioButton2.TabIndex = 1;
             this.radioButton2.TabStop = true;
             this.radioButton2.Text = "UDP";
+            this.radioButton2.ForeColor = System.Drawing.Color.White;
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
             // label1
@@ -83,6 +85,8 @@ namespace EMS_TEST_SIMULATOR
             // 
             // textBox1
             // 
+            this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(63)))), ((int)(((byte)(63)))), ((int)(((byte)(70)))));
+            this.textBox1.ForeColor = System.Drawing.Color.White;
             this.textBox1.Location = new System.Drawing.Point(124, 81);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(63, 28);
@@ -90,6 +94,8 @@ namespace EMS_TEST_SIMULATOR
             // 
             // textBox5
             // 
+            this.textBox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(63)))), ((int)(((byte)(63)))), ((int)(((byte)(70)))));
+            this.textBox5.ForeColor = System.Drawing.Color.White;
             this.textBox5.Location = new System.Drawing.Point(124, 133);
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(322, 28);
@@ -108,6 +114,8 @@ namespace EMS_TEST_SIMULATOR
             // 
             // textBox2
             // 
+            this.textBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(63)))), ((int)(((byte)(63)))), ((int)(((byte)(70)))));
+            this.textBox2.ForeColor = System.Drawing.Color.White;
             this.textBox2.Location = new System.Drawing.Point(210, 81);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(63, 28);
@@ -115,6 +123,8 @@ namespace EMS_TEST_SIMULATOR
             // 
             // textBox3
             // 
+            this.textBox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(63)))), ((int)(((byte)(63)))), ((int)(((byte)(70)))));
+            this.textBox3.ForeColor = System.Drawing.Color.White;
             this.textBox3.Location = new System.Drawing.Point(298, 81);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(63, 28);
@@ -122,6 +132,8 @@ namespace EMS_TEST_SIMULATOR
             // 
             // textBox4
             // 
+            this.textBox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(63)))), ((int)(((byte)(63)))), ((int)(((byte)(70)))));
+            this.textBox4.ForeColor = System.Drawing.Color.White;
             this.textBox4.Location = new System.Drawing.Point(383, 81);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(63, 28);
