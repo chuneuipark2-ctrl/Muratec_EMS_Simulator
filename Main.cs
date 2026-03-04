@@ -1158,7 +1158,42 @@ namespace EMS_TEST_SIMULATOR
 
         private void btn_Command_Click(object sender, EventArgs e)
         {
-           Command_Form command_Form = new Command_Form();
+            // 1) EMO 해제
+            if (_emoGreenBorderOn)
+            {
+                MessageBox.Show("EMO가 눌려 있습니다. 해제 후 반자동 명령을 실행하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 2) I.O 체크 완료
+            if (!IOCheckSheetForm.IoCheckCompleted)
+            {
+                MessageBox.Show("I.O 체크 성적서에서 옵션에 맞는 I.O 체크를 완료한 뒤 [상태저장]을 눌러 주세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 3) 통신 연결
+            if (GlobalComm == null)
+            {
+                MessageBox.Show("먼저 연결을 완료해 주세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 4) Line_Setup 호기 저장
+            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
+            {
+                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 5) 엔코더 101·110·113
+            string vehicleID = Line_Setup.SavedVehicleNo;
+            int v101 = _encManager.GetStoredValue(vehicleID, "101");
+            int v110 = _encManager.GetStoredValue(vehicleID, "110");
+            int v113 = _encManager.GetStoredValue(vehicleID, "113");
+            if (v101 < 0 || v101 > 500 || v110 < 0 || v110 > 500 || v113 < 0 || v113 > 500)
+            {
+                MessageBox.Show("Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Command_Form command_Form = new Command_Form();
 
             // [이것이 Owner 설정!] 
             // cmdForm의 주인은 나(this = Main)라고 알려주는 겁니다.
@@ -1203,11 +1238,41 @@ namespace EMS_TEST_SIMULATOR
 
         private void button7_Click(object sender, EventArgs e)
         {
+            // 1) EMO 해제
             if (_emoGreenBorderOn)
             {
                 MessageBox.Show("EMO가 눌려 있습니다. 해제 후 자동모드를 실행하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            // 2) I.O 체크 완료
+            if (!IOCheckSheetForm.IoCheckCompleted)
+            {
+                MessageBox.Show("I.O 체크 성적서에서 옵션에 맞는 I.O 체크를 완료한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 3) 통신 연결
+            if (GlobalComm == null)
+            {
+                MessageBox.Show("먼저 연결을 완료해 주세요.");
+                return;
+            }
+            // 4) Line_Setup 호기 저장
+            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
+            {
+                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 5) 엔코더 101·110·113
+            string vehicleID = Line_Setup.SavedVehicleNo;
+            int v101 = _encManager.GetStoredValue(vehicleID, "101");
+            int v110 = _encManager.GetStoredValue(vehicleID, "110");
+            int v113 = _encManager.GetStoredValue(vehicleID, "113");
+            if (v101 < 0 || v101 > 500 || v110 < 0 || v110 > 500 || v113 < 0 || v113 > 500)
+            {
+                MessageBox.Show("Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // 6) 자동모드 미실행 (실행 중이면 정지 요청 처리)
             if (_autoRunning)
             {
                 _autoGreenBorderOn = false;
@@ -1217,34 +1282,11 @@ namespace EMS_TEST_SIMULATOR
                 MessageBox.Show("사이클 정지 요청되었습니다. 현재 동작을 마친 뒤 101번 위치로 복귀하여 타이어를 내려놓은 후 정지합니다.");
                 return;
             }
-
+            // 7) 실행 확인
             DialogResult result = MessageBox.Show("자동모드를 실행하시겠습니까?", "상태확인", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result != DialogResult.Yes)
             {
                 MessageBox.Show("취소하였습니다.");
-                return;
-            }
-
-            if (GlobalComm == null)
-            {
-                MessageBox.Show("먼저 연결을 완료해 주세요.");
-                return;
-            }
-
-            // AUTO 실행 조건 (AND): (1) Line_Setup 상태저장 호기 존재 (2) 그 동일 호기에 대한 엔코더(101,110,113) 설정 존재
-            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
-            {
-                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string vehicleID = Line_Setup.SavedVehicleNo;
-            int v101 = _encManager.GetStoredValue(vehicleID, "101");
-            int v110 = _encManager.GetStoredValue(vehicleID, "110");
-            int v113 = _encManager.GetStoredValue(vehicleID, "113");
-            if (v101 < 0 || v101 > 500 || v110 < 0 || v110 > 500 || v113 < 0 || v113 > 500)
-            {
-                MessageBox.Show("Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -1282,6 +1324,7 @@ namespace EMS_TEST_SIMULATOR
                         else if (_cycleStopRequestedByUser)
                         {
                             _cycleStopRequestedByUser = false;
+                            IOCheckSheetForm.AutoCycleCompleted = true;  // 사이클 정지 완료 시점 → I.O 자동 체크 대상 반영용
                             MessageBox.Show("자동모드를 정지하였습니다. (101번 위치, 타이어 하차 완료)");
                         }
                     }));

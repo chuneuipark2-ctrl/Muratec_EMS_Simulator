@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -50,6 +50,17 @@
     <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="UglyToad.PdfPig">
+      <HintPath>packages\UglyToad.PdfPig.1.7.0-custom-5\lib\net45\UglyToad.PdfPig.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI">
+      <HintPath>packages\NPOI.2.7.1\lib\netstandard2.0\NPOI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
+    <PackageReference Include="NPOI" Version="2.7.1" />
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command_Form.cs">
@@ -74,6 +85,12 @@
     </Compile>
     <Compile Include="IOCheckSheetForm.Designer.cs">
       <DependentUpon>IOCheckSheetForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VirtualKeyboardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CalendarPopupForm.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Line_Setup.cs">
       <SubType>Form</SubType>
@@ -135,6 +152,9 @@
       <DependentUpon>SR150_RAIL.xaml</DependentUpon>
     </Compile>
     <Compile Include="Status_panel.cs" />
+    <EmbeddedResource Include="CalendarPopupForm.resx">
+      <DependentUpon>CalendarPopupForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Command_Form.resx">
       <DependentUpon>Command_Form.cs</DependentUpon>
     </EmbeddedResource>
@@ -169,6 +189,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SR50_DIO2.resx">
       <DependentUpon>SR50_DIO2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VirtualKeyboardForm.resx">
+      <DependentUpon>VirtualKeyboardForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -234,6 +257,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\EMO FINAL-Photoroom.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="IO_List_All_Signals.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

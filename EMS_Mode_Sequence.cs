@@ -15,8 +15,8 @@ namespace EMS_TEST_SIMULATOR
         // 반송 데이터 No 관리 전역 카운터 (0~9999 무한 반복, 데이터로그용 내부 메모리)
         private static int _globalCommandCount = 0;
 
-        // 엔코더 설정 매니저 객체
-        public Encoder_Setting_Manager _encManager = new Encoder_Setting_Manager();
+        // 엔코더 설정 매니저 객체 (부모 Main._encManager 숨김)
+        public new Encoder_Setting_Manager _encManager = new Encoder_Setting_Manager();
 
         //시작, 종료위치 저장변수
         private string Start_position;
