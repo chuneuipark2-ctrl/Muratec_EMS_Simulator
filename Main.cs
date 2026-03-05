@@ -57,6 +57,9 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>EMO 눌려 있는 동안 기체 이상정지 H4(05) 주기 전송용 타이머. 해제 시 중지 후 H4(06) 1회 전송.</summary>
         private System.Windows.Forms.Timer _emoH4AbnormalStopTimer;
 
+        /// <summary>pictureBox1 이미지 전환: 목적 동작 코드가 바뀔 때만 갱신해 GIF 재시작 방지. 초기값은 센티넬(처음 null 호출 시 정지 이미지 적용되도록).</summary>
+        private string _lastTargetActionModeForPictureBox = "__INIT__";
+
 
 
 
@@ -73,6 +76,9 @@ namespace EMS_TEST_SIMULATOR
         {
             base.OnShown(e);
             ApplyDarkTheme();
+            // 기본은 EMS 정지. 목적 동작 코드 0/1/2 수신 시에만 이동/승강/하강 GIF 표시.
+            if (pictureBox1 != null)
+                pictureBox1.Image = Properties.Resources.EMS_정지;
         }
 
         public class ErrorItem
@@ -430,6 +436,7 @@ namespace EMS_TEST_SIMULATOR
                 lbl_transfer_command_Received_text.Text = na;
                 lbl_target_point_text.Text = na;
                 lbl_error_point_text.Text = na;
+                SetPictureBox1ByTargetActionMode(null);
                 return;
             }
             lbl_response_code_text.Text = string.IsNullOrEmpty(status.ResponseCode) ? na : status.ResponseCode;
@@ -443,6 +450,25 @@ namespace EMS_TEST_SIMULATOR
             lbl_transfer_command_Received_text.Text = FormatCommandAcceptStatus(status.CommandAcceptStatus);
             lbl_target_point_text.Text = string.IsNullOrEmpty(status.TargetSectionCount) ? na : status.TargetSectionCount;
             lbl_error_point_text.Text = string.IsNullOrEmpty(status.ErrorSectionCount) ? na : status.ErrorSectionCount;
+            SetPictureBox1ByTargetActionMode(status.TargetActionMode);
+        }
+
+        /// <summary>목적 동작 모드에 따라 pictureBox1(EMS 현재상태) 이미지 전환. 0=이동/주행, 1=01.승강 EMS, 2=02.하강 EMS. 코드가 바뀔 때만 갱신해 GIF가 매 틱마다 처음부터 재생되지 않도록 함.</summary>
+        private void SetPictureBox1ByTargetActionMode(string targetActionMode)
+        {
+            if (pictureBox1 == null) return;
+            if (targetActionMode == _lastTargetActionModeForPictureBox) return;
+            _lastTargetActionModeForPictureBox = targetActionMode;
+
+            Image img;
+            switch (targetActionMode)
+            {
+                case "0": img = Properties.Resources._02__레이아웃; break;   // 이동(주행)
+                case "1": img = Properties.Resources._01__승강_EMS; break;   // 01. 승강 EMS (탑재)
+                case "2": img = Properties.Resources._02__하강_EMS; break;   // 02. 하강 EMS (이재)
+                default: img = Properties.Resources.EMS_정지; break;          // 이동/탑재/이재 아님 → EMS 정지
+            }
+            pictureBox1.Image = img;
         }
 
         private static string FormatMachineMode(string value)
@@ -1453,6 +1479,11 @@ namespace EMS_TEST_SIMULATOR
             {
                 form.ShowDialog(this);
             }
+        }
+
+        private void pictureBox1_Click_1(object sender, EventArgs e)
+        {
+
         }
     }
 

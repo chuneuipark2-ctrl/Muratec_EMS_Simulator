@@ -63,6 +63,16 @@ namespace EMS_TEST_SIMULATOR.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
         /// </summary>
+        internal static System.Drawing.Bitmap _01__승강_EMS {
+            get {
+                object obj = ResourceManager.GetObject("01. 승강 EMS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
         internal static System.Drawing.Bitmap _01__제목 {
             get {
                 object obj = ResourceManager.GetObject("01. 제목", resourceCulture);
@@ -76,6 +86,16 @@ namespace EMS_TEST_SIMULATOR.Properties {
         internal static System.Drawing.Bitmap _02__레이아웃 {
             get {
                 object obj = ResourceManager.GetObject("02. 레이아웃", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap _02__하강_EMS {
+            get {
+                object obj = ResourceManager.GetObject("02. 하강 EMS", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -146,6 +166,16 @@ namespace EMS_TEST_SIMULATOR.Properties {
         internal static System.Drawing.Bitmap EMO2 {
             get {
                 object obj = ResourceManager.GetObject("EMO2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap EMS_정지 {
+            get {
+                object obj = ResourceManager.GetObject("EMS 정지", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

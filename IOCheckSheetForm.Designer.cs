@@ -94,7 +94,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(1984, 56);
+            this.panelTop.Size = new System.Drawing.Size(2029, 56);
             this.panelTop.TabIndex = 0;
             // 
             // label1
@@ -186,7 +186,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft.Location = new System.Drawing.Point(0, 56);
             this.panelLeft.Name = "panelLeft";
             this.panelLeft.Padding = new System.Windows.Forms.Padding(8);
-            this.panelLeft.Size = new System.Drawing.Size(280, 1045);
+            this.panelLeft.Size = new System.Drawing.Size(280, 1095);
             this.panelLeft.TabIndex = 1;
             // 
             // comboBox3
@@ -222,7 +222,7 @@ namespace EMS_TEST_SIMULATOR
             this.buttonApplyOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonApplyOptions.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.buttonApplyOptions.ForeColor = System.Drawing.Color.White;
-            this.buttonApplyOptions.Location = new System.Drawing.Point(45, 982);
+            this.buttonApplyOptions.Location = new System.Drawing.Point(45, 1032);
             this.buttonApplyOptions.Name = "buttonApplyOptions";
             this.buttonApplyOptions.Size = new System.Drawing.Size(174, 32);
             this.buttonApplyOptions.TabIndex = 16;
@@ -596,7 +596,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelRight.Location = new System.Drawing.Point(280, 56);
             this.panelRight.Name = "panelRight";
             this.panelRight.Padding = new System.Windows.Forms.Padding(6);
-            this.panelRight.Size = new System.Drawing.Size(1704, 1045);
+            this.panelRight.Size = new System.Drawing.Size(1749, 1095);
             this.panelRight.TabIndex = 2;
             // 
             // tabControl1
@@ -727,7 +727,7 @@ namespace EMS_TEST_SIMULATOR
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(184, 873);
+            this.button1.Location = new System.Drawing.Point(24, 923);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(174, 32);
             this.button1.TabIndex = 10;
@@ -739,7 +739,7 @@ namespace EMS_TEST_SIMULATOR
             this.labelLegendOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelLegendOutput.AutoSize = true;
             this.labelLegendOutput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(220)))), ((int)(((byte)(100)))));
-            this.labelLegendOutput.Location = new System.Drawing.Point(1519, 10);
+            this.labelLegendOutput.Location = new System.Drawing.Point(1564, 10);
             this.labelLegendOutput.Name = "labelLegendOutput";
             this.labelLegendOutput.Size = new System.Drawing.Size(82, 25);
             this.labelLegendOutput.TabIndex = 9;
@@ -750,7 +750,7 @@ namespace EMS_TEST_SIMULATOR
             this.labelLegendInput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelLegendInput.AutoSize = true;
             this.labelLegendInput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
-            this.labelLegendInput.Location = new System.Drawing.Point(1449, 10);
+            this.labelLegendInput.Location = new System.Drawing.Point(1494, 10);
             this.labelLegendInput.Name = "labelLegendInput";
             this.labelLegendInput.Size = new System.Drawing.Size(64, 25);
             this.labelLegendInput.TabIndex = 8;
@@ -761,7 +761,7 @@ namespace EMS_TEST_SIMULATOR
             this.labelLegend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelLegend.AutoSize = true;
             this.labelLegend.ForeColor = System.Drawing.Color.White;
-            this.labelLegend.Location = new System.Drawing.Point(1385, 10);
+            this.labelLegend.Location = new System.Drawing.Point(1430, 10);
             this.labelLegend.Name = "labelLegend";
             this.labelLegend.Size = new System.Drawing.Size(58, 25);
             this.labelLegend.TabIndex = 7;
@@ -812,7 +812,7 @@ namespace EMS_TEST_SIMULATOR
             this.buttonSavePdf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonSavePdf.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.buttonSavePdf.ForeColor = System.Drawing.Color.White;
-            this.buttonSavePdf.Location = new System.Drawing.Point(1491, 873);
+            this.buttonSavePdf.Location = new System.Drawing.Point(243, 923);
             this.buttonSavePdf.Name = "buttonSavePdf";
             this.buttonSavePdf.Size = new System.Drawing.Size(174, 32);
             this.buttonSavePdf.TabIndex = 3;
@@ -824,7 +824,7 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1984, 1101);
+            this.ClientSize = new System.Drawing.Size(2029, 1151);
             this.Controls.Add(this.panelRight);
             this.Controls.Add(this.panelLeft);
             this.Controls.Add(this.panelTop);

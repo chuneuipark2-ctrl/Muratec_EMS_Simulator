@@ -1410,10 +1410,11 @@ namespace EMS_TEST_SIMULATOR
                 }
                 else
                 {
+                    // ListViewItem: Text=1열(PDM No), SubItems[0]=1열과 동일, SubItems[1]=DESCRIPTION, [2]=SPEC, [3]=MANUFACTURE
                     string c1 = item.Text ?? "";
-                    string c2 = item.SubItems.Count > 0 ? (item.SubItems[0]?.Text ?? "") : "";
-                    string c3 = item.SubItems.Count > 1 ? (item.SubItems[1]?.Text ?? "") : "";
-                    string c4 = item.SubItems.Count > 2 ? (item.SubItems[2]?.Text ?? "") : "";
+                    string c2 = item.SubItems.Count > 1 ? (item.SubItems[1]?.Text ?? "") : "";
+                    string c3 = item.SubItems.Count > 2 ? (item.SubItems[2]?.Text ?? "") : "";
+                    string c4 = item.SubItems.Count > 3 ? (item.SubItems[3]?.Text ?? "") : "";
                     if (string.IsNullOrWhiteSpace(c1) && string.IsNullOrWhiteSpace(c2) && string.IsNullOrWhiteSpace(c3) && string.IsNullOrWhiteSpace(c4))
                         continue;
                     ws.Cell(excelRow, 1).Value = c1;
