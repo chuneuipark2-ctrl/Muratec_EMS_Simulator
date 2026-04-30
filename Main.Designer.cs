@@ -36,7 +36,11 @@ namespace EMS_TEST_SIMULATOR
             this.label4 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl11 = new EMS_TEST_SIMULATOR.UserControl1();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl21 = new EMS_TEST_SIMULATOR.UserControl2();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.통신로그 = new System.Windows.Forms.TabPage();
             this.Communication_log = new System.Windows.Forms.TabControl();
@@ -140,10 +144,6 @@ namespace EMS_TEST_SIMULATOR
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl11 = new EMS_TEST_SIMULATOR.UserControl1();
-            this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl21 = new EMS_TEST_SIMULATOR.UserControl2();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -233,21 +233,41 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.tabPage1.BackColor = System.Drawing.Color.Black;
             this.tabPage1.Controls.Add(this.elementHost1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 34);
+            this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(963, 128);
+            this.tabPage1.Size = new System.Drawing.Size(963, 138);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "SR50-RAIL";
+            // 
+            // elementHost1
+            // 
+            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost1.Location = new System.Drawing.Point(0, 0);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(963, 138);
+            this.elementHost1.TabIndex = 0;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.userControl11;
             // 
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.Black;
             this.tabPage2.Controls.Add(this.elementHost2);
-            this.tabPage2.Location = new System.Drawing.Point(4, 34);
+            this.tabPage2.Location = new System.Drawing.Point(4, 24);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(963, 128);
+            this.tabPage2.Size = new System.Drawing.Size(963, 138);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "SR150-RAIL";
+            // 
+            // elementHost2
+            // 
+            this.elementHost2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost2.Location = new System.Drawing.Point(0, 0);
+            this.elementHost2.Name = "elementHost2";
+            this.elementHost2.Size = new System.Drawing.Size(963, 138);
+            this.elementHost2.TabIndex = 0;
+            this.elementHost2.Text = "elementHost2";
+            this.elementHost2.Child = this.userControl21;
             // 
             // tabControl2
             // 
@@ -273,10 +293,10 @@ namespace EMS_TEST_SIMULATOR
             this.통신로그.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.통신로그.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.통신로그.Controls.Add(this.Communication_log);
-            this.통신로그.Location = new System.Drawing.Point(4, 38);
+            this.통신로그.Location = new System.Drawing.Point(4, 28);
             this.통신로그.Name = "통신로그";
             this.통신로그.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.통신로그.Size = new System.Drawing.Size(518, 242);
+            this.통신로그.Size = new System.Drawing.Size(518, 252);
             this.통신로그.TabIndex = 0;
             this.통신로그.Text = "통신로그";
             // 
@@ -289,7 +309,7 @@ namespace EMS_TEST_SIMULATOR
             this.Communication_log.Location = new System.Drawing.Point(6, 4);
             this.Communication_log.Name = "Communication_log";
             this.Communication_log.SelectedIndex = 0;
-            this.Communication_log.Size = new System.Drawing.Size(506, 232);
+            this.Communication_log.Size = new System.Drawing.Size(506, 242);
             this.Communication_log.TabIndex = 0;
             // 
             // tabPage3
@@ -297,10 +317,10 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.tabPage3.Controls.Add(this.groupBox2);
             this.tabPage3.Controls.Add(this.event_log_listview);
-            this.tabPage3.Location = new System.Drawing.Point(4, 34);
+            this.tabPage3.Location = new System.Drawing.Point(4, 24);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(498, 194);
+            this.tabPage3.Size = new System.Drawing.Size(498, 214);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "주요로그";
             // 
@@ -356,7 +376,7 @@ namespace EMS_TEST_SIMULATOR
             this.event_log_listview.HideSelection = false;
             this.event_log_listview.Location = new System.Drawing.Point(-1, 33);
             this.event_log_listview.Name = "event_log_listview";
-            this.event_log_listview.Size = new System.Drawing.Size(774, 157);
+            this.event_log_listview.Size = new System.Drawing.Size(774, 177);
             this.event_log_listview.TabIndex = 0;
             this.event_log_listview.UseCompatibleStateImageBehavior = false;
             this.event_log_listview.SelectedIndexChanged += new System.EventHandler(this.event_log_listview_SelectedIndexChanged);
@@ -366,10 +386,10 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.tabPage4.Controls.Add(this.groupBox1);
             this.tabPage4.Controls.Add(this.dgvCommLog);
-            this.tabPage4.Location = new System.Drawing.Point(4, 34);
+            this.tabPage4.Location = new System.Drawing.Point(4, 24);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(409, 194);
+            this.tabPage4.Size = new System.Drawing.Size(498, 214);
             this.tabPage4.TabIndex = 1;
             this.tabPage4.Text = "통신로그";
             // 
@@ -383,7 +403,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox1.ForeColor = System.Drawing.Color.White;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(403, 36);
+            this.groupBox1.Size = new System.Drawing.Size(492, 36);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "통신 로그";
@@ -432,17 +452,17 @@ namespace EMS_TEST_SIMULATOR
             this.dgvCommLog.RowHeadersVisible = false;
             this.dgvCommLog.RowHeadersWidth = 62;
             this.dgvCommLog.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvCommLog.Size = new System.Drawing.Size(403, 188);
+            this.dgvCommLog.Size = new System.Drawing.Size(492, 208);
             this.dgvCommLog.TabIndex = 2;
             // 
             // 코드리스트
             // 
             this.코드리스트.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.코드리스트.Controls.Add(this.tabControl3);
-            this.코드리스트.Location = new System.Drawing.Point(4, 38);
+            this.코드리스트.Location = new System.Drawing.Point(4, 28);
             this.코드리스트.Name = "코드리스트";
             this.코드리스트.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.코드리스트.Size = new System.Drawing.Size(429, 242);
+            this.코드리스트.Size = new System.Drawing.Size(518, 252);
             this.코드리스트.TabIndex = 1;
             this.코드리스트.Text = "코드리스트";
             // 
@@ -458,17 +478,17 @@ namespace EMS_TEST_SIMULATOR
             this.tabControl3.Location = new System.Drawing.Point(6, 4);
             this.tabControl3.Name = "tabControl3";
             this.tabControl3.SelectedIndex = 0;
-            this.tabControl3.Size = new System.Drawing.Size(417, 232);
+            this.tabControl3.Size = new System.Drawing.Size(506, 242);
             this.tabControl3.TabIndex = 0;
             // 
             // 응답코드
             // 
             this.응답코드.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.응답코드.Controls.Add(this.listView4);
-            this.응답코드.Location = new System.Drawing.Point(4, 34);
+            this.응답코드.Location = new System.Drawing.Point(4, 24);
             this.응답코드.Name = "응답코드";
             this.응답코드.Padding = new System.Windows.Forms.Padding(3);
-            this.응답코드.Size = new System.Drawing.Size(409, 194);
+            this.응답코드.Size = new System.Drawing.Size(498, 214);
             this.응답코드.TabIndex = 0;
             this.응답코드.Text = "응답코드";
             // 
@@ -481,7 +501,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView4.HideSelection = false;
             this.listView4.Location = new System.Drawing.Point(3, 3);
             this.listView4.Name = "listView4";
-            this.listView4.Size = new System.Drawing.Size(403, 188);
+            this.listView4.Size = new System.Drawing.Size(492, 208);
             this.listView4.TabIndex = 0;
             this.listView4.UseCompatibleStateImageBehavior = false;
             this.listView4.SelectedIndexChanged += new System.EventHandler(this.listView4_SelectedIndexChanged_1);
@@ -499,10 +519,10 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.목적동작코드.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.목적동작코드.Controls.Add(this.listView3);
-            this.목적동작코드.Location = new System.Drawing.Point(4, 34);
+            this.목적동작코드.Location = new System.Drawing.Point(4, 24);
             this.목적동작코드.Name = "목적동작코드";
             this.목적동작코드.Padding = new System.Windows.Forms.Padding(3);
-            this.목적동작코드.Size = new System.Drawing.Size(409, 194);
+            this.목적동작코드.Size = new System.Drawing.Size(498, 214);
             this.목적동작코드.TabIndex = 1;
             this.목적동작코드.Text = "목적동작코드";
             // 
@@ -515,7 +535,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView3.HideSelection = false;
             this.listView3.Location = new System.Drawing.Point(3, 3);
             this.listView3.Name = "listView3";
-            this.listView3.Size = new System.Drawing.Size(403, 188);
+            this.listView3.Size = new System.Drawing.Size(492, 208);
             this.listView3.TabIndex = 0;
             this.listView3.UseCompatibleStateImageBehavior = false;
             this.listView3.SelectedIndexChanged += new System.EventHandler(this.listView3_SelectedIndexChanged_1);
@@ -533,10 +553,10 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.동작코드.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.동작코드.Controls.Add(this.listView1);
-            this.동작코드.Location = new System.Drawing.Point(4, 34);
+            this.동작코드.Location = new System.Drawing.Point(4, 24);
             this.동작코드.Name = "동작코드";
             this.동작코드.Padding = new System.Windows.Forms.Padding(3);
-            this.동작코드.Size = new System.Drawing.Size(409, 194);
+            this.동작코드.Size = new System.Drawing.Size(498, 214);
             this.동작코드.TabIndex = 2;
             this.동작코드.Text = "동작코드";
             // 
@@ -549,7 +569,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(3, 3);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(403, 188);
+            this.listView1.Size = new System.Drawing.Size(492, 208);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
@@ -566,10 +586,10 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.에러코드.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.에러코드.Controls.Add(this.listView2);
-            this.에러코드.Location = new System.Drawing.Point(4, 34);
+            this.에러코드.Location = new System.Drawing.Point(4, 24);
             this.에러코드.Name = "에러코드";
             this.에러코드.Padding = new System.Windows.Forms.Padding(3);
-            this.에러코드.Size = new System.Drawing.Size(409, 194);
+            this.에러코드.Size = new System.Drawing.Size(498, 214);
             this.에러코드.TabIndex = 3;
             this.에러코드.Text = "에러코드";
             // 
@@ -582,7 +602,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView2.HideSelection = false;
             this.listView2.Location = new System.Drawing.Point(3, 3);
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(403, 188);
+            this.listView2.Size = new System.Drawing.Size(492, 208);
             this.listView2.TabIndex = 0;
             this.listView2.UseCompatibleStateImageBehavior = false;
             // 
@@ -608,10 +628,10 @@ namespace EMS_TEST_SIMULATOR
             this.엔코더설정.Controls.Add(this.label7);
             this.엔코더설정.Controls.Add(this.comboBox1);
             this.엔코더설정.Controls.Add(this.label6);
-            this.엔코더설정.Location = new System.Drawing.Point(4, 38);
+            this.엔코더설정.Location = new System.Drawing.Point(4, 28);
             this.엔코더설정.Name = "엔코더설정";
             this.엔코더설정.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.엔코더설정.Size = new System.Drawing.Size(429, 242);
+            this.엔코더설정.Size = new System.Drawing.Size(518, 252);
             this.엔코더설정.TabIndex = 2;
             this.엔코더설정.Text = "엔코더설정";
             // 
@@ -680,198 +700,198 @@ namespace EMS_TEST_SIMULATOR
             // label41
             // 
             this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(3, 175);
+            this.label41.Location = new System.Drawing.Point(3, 105);
             this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(42, 25);
+            this.label41.Size = new System.Drawing.Size(28, 15);
             this.label41.TabIndex = 43;
             this.label41.Text = "108";
             // 
             // LBL_108ENCPOS
             // 
             this.LBL_108ENCPOS.AutoSize = true;
-            this.LBL_108ENCPOS.Location = new System.Drawing.Point(60, 175);
+            this.LBL_108ENCPOS.Location = new System.Drawing.Point(60, 105);
             this.LBL_108ENCPOS.Name = "LBL_108ENCPOS";
-            this.LBL_108ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_108ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_108ENCPOS.TabIndex = 42;
             this.LBL_108ENCPOS.Text = "-";
             // 
             // label37
             // 
             this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(3, 150);
+            this.label37.Location = new System.Drawing.Point(3, 90);
             this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(42, 25);
+            this.label37.Size = new System.Drawing.Size(28, 15);
             this.label37.TabIndex = 39;
             this.label37.Text = "107";
             // 
             // LBL_107ENCPOS
             // 
             this.LBL_107ENCPOS.AutoSize = true;
-            this.LBL_107ENCPOS.Location = new System.Drawing.Point(60, 150);
+            this.LBL_107ENCPOS.Location = new System.Drawing.Point(60, 90);
             this.LBL_107ENCPOS.Name = "LBL_107ENCPOS";
-            this.LBL_107ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_107ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_107ENCPOS.TabIndex = 38;
             this.LBL_107ENCPOS.Text = "-";
             // 
             // label33
             // 
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(3, 125);
+            this.label33.Location = new System.Drawing.Point(3, 75);
             this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(42, 25);
+            this.label33.Size = new System.Drawing.Size(28, 15);
             this.label33.TabIndex = 35;
             this.label33.Text = "106";
             // 
             // LBL_106ENCPOS
             // 
             this.LBL_106ENCPOS.AutoSize = true;
-            this.LBL_106ENCPOS.Location = new System.Drawing.Point(60, 125);
+            this.LBL_106ENCPOS.Location = new System.Drawing.Point(60, 75);
             this.LBL_106ENCPOS.Name = "LBL_106ENCPOS";
-            this.LBL_106ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_106ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_106ENCPOS.TabIndex = 34;
             this.LBL_106ENCPOS.Text = "-";
             // 
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(3, 100);
+            this.label29.Location = new System.Drawing.Point(3, 60);
             this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(42, 25);
+            this.label29.Size = new System.Drawing.Size(28, 15);
             this.label29.TabIndex = 31;
             this.label29.Text = "105";
             // 
             // LBL_105ENCPOS
             // 
             this.LBL_105ENCPOS.AutoSize = true;
-            this.LBL_105ENCPOS.Location = new System.Drawing.Point(60, 100);
+            this.LBL_105ENCPOS.Location = new System.Drawing.Point(60, 60);
             this.LBL_105ENCPOS.Name = "LBL_105ENCPOS";
-            this.LBL_105ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_105ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_105ENCPOS.TabIndex = 30;
             this.LBL_105ENCPOS.Text = "-";
             // 
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(145, 100);
+            this.label31.Location = new System.Drawing.Point(145, 60);
             this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(42, 25);
+            this.label31.Size = new System.Drawing.Size(28, 15);
             this.label31.TabIndex = 29;
             this.label31.Text = "113";
             // 
             // LBL_113ENCPOS
             // 
             this.LBL_113ENCPOS.AutoSize = true;
-            this.LBL_113ENCPOS.Location = new System.Drawing.Point(202, 100);
+            this.LBL_113ENCPOS.Location = new System.Drawing.Point(202, 60);
             this.LBL_113ENCPOS.Name = "LBL_113ENCPOS";
-            this.LBL_113ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_113ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_113ENCPOS.TabIndex = 28;
             this.LBL_113ENCPOS.Text = "-";
             // 
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(3, 75);
+            this.label24.Location = new System.Drawing.Point(3, 45);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(42, 25);
+            this.label24.Size = new System.Drawing.Size(28, 15);
             this.label24.TabIndex = 27;
             this.label24.Text = "104";
             // 
             // LBL_104ENCPOS
             // 
             this.LBL_104ENCPOS.AutoSize = true;
-            this.LBL_104ENCPOS.Location = new System.Drawing.Point(60, 75);
+            this.LBL_104ENCPOS.Location = new System.Drawing.Point(60, 45);
             this.LBL_104ENCPOS.Name = "LBL_104ENCPOS";
-            this.LBL_104ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_104ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_104ENCPOS.TabIndex = 26;
             this.LBL_104ENCPOS.Text = "-";
             // 
             // label27
             // 
             this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(145, 75);
+            this.label27.Location = new System.Drawing.Point(145, 45);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(42, 25);
+            this.label27.Size = new System.Drawing.Size(28, 15);
             this.label27.TabIndex = 25;
             this.label27.Text = "112";
             // 
             // LBL_112ENCPOS
             // 
             this.LBL_112ENCPOS.AutoSize = true;
-            this.LBL_112ENCPOS.Location = new System.Drawing.Point(202, 75);
+            this.LBL_112ENCPOS.Location = new System.Drawing.Point(202, 45);
             this.LBL_112ENCPOS.Name = "LBL_112ENCPOS";
-            this.LBL_112ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_112ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_112ENCPOS.TabIndex = 24;
             this.LBL_112ENCPOS.Text = "-";
             // 
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(3, 50);
+            this.label19.Location = new System.Drawing.Point(3, 30);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(42, 25);
+            this.label19.Size = new System.Drawing.Size(28, 15);
             this.label19.TabIndex = 23;
             this.label19.Text = "103";
             // 
             // LBL_103ENCPOS
             // 
             this.LBL_103ENCPOS.AutoSize = true;
-            this.LBL_103ENCPOS.Location = new System.Drawing.Point(60, 50);
+            this.LBL_103ENCPOS.Location = new System.Drawing.Point(60, 30);
             this.LBL_103ENCPOS.Name = "LBL_103ENCPOS";
-            this.LBL_103ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_103ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_103ENCPOS.TabIndex = 22;
             this.LBL_103ENCPOS.Text = "-";
             // 
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(145, 50);
+            this.label21.Location = new System.Drawing.Point(145, 30);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(42, 25);
+            this.label21.Size = new System.Drawing.Size(28, 15);
             this.label21.TabIndex = 21;
             this.label21.Text = "111";
             // 
             // LBL_111ENCPOS
             // 
             this.LBL_111ENCPOS.AutoSize = true;
-            this.LBL_111ENCPOS.Location = new System.Drawing.Point(202, 50);
+            this.LBL_111ENCPOS.Location = new System.Drawing.Point(202, 30);
             this.LBL_111ENCPOS.Name = "LBL_111ENCPOS";
-            this.LBL_111ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_111ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_111ENCPOS.TabIndex = 20;
             this.LBL_111ENCPOS.Text = "-";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(3, 25);
+            this.label13.Location = new System.Drawing.Point(3, 15);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(42, 25);
+            this.label13.Size = new System.Drawing.Size(28, 15);
             this.label13.TabIndex = 19;
             this.label13.Text = "102";
             // 
             // LBL_102ENCPOS
             // 
             this.LBL_102ENCPOS.AutoSize = true;
-            this.LBL_102ENCPOS.Location = new System.Drawing.Point(60, 25);
+            this.LBL_102ENCPOS.Location = new System.Drawing.Point(60, 15);
             this.LBL_102ENCPOS.Name = "LBL_102ENCPOS";
-            this.LBL_102ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_102ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_102ENCPOS.TabIndex = 18;
             this.LBL_102ENCPOS.Text = "-";
             // 
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(145, 25);
+            this.label15.Location = new System.Drawing.Point(145, 15);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(42, 25);
+            this.label15.Size = new System.Drawing.Size(28, 15);
             this.label15.TabIndex = 17;
             this.label15.Text = "110";
             // 
             // LBL_110ENCPOS
             // 
             this.LBL_110ENCPOS.AutoSize = true;
-            this.LBL_110ENCPOS.Location = new System.Drawing.Point(202, 25);
+            this.LBL_110ENCPOS.Location = new System.Drawing.Point(202, 15);
             this.LBL_110ENCPOS.Name = "LBL_110ENCPOS";
-            this.LBL_110ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_110ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_110ENCPOS.TabIndex = 16;
             this.LBL_110ENCPOS.Text = "-";
             // 
@@ -880,7 +900,7 @@ namespace EMS_TEST_SIMULATOR
             this.LBL_109ENCPOS.AutoSize = true;
             this.LBL_109ENCPOS.Location = new System.Drawing.Point(202, 0);
             this.LBL_109ENCPOS.Name = "LBL_109ENCPOS";
-            this.LBL_109ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_109ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_109ENCPOS.TabIndex = 15;
             this.LBL_109ENCPOS.Text = "-";
             // 
@@ -889,7 +909,7 @@ namespace EMS_TEST_SIMULATOR
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(145, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(42, 25);
+            this.label10.Size = new System.Drawing.Size(28, 15);
             this.label10.TabIndex = 14;
             this.label10.Text = "109";
             // 
@@ -900,7 +920,7 @@ namespace EMS_TEST_SIMULATOR
             this.LBL_101ENCPOS.ForeColor = System.Drawing.Color.White;
             this.LBL_101ENCPOS.Location = new System.Drawing.Point(60, 0);
             this.LBL_101ENCPOS.Name = "LBL_101ENCPOS";
-            this.LBL_101ENCPOS.Size = new System.Drawing.Size(19, 25);
+            this.LBL_101ENCPOS.Size = new System.Drawing.Size(12, 15);
             this.LBL_101ENCPOS.TabIndex = 13;
             this.LBL_101ENCPOS.Text = "-";
             // 
@@ -911,7 +931,7 @@ namespace EMS_TEST_SIMULATOR
             this.label11.ForeColor = System.Drawing.Color.White;
             this.label11.Location = new System.Drawing.Point(3, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(42, 25);
+            this.label11.Size = new System.Drawing.Size(28, 15);
             this.label11.TabIndex = 12;
             this.label11.Text = "101";
             // 
@@ -950,7 +970,7 @@ namespace EMS_TEST_SIMULATOR
             this.textBox1.ForeColor = System.Drawing.Color.White;
             this.textBox1.Location = new System.Drawing.Point(141, 152);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(171, 31);
+            this.textBox1.Size = new System.Drawing.Size(171, 23);
             this.textBox1.TabIndex = 6;
             // 
             // label8
@@ -960,7 +980,7 @@ namespace EMS_TEST_SIMULATOR
             this.label8.ForeColor = System.Drawing.Color.White;
             this.label8.Location = new System.Drawing.Point(21, 154);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(102, 25);
+            this.label8.Size = new System.Drawing.Size(67, 15);
             this.label8.TabIndex = 5;
             this.label8.Text = "엔코더입력";
             // 
@@ -986,7 +1006,7 @@ namespace EMS_TEST_SIMULATOR
             "113"});
             this.comboBox2.Location = new System.Drawing.Point(141, 82);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(171, 33);
+            this.comboBox2.Size = new System.Drawing.Size(171, 23);
             this.comboBox2.TabIndex = 4;
             // 
             // label7
@@ -996,7 +1016,7 @@ namespace EMS_TEST_SIMULATOR
             this.label7.ForeColor = System.Drawing.Color.White;
             this.label7.Location = new System.Drawing.Point(23, 86);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(102, 25);
+            this.label7.Size = new System.Drawing.Size(67, 15);
             this.label7.TabIndex = 3;
             this.label7.Text = "포지션설정";
             // 
@@ -1025,7 +1045,7 @@ namespace EMS_TEST_SIMULATOR
             "16호기"});
             this.comboBox1.Location = new System.Drawing.Point(141, 21);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(171, 33);
+            this.comboBox1.Size = new System.Drawing.Size(171, 23);
             this.comboBox1.TabIndex = 2;
             // 
             // label6
@@ -1035,7 +1055,7 @@ namespace EMS_TEST_SIMULATOR
             this.label6.ForeColor = System.Drawing.Color.White;
             this.label6.Location = new System.Drawing.Point(21, 24);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(84, 25);
+            this.label6.Size = new System.Drawing.Size(55, 15);
             this.label6.TabIndex = 1;
             this.label6.Text = "호기번호";
             // 
@@ -1046,10 +1066,10 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel2.SetColumnSpan(this.label3, 2);
             this.label3.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(298, 66);
+            this.label3.Location = new System.Drawing.Point(353, 66);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(161, 25);
+            this.label3.Size = new System.Drawing.Size(106, 15);
             this.label3.TabIndex = 20;
             this.label3.Text = "Rail DIO 통신현황";
             // 
@@ -1111,7 +1131,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_point_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_error_point_text.Location = new System.Drawing.Point(278, 180);
             this.lbl_error_point_text.Name = "lbl_error_point_text";
-            this.lbl_error_point_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_error_point_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_error_point_text.TabIndex = 40;
             this.lbl_error_point_text.Text = "-";
             this.lbl_error_point_text.Click += new System.EventHandler(this.lbl_error_point_text_Click);
@@ -1123,7 +1143,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_point.ForeColor = System.Drawing.Color.White;
             this.lbl_error_point.Location = new System.Drawing.Point(179, 180);
             this.lbl_error_point.Name = "lbl_error_point";
-            this.lbl_error_point.Size = new System.Drawing.Size(90, 25);
+            this.lbl_error_point.Size = new System.Drawing.Size(59, 15);
             this.lbl_error_point.TabIndex = 39;
             this.lbl_error_point.Text = "에러 위치";
             // 
@@ -1134,7 +1154,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_transfer_command_Received_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_transfer_command_Received_text.Location = new System.Drawing.Point(121, 180);
             this.lbl_transfer_command_Received_text.Name = "lbl_transfer_command_Received_text";
-            this.lbl_transfer_command_Received_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_transfer_command_Received_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_transfer_command_Received_text.TabIndex = 38;
             this.lbl_transfer_command_Received_text.Text = "-";
             this.lbl_transfer_command_Received_text.Click += new System.EventHandler(this.lbl_transfer_command_Received_text_Click);
@@ -1146,7 +1166,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_transfer_command_received.ForeColor = System.Drawing.Color.White;
             this.lbl_transfer_command_received.Location = new System.Drawing.Point(9, 180);
             this.lbl_transfer_command_received.Name = "lbl_transfer_command_received";
-            this.lbl_transfer_command_received.Size = new System.Drawing.Size(96, 34);
+            this.lbl_transfer_command_received.Size = new System.Drawing.Size(87, 15);
             this.lbl_transfer_command_received.TabIndex = 37;
             this.lbl_transfer_command_received.Text = "반송 지령 접수";
             // 
@@ -1157,7 +1177,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_target_point_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_target_point_text.Location = new System.Drawing.Point(278, 151);
             this.lbl_target_point_text.Name = "lbl_target_point_text";
-            this.lbl_target_point_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_target_point_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_target_point_text.TabIndex = 36;
             this.lbl_target_point_text.Text = "-";
             this.lbl_target_point_text.Click += new System.EventHandler(this.lbl_target_point_text_Click);
@@ -1169,7 +1189,7 @@ namespace EMS_TEST_SIMULATOR
             this.label26.ForeColor = System.Drawing.Color.White;
             this.label26.Location = new System.Drawing.Point(179, 151);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(90, 25);
+            this.label26.Size = new System.Drawing.Size(59, 15);
             this.label26.TabIndex = 35;
             this.label26.Text = "목적 위치";
             // 
@@ -1180,7 +1200,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_load_status_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_load_status_text.Location = new System.Drawing.Point(121, 151);
             this.lbl_load_status_text.Name = "lbl_load_status_text";
-            this.lbl_load_status_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_load_status_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_load_status_text.TabIndex = 34;
             this.lbl_load_status_text.Text = "-";
             this.lbl_load_status_text.Click += new System.EventHandler(this.lbl_load_status_text_Click);
@@ -1192,7 +1212,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_load_status.ForeColor = System.Drawing.Color.White;
             this.lbl_load_status.Location = new System.Drawing.Point(9, 151);
             this.lbl_load_status.Name = "lbl_load_status";
-            this.lbl_load_status.Size = new System.Drawing.Size(90, 25);
+            this.lbl_load_status.Size = new System.Drawing.Size(59, 15);
             this.lbl_load_status.TabIndex = 33;
             this.lbl_load_status.Text = "화물 탑재";
             // 
@@ -1203,7 +1223,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_current_point_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_current_point_text.Location = new System.Drawing.Point(278, 122);
             this.lbl_current_point_text.Name = "lbl_current_point_text";
-            this.lbl_current_point_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_current_point_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_current_point_text.TabIndex = 32;
             this.lbl_current_point_text.Text = "-";
             this.lbl_current_point_text.Click += new System.EventHandler(this.lbl_current_point_text_Click);
@@ -1215,7 +1235,7 @@ namespace EMS_TEST_SIMULATOR
             this.label22.ForeColor = System.Drawing.Color.White;
             this.label22.Location = new System.Drawing.Point(179, 122);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(90, 25);
+            this.label22.Size = new System.Drawing.Size(59, 15);
             this.label22.TabIndex = 31;
             this.label22.Text = "현재 위치";
             // 
@@ -1226,7 +1246,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_vehicle_mode_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_vehicle_mode_text.Location = new System.Drawing.Point(121, 122);
             this.lbl_vehicle_mode_text.Name = "lbl_vehicle_mode_text";
-            this.lbl_vehicle_mode_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_vehicle_mode_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_vehicle_mode_text.TabIndex = 30;
             this.lbl_vehicle_mode_text.Text = "-";
             this.lbl_vehicle_mode_text.Click += new System.EventHandler(this.lbl_vehicle_mode_text_Click);
@@ -1238,7 +1258,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_vehicle_mode.ForeColor = System.Drawing.Color.White;
             this.lbl_vehicle_mode.Location = new System.Drawing.Point(9, 122);
             this.lbl_vehicle_mode.Name = "lbl_vehicle_mode";
-            this.lbl_vehicle_mode.Size = new System.Drawing.Size(90, 25);
+            this.lbl_vehicle_mode.Size = new System.Drawing.Size(59, 15);
             this.lbl_vehicle_mode.TabIndex = 29;
             this.lbl_vehicle_mode.Text = "대차 상태";
             // 
@@ -1249,7 +1269,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_target_mode_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_target_mode_text.Location = new System.Drawing.Point(278, 93);
             this.lbl_target_mode_text.Name = "lbl_target_mode_text";
-            this.lbl_target_mode_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_target_mode_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_target_mode_text.TabIndex = 28;
             this.lbl_target_mode_text.Text = "-";
             this.lbl_target_mode_text.Click += new System.EventHandler(this.lbl_target_mode_text_Click);
@@ -1261,7 +1281,7 @@ namespace EMS_TEST_SIMULATOR
             this.label18.ForeColor = System.Drawing.Color.White;
             this.label18.Location = new System.Drawing.Point(179, 93);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(90, 29);
+            this.label18.Size = new System.Drawing.Size(87, 15);
             this.label18.TabIndex = 27;
             this.label18.Text = "목적 동작 코드";
             // 
@@ -1272,7 +1292,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_transfer_data_no_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_transfer_data_no_text.Location = new System.Drawing.Point(121, 93);
             this.lbl_transfer_data_no_text.Name = "lbl_transfer_data_no_text";
-            this.lbl_transfer_data_no_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_transfer_data_no_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_transfer_data_no_text.TabIndex = 26;
             this.lbl_transfer_data_no_text.Text = "-";
             this.lbl_transfer_data_no_text.Click += new System.EventHandler(this.lbl_transfer_data_no_text_Click);
@@ -1284,7 +1304,7 @@ namespace EMS_TEST_SIMULATOR
             this.label16.ForeColor = System.Drawing.Color.White;
             this.label16.Location = new System.Drawing.Point(9, 93);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(90, 29);
+            this.label16.Size = new System.Drawing.Size(95, 15);
             this.label16.TabIndex = 25;
             this.label16.Text = "반송 데이터 No.";
             // 
@@ -1295,7 +1315,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_code_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_error_code_text.Location = new System.Drawing.Point(121, 64);
             this.lbl_error_code_text.Name = "lbl_error_code_text";
-            this.lbl_error_code_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_error_code_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_error_code_text.TabIndex = 22;
             this.lbl_error_code_text.Text = "-";
             this.lbl_error_code_text.Click += new System.EventHandler(this.lbl_error_code_text_Click);
@@ -1307,7 +1327,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_error_code.ForeColor = System.Drawing.Color.White;
             this.lbl_error_code.Location = new System.Drawing.Point(9, 64);
             this.lbl_error_code.Name = "lbl_error_code";
-            this.lbl_error_code.Size = new System.Drawing.Size(90, 25);
+            this.lbl_error_code.Size = new System.Drawing.Size(59, 15);
             this.lbl_error_code.TabIndex = 21;
             this.lbl_error_code.Text = "에러 코드";
             // 
@@ -1318,7 +1338,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_operating_code_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_operating_code_text.Location = new System.Drawing.Point(121, 35);
             this.lbl_operating_code_text.Name = "lbl_operating_code_text";
-            this.lbl_operating_code_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_operating_code_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_operating_code_text.TabIndex = 18;
             this.lbl_operating_code_text.Text = "-";
             this.lbl_operating_code_text.Click += new System.EventHandler(this.lbl_operating_code_text_Click);
@@ -1330,7 +1350,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_operating_code.ForeColor = System.Drawing.Color.White;
             this.lbl_operating_code.Location = new System.Drawing.Point(9, 35);
             this.lbl_operating_code.Name = "lbl_operating_code";
-            this.lbl_operating_code.Size = new System.Drawing.Size(90, 25);
+            this.lbl_operating_code.Size = new System.Drawing.Size(59, 15);
             this.lbl_operating_code.TabIndex = 17;
             this.lbl_operating_code.Text = "동작 코드";
             // 
@@ -1341,7 +1361,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_response_code_text.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.lbl_response_code_text.Location = new System.Drawing.Point(121, 6);
             this.lbl_response_code_text.Name = "lbl_response_code_text";
-            this.lbl_response_code_text.Size = new System.Drawing.Size(19, 25);
+            this.lbl_response_code_text.Size = new System.Drawing.Size(12, 15);
             this.lbl_response_code_text.TabIndex = 14;
             this.lbl_response_code_text.Text = "-";
             this.lbl_response_code_text.Click += new System.EventHandler(this.lbl_response_code_text_Click);
@@ -1353,7 +1373,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_respons_code.ForeColor = System.Drawing.Color.White;
             this.lbl_respons_code.Location = new System.Drawing.Point(9, 6);
             this.lbl_respons_code.Name = "lbl_respons_code";
-            this.lbl_respons_code.Size = new System.Drawing.Size(90, 25);
+            this.lbl_respons_code.Size = new System.Drawing.Size(59, 15);
             this.lbl_respons_code.TabIndex = 13;
             this.lbl_respons_code.Text = "응답 코드";
             // 
@@ -1366,10 +1386,10 @@ namespace EMS_TEST_SIMULATOR
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button2.ForeColor = System.Drawing.Color.White;
-            this.button2.Location = new System.Drawing.Point(666, 242);
+            this.button2.Location = new System.Drawing.Point(645, 242);
             this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(148, 38);
+            this.button2.Size = new System.Drawing.Size(169, 50);
             this.button2.TabIndex = 2;
             this.button2.Text = "Connect";
             this.button2.UseVisualStyleBackColor = false;
@@ -1384,10 +1404,10 @@ namespace EMS_TEST_SIMULATOR
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(843, 184);
+            this.button1.Location = new System.Drawing.Point(822, 184);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(150, 42);
+            this.button1.Size = new System.Drawing.Size(171, 50);
             this.button1.TabIndex = 1;
             this.button1.Text = "Line setup";
             this.button1.UseVisualStyleBackColor = false;
@@ -1402,10 +1422,10 @@ namespace EMS_TEST_SIMULATOR
             this.Rail_io.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Rail_io.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.Rail_io.ForeColor = System.Drawing.Color.White;
-            this.Rail_io.Location = new System.Drawing.Point(667, 184);
+            this.Rail_io.Location = new System.Drawing.Point(645, 184);
             this.Rail_io.Margin = new System.Windows.Forms.Padding(4);
             this.Rail_io.Name = "Rail_io";
-            this.Rail_io.Size = new System.Drawing.Size(147, 39);
+            this.Rail_io.Size = new System.Drawing.Size(169, 50);
             this.Rail_io.TabIndex = 17;
             this.Rail_io.Text = "Rail I.O";
             this.Rail_io.UseVisualStyleBackColor = false;
@@ -1434,10 +1454,10 @@ namespace EMS_TEST_SIMULATOR
             this.label1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(24, 269);
+            this.label1.Location = new System.Drawing.Point(24, 279);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 2, 4, 2);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(168, 25);
+            this.label1.Size = new System.Drawing.Size(168, 15);
             this.label1.TabIndex = 19;
             this.label1.Text = "LAYOUT";
             // 
@@ -1450,10 +1470,10 @@ namespace EMS_TEST_SIMULATOR
             this.btn_Command.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Command.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btn_Command.ForeColor = System.Drawing.Color.White;
-            this.btn_Command.Location = new System.Drawing.Point(843, 242);
+            this.btn_Command.Location = new System.Drawing.Point(822, 242);
             this.btn_Command.Margin = new System.Windows.Forms.Padding(4);
             this.btn_Command.Name = "btn_Command";
-            this.btn_Command.Size = new System.Drawing.Size(150, 38);
+            this.btn_Command.Size = new System.Drawing.Size(171, 50);
             this.btn_Command.TabIndex = 23;
             this.btn_Command.Text = "Command";
             this.btn_Command.UseVisualStyleBackColor = false;
@@ -1468,10 +1488,10 @@ namespace EMS_TEST_SIMULATOR
             this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button10.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button10.ForeColor = System.Drawing.Color.White;
-            this.button10.Location = new System.Drawing.Point(667, 126);
+            this.button10.Location = new System.Drawing.Point(645, 126);
             this.button10.Margin = new System.Windows.Forms.Padding(4);
             this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(147, 42);
+            this.button10.Size = new System.Drawing.Size(169, 50);
             this.button10.TabIndex = 28;
             this.button10.Text = "EMS I.O";
             this.button10.UseVisualStyleBackColor = false;
@@ -1508,7 +1528,7 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel2.Controls.Add(this.label4, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.pictureBox1, 1, 2);
             this.tableLayoutPanel2.Controls.Add(this.label5, 1, 1);
-            this.tableLayoutPanel2.Controls.Add(this.button7, 9, 0);
+            this.tableLayoutPanel2.Controls.Add(this.button7, 8, 0);
             this.tableLayoutPanel2.Controls.Add(this.button8, 10, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
@@ -1560,7 +1580,7 @@ namespace EMS_TEST_SIMULATOR
             this.button7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.button7.FlatAppearance.BorderSize = 0;
             this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button7.Location = new System.Drawing.Point(733, 9);
+            this.button7.Location = new System.Drawing.Point(644, 9);
             this.button7.MaximumSize = new System.Drawing.Size(110, 110);
             this.button7.MinimumSize = new System.Drawing.Size(110, 110);
             this.button7.Name = "button7";
@@ -1584,26 +1604,6 @@ namespace EMS_TEST_SIMULATOR
             this.button8.TabIndex = 27;
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
-            // 
-            // elementHost1
-            // 
-            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(0, 0);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(963, 128);
-            this.elementHost1.TabIndex = 0;
-            this.elementHost1.Text = "elementHost1";
-            this.elementHost1.Child = this.userControl11;
-            // 
-            // elementHost2
-            // 
-            this.elementHost2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost2.Location = new System.Drawing.Point(0, 0);
-            this.elementHost2.Name = "elementHost2";
-            this.elementHost2.Size = new System.Drawing.Size(963, 128);
-            this.elementHost2.TabIndex = 0;
-            this.elementHost2.Text = "elementHost2";
-            this.elementHost2.Child = this.userControl21;
             // 
             // Main
             // 

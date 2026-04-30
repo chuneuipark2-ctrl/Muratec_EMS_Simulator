@@ -27,7 +27,6 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft = new System.Windows.Forms.Panel();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.buttonApplyOptions = new System.Windows.Forms.Button();
             this.IO_CBOX2 = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.IO_CBOX1 = new System.Windows.Forms.ComboBox();
@@ -55,7 +54,10 @@ namespace EMS_TEST_SIMULATOR
             this.comboHoistType = new System.Windows.Forms.ComboBox();
             this.labelHoistType = new System.Windows.Forms.Label();
             this.labelOptionTitle = new System.Windows.Forms.Label();
+            this.buttonApplyOptions = new System.Windows.Forms.Button();
             this.panelRight = new System.Windows.Forms.Panel();
+            this.splitMain = new System.Windows.Forms.SplitContainer();
+            this.tableLayoutPanelRight = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.panelDeviceList = new System.Windows.Forms.Panel();
@@ -64,23 +66,30 @@ namespace EMS_TEST_SIMULATOR
             this.listViewDeviceList = new System.Windows.Forms.ListView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dataGridViewIO = new System.Windows.Forms.DataGridView();
-            this.button1 = new System.Windows.Forms.Button();
-            this.labelLegendOutput = new System.Windows.Forms.Label();
-            this.labelLegendInput = new System.Windows.Forms.Label();
-            this.labelLegend = new System.Windows.Forms.Label();
-            this.checkBoxUsedSignalFilter = new System.Windows.Forms.CheckBox();
-            this.comboFilter = new System.Windows.Forms.ComboBox();
+            this.panelRightHeader = new System.Windows.Forms.FlowLayoutPanel();
             this.labelFilter = new System.Windows.Forms.Label();
+            this.comboFilter = new System.Windows.Forms.ComboBox();
+            this.checkBoxUsedSignalFilter = new System.Windows.Forms.CheckBox();
+            this.labelLegend = new System.Windows.Forms.Label();
+            this.labelLegendInput = new System.Windows.Forms.Label();
+            this.labelLegendOutput = new System.Windows.Forms.Label();
+            this.panelRightFooter = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonSavePdf = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.panelTop.SuspendLayout();
             this.panelLeft.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
+            this.splitMain.SuspendLayout();
             this.panelRight.SuspendLayout();
+            this.tableLayoutPanelRight.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panelDeviceList.SuspendLayout();
             this.panelDeviceListTop.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewIO)).BeginInit();
+            this.panelRightHeader.SuspendLayout();
+            this.panelRightFooter.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelTop
@@ -94,7 +103,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(2029, 56);
+            this.panelTop.Size = new System.Drawing.Size(1466, 56);
             this.panelTop.TabIndex = 0;
             // 
             // label1
@@ -151,10 +160,11 @@ namespace EMS_TEST_SIMULATOR
             // 
             // panelLeft
             // 
+            this.panelLeft.AutoScroll = true;
+            this.panelLeft.AutoScrollMinSize = new System.Drawing.Size(320, 1200);
             this.panelLeft.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(37)))), ((int)(((byte)(38)))));
             this.panelLeft.Controls.Add(this.comboBox3);
             this.panelLeft.Controls.Add(this.label4);
-            this.panelLeft.Controls.Add(this.buttonApplyOptions);
             this.panelLeft.Controls.Add(this.IO_CBOX2);
             this.panelLeft.Controls.Add(this.label2);
             this.panelLeft.Controls.Add(this.IO_CBOX1);
@@ -182,11 +192,12 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft.Controls.Add(this.comboHoistType);
             this.panelLeft.Controls.Add(this.labelHoistType);
             this.panelLeft.Controls.Add(this.labelOptionTitle);
-            this.panelLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panelLeft.Location = new System.Drawing.Point(0, 56);
+            this.panelLeft.Controls.Add(this.buttonApplyOptions);
+            this.panelLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelLeft.Location = new System.Drawing.Point(0, 0);
             this.panelLeft.Name = "panelLeft";
-            this.panelLeft.Padding = new System.Windows.Forms.Padding(8);
-            this.panelLeft.Size = new System.Drawing.Size(280, 1095);
+            this.panelLeft.Padding = new System.Windows.Forms.Padding(14, 10, 12, 10);
+            this.panelLeft.Size = new System.Drawing.Size(400, 1051);
             this.panelLeft.TabIndex = 1;
             // 
             // comboBox3
@@ -213,22 +224,6 @@ namespace EMS_TEST_SIMULATOR
             this.label4.Size = new System.Drawing.Size(94, 25);
             this.label4.TabIndex = 32;
             this.label4.Text = "극한검출 :";
-            // 
-            // buttonApplyOptions
-            // 
-            this.buttonApplyOptions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonApplyOptions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-            this.buttonApplyOptions.FlatAppearance.BorderSize = 0;
-            this.buttonApplyOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonApplyOptions.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.buttonApplyOptions.ForeColor = System.Drawing.Color.White;
-            this.buttonApplyOptions.Location = new System.Drawing.Point(45, 1032);
-            this.buttonApplyOptions.Name = "buttonApplyOptions";
-            this.buttonApplyOptions.Size = new System.Drawing.Size(174, 32);
-            this.buttonApplyOptions.TabIndex = 16;
-            this.buttonApplyOptions.Text = "I/O 적용";
-            this.buttonApplyOptions.UseVisualStyleBackColor = false;
-            this.buttonApplyOptions.Click += new System.EventHandler(this.buttonApplyOptions_Click);
             // 
             // IO_CBOX2
             // 
@@ -580,34 +575,42 @@ namespace EMS_TEST_SIMULATOR
             this.labelOptionTitle.TabIndex = 0;
             this.labelOptionTitle.Text = "옵션 설정";
             // 
+            // buttonApplyOptions
+            // 
+            this.buttonApplyOptions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.buttonApplyOptions.FlatAppearance.BorderSize = 0;
+            this.buttonApplyOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonApplyOptions.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.buttonApplyOptions.ForeColor = System.Drawing.Color.White;
+            this.buttonApplyOptions.Location = new System.Drawing.Point(12, 990);
+            this.buttonApplyOptions.Name = "buttonApplyOptions";
+            this.buttonApplyOptions.Size = new System.Drawing.Size(174, 36);
+            this.buttonApplyOptions.TabIndex = 16;
+            this.buttonApplyOptions.Text = "I/O 적용";
+            this.buttonApplyOptions.UseVisualStyleBackColor = false;
+            this.buttonApplyOptions.Click += new System.EventHandler(this.buttonApplyOptions_Click);
+            // 
             // panelRight
             // 
+            this.panelRight.AutoScroll = true;
             this.panelRight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.panelRight.Controls.Add(this.tabControl1);
-            this.panelRight.Controls.Add(this.button1);
-            this.panelRight.Controls.Add(this.labelLegendOutput);
-            this.panelRight.Controls.Add(this.labelLegendInput);
-            this.panelRight.Controls.Add(this.labelLegend);
-            this.panelRight.Controls.Add(this.checkBoxUsedSignalFilter);
-            this.panelRight.Controls.Add(this.comboFilter);
-            this.panelRight.Controls.Add(this.labelFilter);
-            this.panelRight.Controls.Add(this.buttonSavePdf);
             this.panelRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelRight.Location = new System.Drawing.Point(280, 56);
+            this.panelRight.Location = new System.Drawing.Point(0, 0);
             this.panelRight.Name = "panelRight";
             this.panelRight.Padding = new System.Windows.Forms.Padding(6);
-            this.panelRight.Size = new System.Drawing.Size(1749, 1095);
+            this.panelRight.Size = new System.Drawing.Size(1794, 1051);
             this.panelRight.TabIndex = 2;
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.tabControl1.Location = new System.Drawing.Point(9, 49);
+            this.tabControl1.Location = new System.Drawing.Point(6, 62);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1656, 805);
+            this.tabControl1.Size = new System.Drawing.Size(1782, 935);
             this.tabControl1.TabIndex = 11;
             // 
             // tabPage1
@@ -617,19 +620,19 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage1.Location = new System.Drawing.Point(4, 34);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1648, 767);
+            this.tabPage1.Size = new System.Drawing.Size(1774, 897);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "DEVICE LIST";
             // 
             // panelDeviceList
             // 
-            this.panelDeviceList.Controls.Add(this.panelDeviceListTop);
             this.panelDeviceList.Controls.Add(this.listViewDeviceList);
+            this.panelDeviceList.Controls.Add(this.panelDeviceListTop);
             this.panelDeviceList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelDeviceList.Location = new System.Drawing.Point(3, 3);
             this.panelDeviceList.Name = "panelDeviceList";
-            this.panelDeviceList.Padding = new System.Windows.Forms.Padding(8);
-            this.panelDeviceList.Size = new System.Drawing.Size(1642, 761);
+            this.panelDeviceList.Padding = new System.Windows.Forms.Padding(20, 8, 12, 8);
+            this.panelDeviceList.Size = new System.Drawing.Size(1768, 891);
             this.panelDeviceList.TabIndex = 0;
             // 
             // panelDeviceListTop
@@ -637,23 +640,24 @@ namespace EMS_TEST_SIMULATOR
             this.panelDeviceListTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.panelDeviceListTop.Controls.Add(this.buttonLoadExcel);
             this.panelDeviceListTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelDeviceListTop.Location = new System.Drawing.Point(8, 8);
+            this.panelDeviceListTop.Location = new System.Drawing.Point(20, 8);
             this.panelDeviceListTop.Name = "panelDeviceListTop";
-            this.panelDeviceListTop.Size = new System.Drawing.Size(1626, 45);
+            this.panelDeviceListTop.Size = new System.Drawing.Size(1736, 34);
             this.panelDeviceListTop.TabIndex = 2;
             // 
             // buttonLoadExcel
             // 
-            this.buttonLoadExcel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonLoadExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.buttonLoadExcel.Dock = System.Windows.Forms.DockStyle.Right;
             this.buttonLoadExcel.FlatAppearance.BorderSize = 0;
             this.buttonLoadExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonLoadExcel.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.buttonLoadExcel.ForeColor = System.Drawing.Color.White;
-            this.buttonLoadExcel.Location = new System.Drawing.Point(1468, 6);
+            this.buttonLoadExcel.Location = new System.Drawing.Point(1586, 0);
+            this.buttonLoadExcel.Margin = new System.Windows.Forms.Padding(8, 6, 0, 6);
             this.buttonLoadExcel.MinimumSize = new System.Drawing.Size(150, 32);
             this.buttonLoadExcel.Name = "buttonLoadExcel";
-            this.buttonLoadExcel.Size = new System.Drawing.Size(150, 32);
+            this.buttonLoadExcel.Size = new System.Drawing.Size(150, 34);
             this.buttonLoadExcel.TabIndex = 0;
             this.buttonLoadExcel.Text = "파일 불러오기";
             this.buttonLoadExcel.UseVisualStyleBackColor = false;
@@ -663,20 +667,19 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.listViewDeviceList.AllowDrop = true;
             this.listViewDeviceList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.listViewDeviceList.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.listViewDeviceList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewDeviceList.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.listViewDeviceList.ForeColor = System.Drawing.Color.White;
             this.listViewDeviceList.FullRowSelect = true;
             this.listViewDeviceList.HideSelection = false;
-            this.listViewDeviceList.Location = new System.Drawing.Point(8, 52);
+            this.listViewDeviceList.Scrollable = true;
+            this.listViewDeviceList.Location = new System.Drawing.Point(20, 8);
             this.listViewDeviceList.Name = "listViewDeviceList";
-            this.listViewDeviceList.Size = new System.Drawing.Size(1626, 701);
-            this.listViewDeviceList.TabIndex = 1;
+            this.listViewDeviceList.Size = new System.Drawing.Size(1736, 875);
+            this.listViewDeviceList.TabIndex = 4;
             this.listViewDeviceList.UseCompatibleStateImageBehavior = false;
             this.listViewDeviceList.View = System.Windows.Forms.View.Details;
-            this.listViewDeviceList.SelectedIndexChanged += new System.EventHandler(this.listViewDeviceList_SelectedIndexChanged);
-            this.listViewDeviceList.DragDrop += new System.Windows.Forms.DragEventHandler(this.listViewDeviceList_DragDrop);
-            this.listViewDeviceList.DragEnter += new System.Windows.Forms.DragEventHandler(this.listViewDeviceList_DragEnter);
+            this.listViewDeviceList.SelectedIndexChanged += new System.EventHandler(this.listViewDeviceList_SelectedIndexChanged_1);
             // 
             // tabPage2
             // 
@@ -684,7 +687,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage2.Location = new System.Drawing.Point(4, 34);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1648, 767);
+            this.tabPage2.Size = new System.Drawing.Size(1260, 646);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "I.O LIST";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -716,70 +719,37 @@ namespace EMS_TEST_SIMULATOR
             this.dataGridViewIO.Name = "dataGridViewIO";
             this.dataGridViewIO.RowHeadersVisible = false;
             this.dataGridViewIO.RowHeadersWidth = 62;
-            this.dataGridViewIO.Size = new System.Drawing.Size(1642, 761);
+            this.dataGridViewIO.Size = new System.Drawing.Size(1254, 640);
             this.dataGridViewIO.TabIndex = 3;
             // 
-            // button1
+            // panelRightHeader
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-            this.button1.FlatAppearance.BorderSize = 0;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(24, 923);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(174, 32);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "상태저장";
-            this.button1.UseVisualStyleBackColor = false;
+            this.panelRightHeader.AutoScroll = true;
+            this.panelRightHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.panelRightHeader.Controls.Add(this.labelFilter);
+            this.panelRightHeader.Controls.Add(this.comboFilter);
+            this.panelRightHeader.Controls.Add(this.checkBoxUsedSignalFilter);
+            this.panelRightHeader.Controls.Add(this.labelLegend);
+            this.panelRightHeader.Controls.Add(this.labelLegendInput);
+            this.panelRightHeader.Controls.Add(this.labelLegendOutput);
+            this.panelRightHeader.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelRightHeader.Location = new System.Drawing.Point(6, 6);
+            this.panelRightHeader.Name = "panelRightHeader";
+            this.panelRightHeader.Padding = new System.Windows.Forms.Padding(4, 8, 4, 8);
+            this.panelRightHeader.Size = new System.Drawing.Size(1782, 56);
+            this.panelRightHeader.TabIndex = 14;
+            this.panelRightHeader.WrapContents = false;
             // 
-            // labelLegendOutput
+            // labelFilter
             // 
-            this.labelLegendOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelLegendOutput.AutoSize = true;
-            this.labelLegendOutput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(220)))), ((int)(((byte)(100)))));
-            this.labelLegendOutput.Location = new System.Drawing.Point(1564, 10);
-            this.labelLegendOutput.Name = "labelLegendOutput";
-            this.labelLegendOutput.Size = new System.Drawing.Size(82, 25);
-            this.labelLegendOutput.TabIndex = 9;
-            this.labelLegendOutput.Text = "OUTPUT";
-            // 
-            // labelLegendInput
-            // 
-            this.labelLegendInput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelLegendInput.AutoSize = true;
-            this.labelLegendInput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
-            this.labelLegendInput.Location = new System.Drawing.Point(1494, 10);
-            this.labelLegendInput.Name = "labelLegendInput";
-            this.labelLegendInput.Size = new System.Drawing.Size(64, 25);
-            this.labelLegendInput.TabIndex = 8;
-            this.labelLegendInput.Text = "INPUT";
-            // 
-            // labelLegend
-            // 
-            this.labelLegend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelLegend.AutoSize = true;
-            this.labelLegend.ForeColor = System.Drawing.Color.White;
-            this.labelLegend.Location = new System.Drawing.Point(1430, 10);
-            this.labelLegend.Name = "labelLegend";
-            this.labelLegend.Size = new System.Drawing.Size(58, 25);
-            this.labelLegend.TabIndex = 7;
-            this.labelLegend.Text = "범례: ";
-            // 
-            // checkBoxUsedSignalFilter
-            // 
-            this.checkBoxUsedSignalFilter.AutoSize = true;
-            this.checkBoxUsedSignalFilter.Checked = true;
-            this.checkBoxUsedSignalFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxUsedSignalFilter.ForeColor = System.Drawing.Color.White;
-            this.checkBoxUsedSignalFilter.Location = new System.Drawing.Point(270, 12);
-            this.checkBoxUsedSignalFilter.Name = "checkBoxUsedSignalFilter";
-            this.checkBoxUsedSignalFilter.Size = new System.Drawing.Size(170, 29);
-            this.checkBoxUsedSignalFilter.TabIndex = 6;
-            this.checkBoxUsedSignalFilter.Text = "사용신호 필터링";
-            this.checkBoxUsedSignalFilter.UseVisualStyleBackColor = true;
-            this.checkBoxUsedSignalFilter.CheckedChanged += new System.EventHandler(this.checkBoxUsedSignalFilter_CheckedChanged);
+            this.labelFilter.AutoSize = true;
+            this.labelFilter.ForeColor = System.Drawing.Color.White;
+            this.labelFilter.Location = new System.Drawing.Point(4, 14);
+            this.labelFilter.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            this.labelFilter.Name = "labelFilter";
+            this.labelFilter.Size = new System.Drawing.Size(130, 25);
+            this.labelFilter.TabIndex = 0;
+            this.labelFilter.Text = "어드레스 필터:";
             // 
             // comboFilter
             // 
@@ -788,64 +758,178 @@ namespace EMS_TEST_SIMULATOR
             this.comboFilter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboFilter.ForeColor = System.Drawing.Color.White;
             this.comboFilter.FormattingEnabled = true;
-            this.comboFilter.Location = new System.Drawing.Point(97, 10);
+            this.comboFilter.Location = new System.Drawing.Point(138, 10);
+            this.comboFilter.Margin = new System.Windows.Forms.Padding(4, 2, 0, 0);
             this.comboFilter.Name = "comboFilter";
             this.comboFilter.Size = new System.Drawing.Size(160, 33);
             this.comboFilter.TabIndex = 1;
             this.comboFilter.SelectedIndexChanged += new System.EventHandler(this.comboFilter_SelectedIndexChanged);
             // 
-            // labelFilter
+            // checkBoxUsedSignalFilter
             // 
-            this.labelFilter.AutoSize = true;
-            this.labelFilter.ForeColor = System.Drawing.Color.White;
-            this.labelFilter.Location = new System.Drawing.Point(12, 14);
-            this.labelFilter.Name = "labelFilter";
-            this.labelFilter.Size = new System.Drawing.Size(130, 25);
-            this.labelFilter.TabIndex = 0;
-            this.labelFilter.Text = "어드레스 필터:";
+            this.checkBoxUsedSignalFilter.AutoSize = true;
+            this.checkBoxUsedSignalFilter.Checked = true;
+            this.checkBoxUsedSignalFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxUsedSignalFilter.ForeColor = System.Drawing.Color.White;
+            this.checkBoxUsedSignalFilter.Location = new System.Drawing.Point(310, 12);
+            this.checkBoxUsedSignalFilter.Margin = new System.Windows.Forms.Padding(12, 4, 0, 0);
+            this.checkBoxUsedSignalFilter.Name = "checkBoxUsedSignalFilter";
+            this.checkBoxUsedSignalFilter.Size = new System.Drawing.Size(170, 29);
+            this.checkBoxUsedSignalFilter.TabIndex = 6;
+            this.checkBoxUsedSignalFilter.Text = "사용신호 필터링";
+            this.checkBoxUsedSignalFilter.UseVisualStyleBackColor = true;
+            this.checkBoxUsedSignalFilter.CheckedChanged += new System.EventHandler(this.checkBoxUsedSignalFilter_CheckedChanged);
+            // 
+            // labelLegend
+            // 
+            this.labelLegend.AutoSize = true;
+            this.labelLegend.ForeColor = System.Drawing.Color.White;
+            this.labelLegend.Location = new System.Drawing.Point(496, 14);
+            this.labelLegend.Margin = new System.Windows.Forms.Padding(16, 6, 0, 0);
+            this.labelLegend.Name = "labelLegend";
+            this.labelLegend.Size = new System.Drawing.Size(58, 25);
+            this.labelLegend.TabIndex = 7;
+            this.labelLegend.Text = "범례: ";
+            // 
+            // labelLegendInput
+            // 
+            this.labelLegendInput.AutoSize = true;
+            this.labelLegendInput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
+            this.labelLegendInput.Location = new System.Drawing.Point(562, 14);
+            this.labelLegendInput.Margin = new System.Windows.Forms.Padding(8, 6, 0, 0);
+            this.labelLegendInput.Name = "labelLegendInput";
+            this.labelLegendInput.Size = new System.Drawing.Size(64, 25);
+            this.labelLegendInput.TabIndex = 8;
+            this.labelLegendInput.Text = "INPUT";
+            // 
+            // labelLegendOutput
+            // 
+            this.labelLegendOutput.AutoSize = true;
+            this.labelLegendOutput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(220)))), ((int)(((byte)(100)))));
+            this.labelLegendOutput.Location = new System.Drawing.Point(634, 14);
+            this.labelLegendOutput.Margin = new System.Windows.Forms.Padding(8, 6, 0, 0);
+            this.labelLegendOutput.Name = "labelLegendOutput";
+            this.labelLegendOutput.Size = new System.Drawing.Size(82, 25);
+            this.labelLegendOutput.TabIndex = 9;
+            this.labelLegendOutput.Text = "OUTPUT";
+            // 
+            // panelRightFooter
+            // 
+            this.panelRightFooter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.panelRightFooter.Controls.Add(this.buttonSavePdf);
+            this.panelRightFooter.Controls.Add(this.button1);
+            this.panelRightFooter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelRightFooter.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.panelRightFooter.Location = new System.Drawing.Point(6, 997);
+            this.panelRightFooter.Name = "panelRightFooter";
+            this.panelRightFooter.Padding = new System.Windows.Forms.Padding(6, 6, 12, 6);
+            this.panelRightFooter.Size = new System.Drawing.Size(1782, 48);
+            this.panelRightFooter.TabIndex = 15;
+            this.panelRightFooter.WrapContents = false;
             // 
             // buttonSavePdf
             // 
-            this.buttonSavePdf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonSavePdf.AutoSize = true;
             this.buttonSavePdf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
             this.buttonSavePdf.FlatAppearance.BorderSize = 0;
             this.buttonSavePdf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonSavePdf.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.buttonSavePdf.ForeColor = System.Drawing.Color.White;
-            this.buttonSavePdf.Location = new System.Drawing.Point(243, 923);
+            this.buttonSavePdf.Location = new System.Drawing.Point(1590, 6);
+            this.buttonSavePdf.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.buttonSavePdf.Name = "buttonSavePdf";
-            this.buttonSavePdf.Size = new System.Drawing.Size(174, 32);
+            this.buttonSavePdf.Size = new System.Drawing.Size(174, 35);
             this.buttonSavePdf.TabIndex = 3;
             this.buttonSavePdf.Text = "체크시트 출력";
             this.buttonSavePdf.UseVisualStyleBackColor = false;
             this.buttonSavePdf.Click += new System.EventHandler(this.buttonSavePdf_Click);
             // 
+            // button1
+            // 
+            this.button1.AutoSize = true;
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.button1.FlatAppearance.BorderSize = 0;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(1408, 6);
+            this.button1.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(174, 35);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "상태저장";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // tableLayoutPanelRight
+            // 
+            this.tableLayoutPanelRight.ColumnCount = 1;
+            this.tableLayoutPanelRight.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelRight.Controls.Add(this.panelRightHeader, 0, 0);
+            this.tableLayoutPanelRight.Controls.Add(this.tabControl1, 0, 1);
+            this.tableLayoutPanelRight.Controls.Add(this.panelRightFooter, 0, 2);
+            this.tableLayoutPanelRight.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left);
+            this.tableLayoutPanelRight.Dock = System.Windows.Forms.DockStyle.None;
+            this.tableLayoutPanelRight.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanelRight.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanelRight.MinimumSize = new System.Drawing.Size(1020, 480);
+            this.tableLayoutPanelRight.Name = "tableLayoutPanelRight";
+            this.tableLayoutPanelRight.RowCount = 3;
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tableLayoutPanelRight.Size = new System.Drawing.Size(1400, 920);
+            this.tableLayoutPanelRight.TabIndex = 0;
+            this.panelRight.Controls.Add(this.tableLayoutPanelRight);
+            // 
+            // splitMain
+            // 
+            this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitMain.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitMain.IsSplitterFixed = true;
+            this.splitMain.Location = new System.Drawing.Point(0, 56);
+            this.splitMain.Name = "splitMain";
+            this.splitMain.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.splitMain.Panel1MinSize = 25;
+            this.splitMain.Panel2MinSize = 25;
+            this.splitMain.SplitterDistance = 25;
+            this.splitMain.SplitterWidth = 4;
+            this.splitMain.TabIndex = 19;
+            this.splitMain.Panel1.Controls.Add(this.panelLeft);
+            this.splitMain.Panel2.Controls.Add(this.panelRight);
+            // 
             // IOCheckSheetForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(2029, 1151);
-            this.Controls.Add(this.panelRight);
-            this.Controls.Add(this.panelLeft);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScroll = false;
+            this.ClientSize = new System.Drawing.Size(1794, 1051);
             this.Controls.Add(this.panelTop);
+            this.Controls.Add(this.splitMain);
             this.Font = new System.Drawing.Font("맑은 고딕", 9F);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(1024, 680);
             this.Name = "IOCheckSheetForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "I.O 체크 성적서";
             this.Load += new System.EventHandler(this.IOCheckSheetForm_Load);
+            this.Shown += new System.EventHandler(this.IOCheckSheetForm_Shown);
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
-            this.panelLeft.ResumeLayout(false);
-            this.panelLeft.PerformLayout();
+            this.tableLayoutPanelRight.ResumeLayout(false);
             this.panelRight.ResumeLayout(false);
-            this.panelRight.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.panelDeviceList.ResumeLayout(false);
             this.panelDeviceListTop.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewIO)).EndInit();
+            this.panelRightHeader.ResumeLayout(false);
+            this.panelRightHeader.PerformLayout();
+            this.panelRightFooter.ResumeLayout(false);
+            this.panelRightFooter.PerformLayout();
+            this.panelLeft.ResumeLayout(false);
+            this.panelLeft.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
+            this.splitMain.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -858,7 +942,11 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.Label labelDate;
         private System.Windows.Forms.TextBox textBoxTestDate;
         private System.Windows.Forms.Panel panelLeft;
+        private System.Windows.Forms.SplitContainer splitMain;
         private System.Windows.Forms.Panel panelRight;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelRight;
+        private System.Windows.Forms.FlowLayoutPanel panelRightHeader;
+        private System.Windows.Forms.FlowLayoutPanel panelRightFooter;
         private System.Windows.Forms.ComboBox comboFilter;
         private System.Windows.Forms.Label labelFilter;
         private System.Windows.Forms.Button buttonSavePdf;
@@ -903,8 +991,8 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.Panel panelDeviceList;
         private System.Windows.Forms.Panel panelDeviceListTop;
         private System.Windows.Forms.Button buttonLoadExcel;
-        private System.Windows.Forms.ListView listViewDeviceList;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DataGridView dataGridViewIO;
+        private System.Windows.Forms.ListView listViewDeviceList;
     }
 }

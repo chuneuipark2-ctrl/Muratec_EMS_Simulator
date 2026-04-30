@@ -218,6 +218,25 @@ namespace EMS_TEST_SIMULATOR
         {
             textBoxTestDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 
+            if (panelLeft != null)
+            {
+                panelLeft.Resize -= PanelLeftOnResize;
+                panelLeft.Resize += PanelLeftOnResize;
+                PanelLeftOnResize(panelLeft, EventArgs.Empty);
+            }
+
+            if (panelRight != null)
+            {
+                panelRight.Resize -= SyncRightScrollableArea;
+                panelRight.Resize += SyncRightScrollableArea;
+            }
+            if (splitMain != null)
+            {
+                splitMain.SizeChanged -= SplitMain_LayoutSync;
+                splitMain.SizeChanged += SplitMain_LayoutSync;
+            }
+            SyncRightScrollableArea(null, EventArgs.Empty);
+
             // 터치 PC: 가상 키보드는 텍스트박스를 클릭했을 때만 표시 (I/O 적용 등 버튼 클릭 시 포커스 이동으로 자동 뜨지 않도록 Enter는 사용하지 않음).
             if (label1 != null)
                 label1.Click += (s, ev) => { textBoxTesterName?.Focus(); ShowVirtualKeyboard(); };
@@ -268,6 +287,87 @@ namespace EMS_TEST_SIMULATOR
                 AutoCycleCompleted = false;
                 ApplyFilter();
             }
+        }
+
+        private void IOCheckSheetForm_Shown(object sender, EventArgs e)
+        {
+            ApplyPreferredSplitDistance();
+            SyncRightScrollableArea(null, EventArgs.Empty);
+        }
+
+        private void SplitMain_LayoutSync(object sender, EventArgs e)
+        {
+            ApplyPreferredSplitDistance();
+            SyncRightScrollableArea(sender, e);
+        }
+
+        /// <summary>EndInit 시점에는 split 너비가 아직 작을 수 있어 Designer는 최소값만 두고, 여기서 유효 범위로 스플리터 거리·MinSize를 맞춤.</summary>
+        private void ApplyPreferredSplitDistance()
+        {
+            if (splitMain == null || splitMain.IsDisposed) return;
+            int w = splitMain.Width;
+            int sw = splitMain.SplitterWidth;
+            if (w <= sw + 50) return;
+            const int wantDist = 400;
+            const int idealMin1 = 360;
+            const int idealMin2 = 200;
+            int p1min = idealMin1;
+            int p2min = idealMin2;
+            int hi = w - sw - p2min;
+            int lo = p1min;
+            if (hi < lo)
+            {
+                p2min = 25;
+                hi = w - sw - p2min;
+            }
+            if (hi < lo)
+            {
+                p1min = Math.Max(25, hi);
+                lo = p1min;
+                hi = w - sw - p2min;
+            }
+            if (hi < lo) return;
+            splitMain.Panel2MinSize = p2min;
+            splitMain.Panel1MinSize = p1min;
+            hi = w - sw - splitMain.Panel2MinSize;
+            lo = splitMain.Panel1MinSize;
+            if (hi < lo) return;
+            int d = wantDist;
+            if (d < lo) d = lo;
+            if (d > hi) d = hi;
+            if (splitMain.SplitterDistance != d)
+                splitMain.SplitterDistance = d;
+        }
+
+        /// <summary>왼쪽 패널 클라이언트 폭(세로 스크롤 포함)에 맞춰 콤보 폭을 맞춤 — 고정 250px이 스크롤바에 가려지는 문제 방지.</summary>
+        private void PanelLeftOnResize(object sender, EventArgs e)
+        {
+            if (panelLeft == null || panelLeft.IsDisposed || panelLeft.ClientSize.Width <= 0) return;
+            int comboW = Math.Max(160, panelLeft.ClientSize.Width - 26);
+            foreach (Control c in panelLeft.Controls)
+            {
+                if (c is ComboBox cb)
+                    cb.Width = comboW;
+            }
+        }
+
+        /// <summary>우측 <c>panelRight</c> 안에서 <c>tableLayoutPanelRight</c> 크기를 잡아 AutoScroll로 넘침을 스크롤로 처리 (좌측 옵션과 겹치지 않음).</summary>
+        private void SyncRightScrollableArea(object sender, EventArgs e)
+        {
+            if (panelRight == null || tableLayoutPanelRight == null || panelRight.IsDisposed || tableLayoutPanelRight.IsDisposed)
+                return;
+            var dr = panelRight.DisplayRectangle;
+            if (dr.Width <= 0 || dr.Height <= 0) return;
+            const int minW = 1020;
+            const int minH = 480;
+            int w = Math.Max(minW, dr.Width);
+            int h = Math.Max(minH, dr.Height);
+            if (tableLayoutPanelRight.Left == dr.Left && tableLayoutPanelRight.Top == dr.Top
+                && tableLayoutPanelRight.Width == w && tableLayoutPanelRight.Height == h)
+                return;
+            tableLayoutPanelRight.Location = new Point(dr.Left, dr.Top);
+            tableLayoutPanelRight.Width = w;
+            tableLayoutPanelRight.Height = h;
         }
 
         /// <summary>AUTO 사이클 정지 완료 시점 플래그 반영: _allIoTable, _allIoTableFull에서 구분=사용자 아닌 행의 I.O 체크를 true로 설정.</summary>
@@ -398,18 +498,22 @@ namespace EMS_TEST_SIMULATOR
                 catch { /* 레이아웃 전 등에서 GetItemRect(0) 예외 시 스크롤바 없음으로 처리 */ }
             }
             int available = total - sb;
-            const int pdmW = 135, manuW = 175, confirmW = 70;
-            const int minDescW = 250, minSpecW = 250;
-            int flex = available - pdmW - manuW - confirmW;
-            if (flex < minDescW + minSpecW) flex = minDescW + minSpecW;
+            const int pdmW = 150, manuW = 180, confirmW = 80;
+            const int minDescW = 280, minSpecW = 280;
+            // 표 최소 가로 합: 좁을 때는 minTableWidth 이상으로 두어 가로 스크롤 표시, 넓을 때는 남는 폭 활용
+            const int minTableWidth = 1020;
+            int naturalFlex = Math.Max(minDescW + minSpecW, available - pdmW - manuW - confirmW);
+            int minFlex = minTableWidth - pdmW - manuW - confirmW;
+            int flex = Math.Max(naturalFlex, minFlex);
             int descW = Math.Max(minDescW, flex / 2);
             int specW = Math.Max(minSpecW, flex - descW);
-            if (descW + specW > flex) { specW = flex - descW; if (specW < minSpecW) { specW = minSpecW; descW = flex - minSpecW; } }
+            if (descW + specW > flex) { specW = flex - descW; if (specW < minSpecW) { specW = minSpecW; descW = Math.Max(minDescW, flex - minSpecW); } }
             listViewDeviceList.Columns[0].Width = pdmW;
             listViewDeviceList.Columns[1].Width = descW;
             listViewDeviceList.Columns[2].Width = specW;
             listViewDeviceList.Columns[3].Width = manuW;
             listViewDeviceList.Columns[4].Width = confirmW;
+            SyncRightScrollableArea(null, EventArgs.Empty);
         }
 
         private void listViewDeviceList_Resize(object sender, EventArgs e)
@@ -464,7 +568,11 @@ namespace EMS_TEST_SIMULATOR
 
         private void listViewDeviceList_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
-            // 첫 번째 열 포함 모든 열은 DrawSubItem에서 그리므로 여기서는 미그림
+            e.DrawDefault = false;
+            if (e.ItemIndex < 0) return;
+            var back = e.Item.Selected ? SystemColors.Highlight : _deviceListItemBack;
+            using (var br = new SolidBrush(back))
+                e.Graphics.FillRectangle(br, e.Bounds);
         }
 
         private void listViewDeviceList_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
@@ -2226,6 +2334,7 @@ namespace EMS_TEST_SIMULATOR
                 MessageBox.Show("엑셀 파일(.xls, .xlsx)만 지원합니다.", "파일 로드", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            //
             try
             {
                 using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -3048,6 +3157,11 @@ namespace EMS_TEST_SIMULATOR
         }
 
         private void listViewDeviceList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void listViewDeviceList_SelectedIndexChanged_1(object sender, EventArgs e)
         {
 
         }
