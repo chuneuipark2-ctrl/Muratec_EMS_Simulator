@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing.Text;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -150,7 +151,13 @@ namespace EMS_TEST_SIMULATOR
 
                                 byte[] h4 = EMS_Order.EMS_Item_order("1");
                                 if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
 
                                 byte[] h2 = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData
@@ -183,7 +190,13 @@ namespace EMS_TEST_SIMULATOR
 
                                 if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));// 해당문장은 만든 패킷을 아스키코드로 변환하여 통신클래스쪽으로 쏴주는 명령문이다.
 
-
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
 
                                 Order_no = _globalCommandCount.ToString("D4");// D4의 의미는 숫자를 4자리 십진수 (Decimal) 문자열로 변환하되
                                                                               // 자릿수가 부족하면 앞을 0으로 채우는 서식지정자다.
@@ -267,7 +280,13 @@ namespace EMS_TEST_SIMULATOR
                                 _globalCommandCount = (_globalCommandCount + 1) % 10000;
                                 byte[] h4 = EMS_Order.EMS_Item_order("1");
                                 if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
                                 byte[] h2 = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData { SectionNo = End_position, ActionMode = "1", EncoderValue = encEnd }
                                 });
@@ -279,7 +298,13 @@ namespace EMS_TEST_SIMULATOR
                                 _globalCommandCount = (_globalCommandCount + 1) % 10000;
                                 byte[] h4 = EMS_Order.EMS_Item_order("1");
                                 if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
                                 byte[] h2 = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData { SectionNo = Start_position, ActionMode = "0", EncoderValue = "0000" }
                                 });
@@ -297,7 +322,13 @@ namespace EMS_TEST_SIMULATOR
                                 _globalCommandCount = (_globalCommandCount + 1) % 10000;
                                 byte[] h4b = EMS_Order.EMS_Item_order("1");
                                 if (h4b != null) await form._comm.SendData(Encoding.ASCII.GetString(h4b));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
                                 byte[] h2b = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData { SectionNo = End_position, ActionMode = "1", EncoderValue = encEnd }
                                 });
@@ -344,7 +375,13 @@ namespace EMS_TEST_SIMULATOR
                                 _globalCommandCount = (_globalCommandCount + 1) % 10000;
                                 byte[] h4 = EMS_Order.EMS_Item_order("1");
                                 if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
                                 byte[] h2 = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData { SectionNo = End_position, ActionMode = "2", EncoderValue = encEnd }
                                 });
@@ -356,7 +393,13 @@ namespace EMS_TEST_SIMULATOR
                                 _globalCommandCount = (_globalCommandCount + 1) % 10000;
                                 byte[] h4 = EMS_Order.EMS_Item_order("1");
                                 if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
                                 byte[] h2 = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData { SectionNo = Start_position, ActionMode = "0", EncoderValue = "0000" }
                                 });
@@ -374,7 +417,13 @@ namespace EMS_TEST_SIMULATOR
                                 _globalCommandCount = (_globalCommandCount + 1) % 10000;
                                 byte[] h4b = EMS_Order.EMS_Item_order("1");
                                 if (h4b != null) await form._comm.SendData(Encoding.ASCII.GetString(h4b));
-                                await Task.Delay(100);
+                                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                                {
+                                    await SendH3ClearAsync(form);
+                                    if (!mainForm.IsDisposed)
+                                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                    return false;
+                                }
                                 byte[] h2b = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
                                     new ReturnStepData { SectionNo = End_position, ActionMode = "2", EncoderValue = encEnd }
                                 });
@@ -456,6 +505,22 @@ namespace EMS_TEST_SIMULATOR
             if (h3 != null) await form._comm.SendData(Encoding.ASCII.GetString(h3));
         }
 
+        /// <summary>
+        /// H4 전송 후 H1 상태 문의로 갱신된 보고에서 반송지령 접수상태가 1(및 응답 00)일 때까지 대기한다. 타이머 고정 지연 대신 사용.
+        /// </summary>
+        private async Task<bool> WaitForTransferCommandAcceptAfterH4Async(EMS_Protocol proto, CancellationToken cancelToken)
+        {
+            for (int i = 0; i < 300; i++)
+            {
+                if (cancelToken.IsCancellationRequested) return false;
+                var s = proto.Parser?.CurrentStatus;
+                if (s != null && s.ResponseCode == "00" && s.CommandAcceptStatus == "1")
+                    return true;
+                await Task.Delay(200, cancelToken);
+            }
+            return false;
+        }
+
         private async Task Auto_sequence(Command_Form form, Main mainForm, System.Threading.CancellationToken cancelToken)
         {
             try
@@ -497,7 +562,13 @@ namespace EMS_TEST_SIMULATOR
                 // AUTO 최초 1회만 H4 자동(1) 전송, 이후 스텝은 H2만 전송
                 byte[] h4Auto = EMS_Order.EMS_Item_order("1");
                 if (h4Auto != null) await comm.SendData(Encoding.ASCII.GetString(h4Auto));
-                await Task.Delay(100, cancelToken);
+                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, cancelToken))
+                {
+                    await SendH3ClearAsync(form);
+                    if (!mainForm.IsDisposed)
+                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "AUTO", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                    return;
+                }
 
                 bool firstLoop = true;
                 while (!cancelToken.IsCancellationRequested)
@@ -592,7 +663,8 @@ namespace EMS_TEST_SIMULATOR
             // [H4] 작업 지시
             byte[] h4 = proto.EMS_Item_order("1");
             if (h4 != null) await comm.SendData(Encoding.ASCII.GetString(h4));
-            await Task.Delay(100);
+            if (!await WaitForTransferCommandAcceptAfterH4Async(proto, CancellationToken.None))
+                return false;
 
             // [H2] 상세 반송 지시
             byte[] h2 = proto.EMS_Return_Instruction(currentDataNo, steps);
