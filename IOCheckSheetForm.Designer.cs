@@ -94,7 +94,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(2029, 56);
+            this.panelTop.Size = new System.Drawing.Size(1024, 56);
             this.panelTop.TabIndex = 0;
             // 
             // label1
@@ -182,11 +182,12 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft.Controls.Add(this.comboHoistType);
             this.panelLeft.Controls.Add(this.labelHoistType);
             this.panelLeft.Controls.Add(this.labelOptionTitle);
+            this.panelLeft.AutoScroll = true;
             this.panelLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.panelLeft.Location = new System.Drawing.Point(0, 56);
             this.panelLeft.Name = "panelLeft";
             this.panelLeft.Padding = new System.Windows.Forms.Padding(8);
-            this.panelLeft.Size = new System.Drawing.Size(280, 1095);
+            this.panelLeft.Size = new System.Drawing.Size(280, 712);
             this.panelLeft.TabIndex = 1;
             // 
             // comboBox3
@@ -582,6 +583,7 @@ namespace EMS_TEST_SIMULATOR
             // 
             // panelRight
             // 
+            this.panelRight.AutoScroll = true;
             this.panelRight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
             this.panelRight.Controls.Add(this.tabControl1);
             this.panelRight.Controls.Add(this.button1);
@@ -596,7 +598,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelRight.Location = new System.Drawing.Point(280, 56);
             this.panelRight.Name = "panelRight";
             this.panelRight.Padding = new System.Windows.Forms.Padding(6);
-            this.panelRight.Size = new System.Drawing.Size(1749, 1095);
+            this.panelRight.Size = new System.Drawing.Size(744, 712);
             this.panelRight.TabIndex = 2;
             // 
             // tabControl1
@@ -822,9 +824,11 @@ namespace EMS_TEST_SIMULATOR
             // 
             // IOCheckSheetForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(2029, 1151);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.ClientSize = new System.Drawing.Size(1024, 768);
+            this.MinimumSize = new System.Drawing.Size(1024, 768);
+            this.AutoScroll = true;
             this.Controls.Add(this.panelRight);
             this.Controls.Add(this.panelLeft);
             this.Controls.Add(this.panelTop);

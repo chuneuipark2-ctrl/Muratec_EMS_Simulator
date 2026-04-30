@@ -36,7 +36,11 @@ namespace EMS_TEST_SIMULATOR
             this.label4 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl11 = new EMS_TEST_SIMULATOR.UserControl1();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl21 = new EMS_TEST_SIMULATOR.UserControl2();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.통신로그 = new System.Windows.Forms.TabPage();
             this.Communication_log = new System.Windows.Forms.TabControl();
@@ -140,10 +144,6 @@ namespace EMS_TEST_SIMULATOR
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl11 = new EMS_TEST_SIMULATOR.UserControl1();
-            this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl21 = new EMS_TEST_SIMULATOR.UserControl2();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -239,6 +239,16 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "SR50-RAIL";
             // 
+            // elementHost1
+            // 
+            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost1.Location = new System.Drawing.Point(0, 0);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(963, 128);
+            this.elementHost1.TabIndex = 0;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.userControl11;
+            // 
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.Black;
@@ -248,6 +258,16 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage2.Size = new System.Drawing.Size(963, 128);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "SR150-RAIL";
+            // 
+            // elementHost2
+            // 
+            this.elementHost2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost2.Location = new System.Drawing.Point(0, 0);
+            this.elementHost2.Name = "elementHost2";
+            this.elementHost2.Size = new System.Drawing.Size(963, 128);
+            this.elementHost2.TabIndex = 0;
+            this.elementHost2.Text = "elementHost2";
+            this.elementHost2.Child = this.userControl21;
             // 
             // tabControl2
             // 
@@ -369,7 +389,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage4.Location = new System.Drawing.Point(4, 34);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(409, 194);
+            this.tabPage4.Size = new System.Drawing.Size(498, 194);
             this.tabPage4.TabIndex = 1;
             this.tabPage4.Text = "통신로그";
             // 
@@ -383,7 +403,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox1.ForeColor = System.Drawing.Color.White;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(403, 36);
+            this.groupBox1.Size = new System.Drawing.Size(492, 36);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "통신 로그";
@@ -432,7 +452,7 @@ namespace EMS_TEST_SIMULATOR
             this.dgvCommLog.RowHeadersVisible = false;
             this.dgvCommLog.RowHeadersWidth = 62;
             this.dgvCommLog.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvCommLog.Size = new System.Drawing.Size(403, 188);
+            this.dgvCommLog.Size = new System.Drawing.Size(492, 188);
             this.dgvCommLog.TabIndex = 2;
             // 
             // 코드리스트
@@ -442,7 +462,7 @@ namespace EMS_TEST_SIMULATOR
             this.코드리스트.Location = new System.Drawing.Point(4, 38);
             this.코드리스트.Name = "코드리스트";
             this.코드리스트.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.코드리스트.Size = new System.Drawing.Size(429, 242);
+            this.코드리스트.Size = new System.Drawing.Size(518, 242);
             this.코드리스트.TabIndex = 1;
             this.코드리스트.Text = "코드리스트";
             // 
@@ -458,7 +478,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabControl3.Location = new System.Drawing.Point(6, 4);
             this.tabControl3.Name = "tabControl3";
             this.tabControl3.SelectedIndex = 0;
-            this.tabControl3.Size = new System.Drawing.Size(417, 232);
+            this.tabControl3.Size = new System.Drawing.Size(506, 232);
             this.tabControl3.TabIndex = 0;
             // 
             // 응답코드
@@ -468,7 +488,7 @@ namespace EMS_TEST_SIMULATOR
             this.응답코드.Location = new System.Drawing.Point(4, 34);
             this.응답코드.Name = "응답코드";
             this.응답코드.Padding = new System.Windows.Forms.Padding(3);
-            this.응답코드.Size = new System.Drawing.Size(409, 194);
+            this.응답코드.Size = new System.Drawing.Size(498, 194);
             this.응답코드.TabIndex = 0;
             this.응답코드.Text = "응답코드";
             // 
@@ -481,7 +501,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView4.HideSelection = false;
             this.listView4.Location = new System.Drawing.Point(3, 3);
             this.listView4.Name = "listView4";
-            this.listView4.Size = new System.Drawing.Size(403, 188);
+            this.listView4.Size = new System.Drawing.Size(492, 188);
             this.listView4.TabIndex = 0;
             this.listView4.UseCompatibleStateImageBehavior = false;
             this.listView4.SelectedIndexChanged += new System.EventHandler(this.listView4_SelectedIndexChanged_1);
@@ -502,7 +522,7 @@ namespace EMS_TEST_SIMULATOR
             this.목적동작코드.Location = new System.Drawing.Point(4, 34);
             this.목적동작코드.Name = "목적동작코드";
             this.목적동작코드.Padding = new System.Windows.Forms.Padding(3);
-            this.목적동작코드.Size = new System.Drawing.Size(409, 194);
+            this.목적동작코드.Size = new System.Drawing.Size(498, 194);
             this.목적동작코드.TabIndex = 1;
             this.목적동작코드.Text = "목적동작코드";
             // 
@@ -515,7 +535,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView3.HideSelection = false;
             this.listView3.Location = new System.Drawing.Point(3, 3);
             this.listView3.Name = "listView3";
-            this.listView3.Size = new System.Drawing.Size(403, 188);
+            this.listView3.Size = new System.Drawing.Size(492, 188);
             this.listView3.TabIndex = 0;
             this.listView3.UseCompatibleStateImageBehavior = false;
             this.listView3.SelectedIndexChanged += new System.EventHandler(this.listView3_SelectedIndexChanged_1);
@@ -536,7 +556,7 @@ namespace EMS_TEST_SIMULATOR
             this.동작코드.Location = new System.Drawing.Point(4, 34);
             this.동작코드.Name = "동작코드";
             this.동작코드.Padding = new System.Windows.Forms.Padding(3);
-            this.동작코드.Size = new System.Drawing.Size(409, 194);
+            this.동작코드.Size = new System.Drawing.Size(498, 194);
             this.동작코드.TabIndex = 2;
             this.동작코드.Text = "동작코드";
             // 
@@ -549,7 +569,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(3, 3);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(403, 188);
+            this.listView1.Size = new System.Drawing.Size(492, 188);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
@@ -569,7 +589,7 @@ namespace EMS_TEST_SIMULATOR
             this.에러코드.Location = new System.Drawing.Point(4, 34);
             this.에러코드.Name = "에러코드";
             this.에러코드.Padding = new System.Windows.Forms.Padding(3);
-            this.에러코드.Size = new System.Drawing.Size(409, 194);
+            this.에러코드.Size = new System.Drawing.Size(498, 194);
             this.에러코드.TabIndex = 3;
             this.에러코드.Text = "에러코드";
             // 
@@ -582,7 +602,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView2.HideSelection = false;
             this.listView2.Location = new System.Drawing.Point(3, 3);
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(403, 188);
+            this.listView2.Size = new System.Drawing.Size(492, 188);
             this.listView2.TabIndex = 0;
             this.listView2.UseCompatibleStateImageBehavior = false;
             // 
@@ -611,7 +631,7 @@ namespace EMS_TEST_SIMULATOR
             this.엔코더설정.Location = new System.Drawing.Point(4, 38);
             this.엔코더설정.Name = "엔코더설정";
             this.엔코더설정.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.엔코더설정.Size = new System.Drawing.Size(429, 242);
+            this.엔코더설정.Size = new System.Drawing.Size(518, 242);
             this.엔코더설정.TabIndex = 2;
             this.엔코더설정.Text = "엔코더설정";
             // 
@@ -1584,26 +1604,6 @@ namespace EMS_TEST_SIMULATOR
             this.button8.TabIndex = 27;
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
-            // 
-            // elementHost1
-            // 
-            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(0, 0);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(963, 128);
-            this.elementHost1.TabIndex = 0;
-            this.elementHost1.Text = "elementHost1";
-            this.elementHost1.Child = this.userControl11;
-            // 
-            // elementHost2
-            // 
-            this.elementHost2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost2.Location = new System.Drawing.Point(0, 0);
-            this.elementHost2.Name = "elementHost2";
-            this.elementHost2.Size = new System.Drawing.Size(963, 128);
-            this.elementHost2.TabIndex = 0;
-            this.elementHost2.Text = "elementHost2";
-            this.elementHost2.Child = this.userControl21;
             // 
             // Main
             // 
