@@ -2226,6 +2226,7 @@ namespace EMS_TEST_SIMULATOR
                 MessageBox.Show("엑셀 파일(.xls, .xlsx)만 지원합니다.", "파일 로드", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            //
             try
             {
                 using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
