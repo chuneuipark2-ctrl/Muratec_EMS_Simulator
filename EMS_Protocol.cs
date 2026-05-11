@@ -179,6 +179,7 @@ namespace EMS_TEST_SIMULATOR
                             CurrentStatus.MachineMode = body.Substring(23, 1);
                             CurrentStatus.CargoStatus = body.Substring(24, 1);
                             CurrentStatus.CommandAcceptStatus = body.Substring(25, 1);
+                            
 
                             if (CurrentStatus.ResponseCode == "00") IsLinkEstablished = true;
                         }

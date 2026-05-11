@@ -32,6 +32,12 @@ namespace EMS_TEST_SIMULATOR
         private bool _showingVirtualKeyboard;
         /// <summary>DEVICE LIST 셀 전체 데이터 툴팁 (잘린 데이터 확인용)</summary>
         private ToolTip _deviceListToolTip;
+        /// <summary>Shown에서 1회 0.5 스케일 적용 여부 (Main과 유사한 작은 화면)</summary>
+        private bool _halfUiScaleApplied;
+        /// <summary>스플리터·열 너비·우측 최소 크기 등 픽셀 상수에 곱함. 스케일 전 1, 적용 후 0.5</summary>
+        private float _layoutDimScale = 1f;
+        /// <summary>0.5 UI: Panel1 안에서 옵션 스크롤 영역과 I/O 적용 버튼 행을 나눔(가로 스크롤바보다 아래에 버튼이 가지 않도록).</summary>
+        private TableLayoutPanel _leftColumnHost;
         /// <summary>I.O LIST에서 사용자가 직접 체크하는 행만의 키 집합. 키 형식: "IO구분_어드레스_BIT" (예: INPUT_800010_0). 비어 있으면 CSV 미로드 시 기존 동작(신호명칭 있는 행만 편집/검사).</summary>
         private HashSet<string> _userCheckableIoKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -224,6 +230,11 @@ namespace EMS_TEST_SIMULATOR
                 panelLeft.Resize += PanelLeftOnResize;
                 PanelLeftOnResize(panelLeft, EventArgs.Empty);
             }
+            if (panelDeviceListTop != null)
+            {
+                panelDeviceListTop.Resize -= PanelDeviceListTop_ResizeLayoutExcelButton;
+                panelDeviceListTop.Resize += PanelDeviceListTop_ResizeLayoutExcelButton;
+            }
 
             if (panelRight != null)
             {
@@ -287,12 +298,124 @@ namespace EMS_TEST_SIMULATOR
                 AutoCycleCompleted = false;
                 ApplyFilter();
             }
+
+            LayoutPanelTopReflow();
+            LayoutLoadExcelButtonInTopBar();
+        }
+
+        private void PanelDeviceListTop_ResizeLayoutExcelButton(object sender, EventArgs e)
+        {
+            LayoutLoadExcelButtonInTopBar();
         }
 
         private void IOCheckSheetForm_Shown(object sender, EventArgs e)
         {
-            ApplyPreferredSplitDistance();
+            if (!DesignMode && !_halfUiScaleApplied)
+            {
+                _halfUiScaleApplied = true;
+                ApplyPreferredSplitDistance();
+#pragma warning disable 618 // Scale(float,float): 고정 레이아웃을 비율로 한 번 축소 (AutoScaleMode.None)
+                Scale(0.5f, 0.5f);
+#pragma warning restore 618
+                _layoutDimScale = 0.5f;
+                ApplyPreferredSplitDistance();
+                LayoutPanelTopReflow();
+                LayoutPanelLeftStacked();
+                SetGridColumnWidths();
+                ApplyDeviceListColumnWidths();
+                SizeChanged -= IOCheckSheetForm_SizeReflowHalfUi;
+                SizeChanged += IOCheckSheetForm_SizeReflowHalfUi;
+            }
             SyncRightScrollableArea(null, EventArgs.Empty);
+        }
+
+        /// <summary>0.5 UI에서 옵션은 <c>panelLeft</c> 스크롤, <c>I/O 적용</c>은 그 아래 전용 행(가로 스크롤바 위에 버튼이 오도록).</summary>
+        private void EnsureIoApplyButtonDockedToSplitPanel1()
+        {
+            if (!_halfUiScaleApplied || splitMain?.Panel1 == null || buttonApplyOptions == null || splitMain.Panel1.IsDisposed || buttonApplyOptions.IsDisposed)
+                return;
+            float s = _layoutDimScale;
+            int mx = Math.Max(6, (int)Math.Round(14 * s));
+            int marginTop = Math.Max(4, (int)Math.Round(8 * s));
+            int marginBottom = Math.Max(12, (int)Math.Round(18 * s));
+            int bh = Math.Max(28, (int)Math.Round(36 * s));
+            int btnRowH = marginTop + bh + marginBottom;
+            buttonApplyOptions.Margin = new Padding(mx, marginTop, mx, marginBottom);
+            buttonApplyOptions.Height = bh;
+            buttonApplyOptions.Dock = DockStyle.Fill;
+
+            if (_leftColumnHost == null)
+            {
+                _leftColumnHost = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 1,
+                    RowCount = 2,
+                    BackColor = panelLeft.BackColor,
+                    Padding = new Padding(0),
+                    Margin = new Padding(0)
+                };
+                _leftColumnHost.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+                _leftColumnHost.RowStyles.Add(new RowStyle(SizeType.Absolute, btnRowH));
+
+                splitMain.Panel1.SuspendLayout();
+                try
+                {
+                    if (panelLeft.Parent == splitMain.Panel1)
+                        splitMain.Panel1.Controls.Remove(panelLeft);
+                    if (buttonApplyOptions.Parent != null)
+                        buttonApplyOptions.Parent.Controls.Remove(buttonApplyOptions);
+
+                    _leftColumnHost.SuspendLayout();
+                    try
+                    {
+                        _leftColumnHost.Controls.Add(panelLeft, 0, 0);
+                        panelLeft.Dock = DockStyle.Fill;
+                        _leftColumnHost.Controls.Add(buttonApplyOptions, 0, 1);
+                    }
+                    finally
+                    {
+                        _leftColumnHost.ResumeLayout(false);
+                    }
+                    splitMain.Panel1.Controls.Add(_leftColumnHost);
+                }
+                finally
+                {
+                    splitMain.Panel1.ResumeLayout(true);
+                }
+            }
+            else
+            {
+                if (_leftColumnHost.RowStyles.Count >= 2)
+                    _leftColumnHost.RowStyles[1] = new RowStyle(SizeType.Absolute, btnRowH);
+            }
+            SyncLeftBottomChromeRowToRightFooter();
+        }
+
+        /// <summary>좌측 I/O 적용 행 높이를 우측 푸터(상태저장/체크시트) 행과 맞춰 하단 밴드·스크롤 영역 높이를 동기화.</summary>
+        private void SyncLeftBottomChromeRowToRightFooter()
+        {
+            if (!_halfUiScaleApplied || _leftColumnHost == null || tableLayoutPanelRight == null || tableLayoutPanelRight.RowStyles.Count < 3)
+                return;
+            if (_leftColumnHost.RowStyles.Count < 2) return;
+            var rs = tableLayoutPanelRight.RowStyles[2];
+            if (rs.SizeType != SizeType.Absolute) return;
+            int footerH = (int)Math.Ceiling(rs.Height);
+            float s = _layoutDimScale;
+            int marginTop = Math.Max(4, (int)Math.Round(8 * s));
+            int marginBottom = Math.Max(12, (int)Math.Round(18 * s));
+            int bh = Math.Max(28, (int)Math.Round(36 * s));
+            int btnRowH = marginTop + bh + marginBottom;
+            int row1 = Math.Max(btnRowH, footerH);
+            _leftColumnHost.RowStyles[1] = new RowStyle(SizeType.Absolute, row1);
+        }
+
+        private void IOCheckSheetForm_SizeReflowHalfUi(object sender, EventArgs e)
+        {
+            if (!_halfUiScaleApplied) return;
+            LayoutPanelTopReflow();
+            LayoutPanelLeftStacked();
+            EnsureRightChromeLayout();
         }
 
         private void SplitMain_LayoutSync(object sender, EventArgs e)
@@ -308,9 +431,12 @@ namespace EMS_TEST_SIMULATOR
             int w = splitMain.Width;
             int sw = splitMain.SplitterWidth;
             if (w <= sw + 50) return;
-            const int wantDist = 400;
-            const int idealMin1 = 360;
-            const int idealMin2 = 200;
+            float s = _layoutDimScale;
+            int wantDist = (int)Math.Round(400 * s);
+            if (s < 0.99f)
+                wantDist = Math.Max(wantDist, (int)Math.Round(440 * s));
+            int idealMin1 = (int)Math.Round(360 * s);
+            int idealMin2 = (int)Math.Round(200 * s);
             int p1min = idealMin1;
             int p2min = idealMin2;
             int hi = w - sw - p2min;
@@ -343,12 +469,172 @@ namespace EMS_TEST_SIMULATOR
         private void PanelLeftOnResize(object sender, EventArgs e)
         {
             if (panelLeft == null || panelLeft.IsDisposed || panelLeft.ClientSize.Width <= 0) return;
+            if (_halfUiScaleApplied)
+            {
+                LayoutPanelLeftStacked();
+                return;
+            }
             int comboW = Math.Max(160, panelLeft.ClientSize.Width - 26);
             foreach (Control c in panelLeft.Controls)
             {
                 if (c is ComboBox cb)
                     cb.Width = comboW;
             }
+        }
+
+        /// <summary>0.5 스케일 후 상단 한 줄이 패널 높이보다 커 겹칠 때 — 줄바꿈·높이 보정.</summary>
+        private void LayoutPanelTopReflow()
+        {
+            if (panelTop == null || panelTop.IsDisposed) return;
+            float s = _layoutDimScale;
+            if (textBoxTesterName != null)
+                textBoxTesterName.Width = Math.Max(textBoxTesterName.Width, 230);
+            if (textBoxTestDate != null)
+                textBoxTestDate.Width = Math.Max(textBoxTestDate.Width, 180);
+            int pad = Math.Max(6, (int)Math.Round(10 * s));
+            int gap = Math.Max(4, (int)Math.Round(8 * s));
+            var row = new Control[] { labelTitle, label1, textBoxTesterName, labelDate, textBoxTestDate };
+            int maxW = Math.Max(80, panelTop.ClientSize.Width - pad * 2);
+            int x = pad, y = pad, lineH = 0;
+            foreach (var c in row)
+            {
+                if (c == null) continue;
+                int w = Math.Max(c.Width, c.PreferredSize.Width);
+                if (x > pad && x + w > maxW + pad)
+                {
+                    x = pad;
+                    y += lineH + gap;
+                    lineH = 0;
+                }
+                c.Location = new Point(x, y);
+                x = c.Right + gap;
+                lineH = Math.Max(lineH, c.Height);
+            }
+            int needH = y + lineH + pad;
+            if (panelTop.Height < needH)
+                panelTop.Height = needH;
+        }
+
+        /// <summary>0.5 스케일 후 콤보 최소 높이로 세로 간격이 무너질 때 — 라벨+콤보 세로 스택·스크롤 영역 갱신.</summary>
+        private void LayoutPanelLeftStacked()
+        {
+            if (panelLeft == null || panelLeft.IsDisposed || !_halfUiScaleApplied) return;
+            EnsureIoApplyButtonDockedToSplitPanel1();
+            float s = _layoutDimScale;
+            int padL = panelLeft.Padding.Left;
+            int padT = panelLeft.Padding.Top;
+            int padR = panelLeft.Padding.Right;
+            int padB = panelLeft.Padding.Bottom;
+            int gapX = Math.Max(4, (int)Math.Round(8 * s));
+            int gapAfterLabel = Math.Max(2, (int)Math.Round(4 * s));
+            int gapAfterCombo = Math.Max(6, (int)Math.Round(12 * s));
+            int x = padL + gapX;
+            int innerW = Math.Max(40, panelLeft.ClientSize.Width - padL - padR - gapX * 2);
+            int y = padT;
+
+            void placeTitle(Control t)
+            {
+                if (t == null) return;
+                t.Location = new Point(x, y);
+                y += t.Height + gapAfterCombo;
+            }
+            void placePair(Control lbl, Control combo)
+            {
+                if (lbl == null || combo == null) return;
+                lbl.Location = new Point(x, y);
+                y += lbl.Height + gapAfterLabel;
+                combo.Location = new Point(x, y);
+                combo.Width = innerW;
+                int ch = Math.Max(combo.PreferredSize.Height, (int)Math.Round(33 * s));
+                if (combo.Height < ch) combo.Height = ch;
+                y += combo.Height + gapAfterCombo;
+            }
+
+            placeTitle(labelOptionTitle);
+            placePair(label3, IO_CBOX1);
+            placePair(label2, IO_CBOX2);
+            placePair(labelHoistType, comboHoistType);
+            placePair(labelCommType, comboCommType);
+            placePair(labelCollision, comboCollision);
+            placePair(labelLayout, comboLayout);
+            placePair(labelCargoProtrusion, comboCargoProtrusion);
+            placePair(labelLiftStop, comboLiftStop);
+            placePair(labelOption, comboOption);
+            placePair(labelCollisionDetect, comboCollisionDetect);
+            placePair(labelLimitDetect, comboLimitDetect);
+            placePair(label4, comboBox3);
+            placePair(labelTransferMotor, comboTransferMotor);
+            placePair(label8bitStop, combo8bitStop);
+
+            int maxBottom = y;
+            foreach (Control c in panelLeft.Controls)
+            {
+                if (c.Visible)
+                    maxBottom = Math.Max(maxBottom, c.Bottom);
+            }
+            // 가로 최소 폭을 뷰 폭에 맞춤 — 불필요한 가로 스크롤이 생기면 H스크롤이 버튼 행과 겹쳐 보임
+            int cw = Math.Max(1, panelLeft.ClientSize.Width);
+            int bottomSlack = (int)Math.Round(72 * s);
+            int scrollH = Math.Max((int)Math.Round(400 * s), maxBottom + padB + bottomSlack);
+            panelLeft.AutoScrollMinSize = new Size(cw, scrollH);
+            EnsureIoApplyButtonDockedToSplitPanel1();
+            SyncLeftBottomChromeRowToRightFooter();
+        }
+
+        /// <summary>DEVICE LIST 상단 — 한 줄 높이·고정 크기로 왼쪽 정렬 (우측 정렬 시 폭이 좁을 때 잘림 방지).</summary>
+        private void LayoutLoadExcelButtonInTopBar()
+        {
+            if (buttonLoadExcel == null || panelDeviceListTop == null || panelDeviceListTop.IsDisposed)
+                return;
+            float s = _halfUiScaleApplied ? _layoutDimScale : 1f;
+            buttonLoadExcel.Dock = DockStyle.None;
+            buttonLoadExcel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            int btnW = Math.Max(120, (int)Math.Round(150 * Math.Max(s, 0.45f)));
+            int btnH = Math.Max(28, (int)Math.Round(34 * Math.Max(s, 0.45f)));
+            buttonLoadExcel.Size = new Size(btnW, btnH);
+            int topPad = panelDeviceListTop.Padding.Top + 2;
+            int leftPad = panelDeviceListTop.Padding.Left + 4;
+            buttonLoadExcel.Location = new Point(leftPad, topPad);
+            int needH = topPad + btnH + panelDeviceListTop.Padding.Bottom + 6;
+            panelDeviceListTop.MinimumSize = new Size(0, needH);
+            if (panelDeviceListTop.Height != needH)
+                panelDeviceListTop.Height = needH;
+        }
+
+        /// <summary>축소 UI에서 파란 버튼(파일 불러오기·상태저장·체크시트 출력)이 잘리지 않도록 우측·DEVICE 상단 바 높이 보정.</summary>
+        private void EnsureRightChromeLayout()
+        {
+            if (!_halfUiScaleApplied) return;
+
+            LayoutLoadExcelButtonInTopBar();
+
+            if (panelRightFooter == null || tableLayoutPanelRight == null || tableLayoutPanelRight.RowStyles.Count < 3)
+                return;
+
+            panelRightFooter.WrapContents = true;
+            int padV = panelRightFooter.Padding.Top + panelRightFooter.Padding.Bottom;
+            int btnH = 0;
+            if (button1 != null) btnH = Math.Max(btnH, button1.Height);
+            if (buttonSavePdf != null) btnH = Math.Max(btnH, buttonSavePdf.Height);
+            int cw = panelRightFooter.ClientSize.Width;
+            if (cw <= 0 && splitMain?.Panel2 != null)
+                cw = Math.Max(100, splitMain.Panel2.ClientSize.Width - 24);
+            int combined = (button1?.Width ?? 0) + (buttonSavePdf?.Width ?? 0) + 32;
+            int rows = (cw > 0 && combined > cw) ? 2 : 1;
+            float fh = padV + btnH * rows + (rows > 1 ? 10 : 6);
+            fh = Math.Max(fh, 48f);
+            tableLayoutPanelRight.SuspendLayout();
+            try
+            {
+                tableLayoutPanelRight.RowStyles[2] = new RowStyle(SizeType.Absolute, fh);
+                panelRightFooter.MinimumSize = new Size(0, (int)Math.Ceiling(fh));
+            }
+            finally
+            {
+                tableLayoutPanelRight.ResumeLayout(true);
+            }
+            panelRightFooter.PerformLayout();
+            SyncLeftBottomChromeRowToRightFooter();
         }
 
         /// <summary>우측 <c>panelRight</c> 안에서 <c>tableLayoutPanelRight</c> 크기를 잡아 AutoScroll로 넘침을 스크롤로 처리 (좌측 옵션과 겹치지 않음).</summary>
@@ -358,16 +644,20 @@ namespace EMS_TEST_SIMULATOR
                 return;
             var dr = panelRight.DisplayRectangle;
             if (dr.Width <= 0 || dr.Height <= 0) return;
-            const int minW = 1020;
-            const int minH = 480;
+            int minW = Math.Max(200, (int)Math.Round(1020 * _layoutDimScale));
+            int minH = Math.Max(120, (int)Math.Round(480 * _layoutDimScale));
             int w = Math.Max(minW, dr.Width);
             int h = Math.Max(minH, dr.Height);
             if (tableLayoutPanelRight.Left == dr.Left && tableLayoutPanelRight.Top == dr.Top
                 && tableLayoutPanelRight.Width == w && tableLayoutPanelRight.Height == h)
+            {
+                EnsureRightChromeLayout();
                 return;
+            }
             tableLayoutPanelRight.Location = new Point(dr.Left, dr.Top);
             tableLayoutPanelRight.Width = w;
             tableLayoutPanelRight.Height = h;
+            EnsureRightChromeLayout();
         }
 
         /// <summary>AUTO 사이클 정지 완료 시점 플래그 반영: _allIoTable, _allIoTableFull에서 구분=사용자 아닌 행의 I.O 체크를 true로 설정.</summary>
@@ -480,7 +770,7 @@ namespace EMS_TEST_SIMULATOR
             panelDeviceList.DragDrop += listViewDeviceList_DragDrop;
         }
 
-        /// <summary>ListView 클라이언트 너비에 맞춰 열 너비 배분 (글자 잘림 방지용 최소 너비 적용)</summary>
+        /// <summary>ListView 클라이언트 너비에 맞춰 열 너비 배분 (디자인 비율 유지, 합이 뷰 너비를 넘지 않게)</summary>
         private void ApplyDeviceListColumnWidths()
         {
             if (listViewDeviceList?.Columns == null || listViewDeviceList.Columns.Count < 5) return;
@@ -498,21 +788,68 @@ namespace EMS_TEST_SIMULATOR
                 catch { /* 레이아웃 전 등에서 GetItemRect(0) 예외 시 스크롤바 없음으로 처리 */ }
             }
             int available = total - sb;
-            const int pdmW = 150, manuW = 180, confirmW = 80;
-            const int minDescW = 280, minSpecW = 280;
-            // 표 최소 가로 합: 좁을 때는 minTableWidth 이상으로 두어 가로 스크롤 표시, 넓을 때는 남는 폭 활용
-            const int minTableWidth = 1020;
-            int naturalFlex = Math.Max(minDescW + minSpecW, available - pdmW - manuW - confirmW);
-            int minFlex = minTableWidth - pdmW - manuW - confirmW;
-            int flex = Math.Max(naturalFlex, minFlex);
-            int descW = Math.Max(minDescW, flex / 2);
-            int specW = Math.Max(minSpecW, flex - descW);
-            if (descW + specW > flex) { specW = flex - descW; if (specW < minSpecW) { specW = minSpecW; descW = Math.Max(minDescW, flex - minSpecW); } }
-            listViewDeviceList.Columns[0].Width = pdmW;
-            listViewDeviceList.Columns[1].Width = descW;
-            listViewDeviceList.Columns[2].Width = specW;
-            listViewDeviceList.Columns[3].Width = manuW;
-            listViewDeviceList.Columns[4].Width = confirmW;
+            if (available < 120) return;
+            float s = _layoutDimScale;
+            // 디자인 비율: PDM 100, DESCRIPTION 280, SPEC 280, MANUF 140, 확인 70 (합 870)
+            int[] weight = { 100, 280, 280, 140, 70 };
+            const int sumW = 100 + 280 + 280 + 140 + 70;
+            int[] minCol = {
+                Math.Max(40, (int)Math.Round(72 * s)),
+                Math.Max(56, (int)Math.Round(96 * s)),
+                Math.Max(56, (int)Math.Round(96 * s)),
+                Math.Max(48, (int)Math.Round(88 * s)),
+                Math.Max(32, (int)Math.Round(52 * s))
+            };
+            int sumMin = minCol[0] + minCol[1] + minCol[2] + minCol[3] + minCol[4];
+            if (available < sumMin)
+            {
+                int acc = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    int wi = Math.Max(18, (int)((long)available * minCol[i] / sumMin));
+                    listViewDeviceList.Columns[i].Width = wi;
+                    acc += wi;
+                }
+                listViewDeviceList.Columns[4].Width = Math.Max(18, available - acc);
+                SyncRightScrollableArea(null, EventArgs.Empty);
+                return;
+            }
+            var w = new int[5];
+            int used = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                w[i] = Math.Max(minCol[i], (int)Math.Round((double)available * weight[i] / sumW));
+                used += w[i];
+            }
+            if (used > available)
+            {
+                int over = used - available;
+                for (int guard = 0; over > 0 && guard < 32; guard++)
+                {
+                    for (int c = 2; c >= 1 && over > 0; c--)
+                    {
+                        int d = Math.Min(over, Math.Max(0, w[c] - minCol[c]));
+                        if (d <= 0) continue;
+                        w[c] -= d;
+                        over -= d;
+                    }
+                    for (int c = 3; c >= 0 && over > 0; c--)
+                    {
+                        int d = Math.Min(over, Math.Max(0, w[c] - minCol[c]));
+                        if (d <= 0) continue;
+                        w[c] -= d;
+                        over -= d;
+                    }
+                }
+            }
+            else if (used < available)
+            {
+                int rest = available - used;
+                w[1] += rest / 2;
+                w[2] += rest - rest / 2;
+            }
+            for (int i = 0; i < 5; i++)
+                listViewDeviceList.Columns[i].Width = w[i];
             SyncRightScrollableArea(null, EventArgs.Empty);
         }
 
@@ -1298,11 +1635,14 @@ namespace EMS_TEST_SIMULATOR
             dataGridViewIO.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             // 어드레스, IO구분(숨김), BIT, I.O기판/커넥터No., IO기판/PIN-NO, 중계기판/기판명칭, 중계기판/커넥터NO, 중계기판 PIN-NO., 신호명칭, 논리, I.O 체크, 비고
             int[] widths = { 115, 0, 50, 185, 130, 170, 160, 155, 320, 72, 95, 120 };
+            float s = _layoutDimScale;
             for (int i = 0; i < dataGridViewIO.Columns.Count && i < widths.Length; i++)
             {
                 var col = dataGridViewIO.Columns[i];
-                col.MinimumWidth = widths[i] > 0 ? widths[i] : 30;
-                col.Width = widths[i] > 0 ? widths[i] : 0;
+                int cw = widths[i] > 0 ? (int)Math.Round(widths[i] * s) : 0;
+                int minW = widths[i] > 0 ? Math.Max(20, cw) : Math.Max(15, (int)Math.Round(30 * s));
+                col.MinimumWidth = minW;
+                col.Width = cw;
                 if (col.Name == "IO구분")
                     col.Visible = false;
             }
@@ -2250,7 +2590,7 @@ namespace EMS_TEST_SIMULATOR
                         bool chk = v is bool b && b || (v != null && (v is DBNull ? false : Convert.ToBoolean(v)));
                         if (!chk)
                         {
-                            MessageBox.Show("I.O LIST에서 사용자가 체크하는 항목(구분=사용자)을 모두 체크한 뒤 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("I.O LIST에서 사용자가 체크하는 항목을 모두 체크한 다음 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return;
                         }
                     }
@@ -2268,7 +2608,7 @@ namespace EMS_TEST_SIMULATOR
                             bool chk = v is bool b && b || (v != null && (v is DBNull ? false : Convert.ToBoolean(v)));
                             if (!chk)
                             {
-                                MessageBox.Show("I.O LIST에서 신호명칭이 있는 모든 항목에 I.O 체크를 한 뒤 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show("I.O LIST에서 신호명칭이 있는 모든 항목에 I.O 체크를 한 뒤에 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 return;
                             }
                         }
@@ -3162,6 +3502,16 @@ namespace EMS_TEST_SIMULATOR
         }
 
         private void listViewDeviceList_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
         {
 
         }

@@ -56,16 +56,7 @@ namespace EMS_TEST_SIMULATOR
             this.labelOptionTitle = new System.Windows.Forms.Label();
             this.buttonApplyOptions = new System.Windows.Forms.Button();
             this.panelRight = new System.Windows.Forms.Panel();
-            this.splitMain = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanelRight = new System.Windows.Forms.TableLayoutPanel();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.panelDeviceList = new System.Windows.Forms.Panel();
-            this.panelDeviceListTop = new System.Windows.Forms.Panel();
-            this.buttonLoadExcel = new System.Windows.Forms.Button();
-            this.listViewDeviceList = new System.Windows.Forms.ListView();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.dataGridViewIO = new System.Windows.Forms.DataGridView();
             this.panelRightHeader = new System.Windows.Forms.FlowLayoutPanel();
             this.labelFilter = new System.Windows.Forms.Label();
             this.comboFilter = new System.Windows.Forms.ComboBox();
@@ -73,23 +64,34 @@ namespace EMS_TEST_SIMULATOR
             this.labelLegend = new System.Windows.Forms.Label();
             this.labelLegendInput = new System.Windows.Forms.Label();
             this.labelLegendOutput = new System.Windows.Forms.Label();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.panelDeviceList = new System.Windows.Forms.Panel();
+            this.listViewDeviceList = new System.Windows.Forms.ListView();
+            this.panelDeviceListTop = new System.Windows.Forms.Panel();
+            this.buttonLoadExcel = new System.Windows.Forms.Button();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.dataGridViewIO = new System.Windows.Forms.DataGridView();
             this.panelRightFooter = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonSavePdf = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.splitMain = new System.Windows.Forms.SplitContainer();
             this.panelTop.SuspendLayout();
             this.panelLeft.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
-            this.splitMain.SuspendLayout();
             this.panelRight.SuspendLayout();
             this.tableLayoutPanelRight.SuspendLayout();
+            this.panelRightHeader.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panelDeviceList.SuspendLayout();
             this.panelDeviceListTop.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewIO)).BeginInit();
-            this.panelRightHeader.SuspendLayout();
             this.panelRightFooter.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
+            this.splitMain.Panel1.SuspendLayout();
+            this.splitMain.Panel2.SuspendLayout();
+            this.splitMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelTop
@@ -103,7 +105,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(1466, 56);
+            this.panelTop.Size = new System.Drawing.Size(1478, 56);
             this.panelTop.TabIndex = 0;
             // 
             // label1
@@ -197,7 +199,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft.Location = new System.Drawing.Point(0, 0);
             this.panelLeft.Name = "panelLeft";
             this.panelLeft.Padding = new System.Windows.Forms.Padding(14, 10, 12, 10);
-            this.panelLeft.Size = new System.Drawing.Size(400, 1051);
+            this.panelLeft.Size = new System.Drawing.Size(25, 1051);
             this.panelLeft.TabIndex = 1;
             // 
             // comboBox3
@@ -594,133 +596,31 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.panelRight.AutoScroll = true;
             this.panelRight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.panelRight.Controls.Add(this.tableLayoutPanelRight);
             this.panelRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelRight.Location = new System.Drawing.Point(0, 0);
             this.panelRight.Name = "panelRight";
             this.panelRight.Padding = new System.Windows.Forms.Padding(6);
-            this.panelRight.Size = new System.Drawing.Size(1794, 1051);
+            this.panelRight.Size = new System.Drawing.Size(1449, 1051);
             this.panelRight.TabIndex = 2;
             // 
-            // tabControl1
+            // tableLayoutPanelRight
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.tabControl1.Location = new System.Drawing.Point(6, 62);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1782, 935);
-            this.tabControl1.TabIndex = 11;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.tabPage1.Controls.Add(this.panelDeviceList);
-            this.tabPage1.Location = new System.Drawing.Point(4, 34);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1774, 897);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "DEVICE LIST";
-            // 
-            // panelDeviceList
-            // 
-            this.panelDeviceList.Controls.Add(this.listViewDeviceList);
-            this.panelDeviceList.Controls.Add(this.panelDeviceListTop);
-            this.panelDeviceList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelDeviceList.Location = new System.Drawing.Point(3, 3);
-            this.panelDeviceList.Name = "panelDeviceList";
-            this.panelDeviceList.Padding = new System.Windows.Forms.Padding(20, 8, 12, 8);
-            this.panelDeviceList.Size = new System.Drawing.Size(1768, 891);
-            this.panelDeviceList.TabIndex = 0;
-            // 
-            // panelDeviceListTop
-            // 
-            this.panelDeviceListTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.panelDeviceListTop.Controls.Add(this.buttonLoadExcel);
-            this.panelDeviceListTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelDeviceListTop.Location = new System.Drawing.Point(20, 8);
-            this.panelDeviceListTop.Name = "panelDeviceListTop";
-            this.panelDeviceListTop.Size = new System.Drawing.Size(1736, 34);
-            this.panelDeviceListTop.TabIndex = 2;
-            // 
-            // buttonLoadExcel
-            // 
-            this.buttonLoadExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-            this.buttonLoadExcel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonLoadExcel.FlatAppearance.BorderSize = 0;
-            this.buttonLoadExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonLoadExcel.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.buttonLoadExcel.ForeColor = System.Drawing.Color.White;
-            this.buttonLoadExcel.Location = new System.Drawing.Point(1586, 0);
-            this.buttonLoadExcel.Margin = new System.Windows.Forms.Padding(8, 6, 0, 6);
-            this.buttonLoadExcel.MinimumSize = new System.Drawing.Size(150, 32);
-            this.buttonLoadExcel.Name = "buttonLoadExcel";
-            this.buttonLoadExcel.Size = new System.Drawing.Size(150, 34);
-            this.buttonLoadExcel.TabIndex = 0;
-            this.buttonLoadExcel.Text = "파일 불러오기";
-            this.buttonLoadExcel.UseVisualStyleBackColor = false;
-            this.buttonLoadExcel.Click += new System.EventHandler(this.buttonLoadExcel_Click);
-            // 
-            // listViewDeviceList
-            // 
-            this.listViewDeviceList.AllowDrop = true;
-            this.listViewDeviceList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.listViewDeviceList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewDeviceList.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.listViewDeviceList.ForeColor = System.Drawing.Color.White;
-            this.listViewDeviceList.FullRowSelect = true;
-            this.listViewDeviceList.HideSelection = false;
-            this.listViewDeviceList.Scrollable = true;
-            this.listViewDeviceList.Location = new System.Drawing.Point(20, 8);
-            this.listViewDeviceList.Name = "listViewDeviceList";
-            this.listViewDeviceList.Size = new System.Drawing.Size(1736, 875);
-            this.listViewDeviceList.TabIndex = 4;
-            this.listViewDeviceList.UseCompatibleStateImageBehavior = false;
-            this.listViewDeviceList.View = System.Windows.Forms.View.Details;
-            this.listViewDeviceList.SelectedIndexChanged += new System.EventHandler(this.listViewDeviceList_SelectedIndexChanged_1);
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.dataGridViewIO);
-            this.tabPage2.Location = new System.Drawing.Point(4, 34);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1260, 646);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "I.O LIST";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // dataGridViewIO
-            // 
-            this.dataGridViewIO.AllowUserToAddRows = false;
-            this.dataGridViewIO.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewIO.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridViewIO.ColumnHeadersHeight = 28;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewIO.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dataGridViewIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridViewIO.EnableHeadersVisualStyles = false;
-            this.dataGridViewIO.Location = new System.Drawing.Point(3, 3);
-            this.dataGridViewIO.Name = "dataGridViewIO";
-            this.dataGridViewIO.RowHeadersVisible = false;
-            this.dataGridViewIO.RowHeadersWidth = 62;
-            this.dataGridViewIO.Size = new System.Drawing.Size(1254, 640);
-            this.dataGridViewIO.TabIndex = 3;
+            this.tableLayoutPanelRight.ColumnCount = 1;
+            this.tableLayoutPanelRight.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelRight.Controls.Add(this.panelRightHeader, 0, 0);
+            this.tableLayoutPanelRight.Controls.Add(this.tabControl1, 0, 1);
+            this.tableLayoutPanelRight.Controls.Add(this.panelRightFooter, 0, 2);
+            this.tableLayoutPanelRight.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanelRight.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanelRight.MinimumSize = new System.Drawing.Size(1020, 480);
+            this.tableLayoutPanelRight.Name = "tableLayoutPanelRight";
+            this.tableLayoutPanelRight.RowCount = 3;
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanelRight.Size = new System.Drawing.Size(1400, 920);
+            this.tableLayoutPanelRight.TabIndex = 0;
             // 
             // panelRightHeader
             // 
@@ -733,10 +633,10 @@ namespace EMS_TEST_SIMULATOR
             this.panelRightHeader.Controls.Add(this.labelLegendInput);
             this.panelRightHeader.Controls.Add(this.labelLegendOutput);
             this.panelRightHeader.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelRightHeader.Location = new System.Drawing.Point(6, 6);
+            this.panelRightHeader.Location = new System.Drawing.Point(3, 3);
             this.panelRightHeader.Name = "panelRightHeader";
             this.panelRightHeader.Padding = new System.Windows.Forms.Padding(4, 8, 4, 8);
-            this.panelRightHeader.Size = new System.Drawing.Size(1782, 56);
+            this.panelRightHeader.Size = new System.Drawing.Size(1394, 56);
             this.panelRightHeader.TabIndex = 14;
             this.panelRightHeader.WrapContents = false;
             // 
@@ -813,6 +713,127 @@ namespace EMS_TEST_SIMULATOR
             this.labelLegendOutput.TabIndex = 9;
             this.labelLegendOutput.Text = "OUTPUT";
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.tabControl1.Location = new System.Drawing.Point(3, 65);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(1394, 798);
+            this.tabControl1.TabIndex = 11;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tabPage1.Controls.Add(this.panelDeviceList);
+            this.tabPage1.Location = new System.Drawing.Point(4, 34);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1386, 760);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "DEVICE LIST";
+            this.tabPage1.Click += new System.EventHandler(this.tabPage1_Click);
+            // 
+            // panelDeviceList
+            // 
+            this.panelDeviceList.Controls.Add(this.listViewDeviceList);
+            this.panelDeviceList.Controls.Add(this.panelDeviceListTop);
+            this.panelDeviceList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelDeviceList.Location = new System.Drawing.Point(3, 3);
+            this.panelDeviceList.Name = "panelDeviceList";
+            this.panelDeviceList.Padding = new System.Windows.Forms.Padding(20, 8, 12, 8);
+            this.panelDeviceList.Size = new System.Drawing.Size(1380, 754);
+            this.panelDeviceList.TabIndex = 0;
+            // 
+            // listViewDeviceList
+            // 
+            this.listViewDeviceList.AllowDrop = true;
+            this.listViewDeviceList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.listViewDeviceList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewDeviceList.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.listViewDeviceList.ForeColor = System.Drawing.Color.White;
+            this.listViewDeviceList.FullRowSelect = true;
+            this.listViewDeviceList.HideSelection = false;
+            this.listViewDeviceList.Location = new System.Drawing.Point(20, 42);
+            this.listViewDeviceList.Name = "listViewDeviceList";
+            this.listViewDeviceList.Size = new System.Drawing.Size(1348, 704);
+            this.listViewDeviceList.TabIndex = 4;
+            this.listViewDeviceList.UseCompatibleStateImageBehavior = false;
+            this.listViewDeviceList.View = System.Windows.Forms.View.Details;
+            this.listViewDeviceList.SelectedIndexChanged += new System.EventHandler(this.listViewDeviceList_SelectedIndexChanged_1);
+            // 
+            // panelDeviceListTop
+            // 
+            this.panelDeviceListTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.panelDeviceListTop.Controls.Add(this.buttonLoadExcel);
+            this.panelDeviceListTop.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelDeviceListTop.Location = new System.Drawing.Point(20, 8);
+            this.panelDeviceListTop.Name = "panelDeviceListTop";
+            this.panelDeviceListTop.Size = new System.Drawing.Size(1348, 34);
+            this.panelDeviceListTop.TabIndex = 2;
+            // 
+            // buttonLoadExcel
+            // 
+            this.buttonLoadExcel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonLoadExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.buttonLoadExcel.FlatAppearance.BorderSize = 0;
+            this.buttonLoadExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonLoadExcel.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.buttonLoadExcel.ForeColor = System.Drawing.Color.White;
+            this.buttonLoadExcel.Location = new System.Drawing.Point(1198, 0);
+            this.buttonLoadExcel.Margin = new System.Windows.Forms.Padding(8, 6, 0, 6);
+            this.buttonLoadExcel.MinimumSize = new System.Drawing.Size(150, 32);
+            this.buttonLoadExcel.Name = "buttonLoadExcel";
+            this.buttonLoadExcel.Size = new System.Drawing.Size(150, 34);
+            this.buttonLoadExcel.TabIndex = 0;
+            this.buttonLoadExcel.Text = "파일 불러오기";
+            this.buttonLoadExcel.UseVisualStyleBackColor = false;
+            this.buttonLoadExcel.Click += new System.EventHandler(this.buttonLoadExcel_Click);
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.dataGridViewIO);
+            this.tabPage2.Location = new System.Drawing.Point(4, 34);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1386, 760);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "I.O LIST";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // dataGridViewIO
+            // 
+            this.dataGridViewIO.AllowUserToAddRows = false;
+            this.dataGridViewIO.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewIO.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dataGridViewIO.ColumnHeadersHeight = 28;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewIO.DefaultCellStyle = dataGridViewCellStyle2;
+            this.dataGridViewIO.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridViewIO.EnableHeadersVisualStyles = false;
+            this.dataGridViewIO.Location = new System.Drawing.Point(3, 3);
+            this.dataGridViewIO.Name = "dataGridViewIO";
+            this.dataGridViewIO.RowHeadersVisible = false;
+            this.dataGridViewIO.RowHeadersWidth = 62;
+            this.dataGridViewIO.Size = new System.Drawing.Size(1380, 754);
+            this.dataGridViewIO.TabIndex = 3;
+            // 
             // panelRightFooter
             // 
             this.panelRightFooter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
@@ -820,10 +841,10 @@ namespace EMS_TEST_SIMULATOR
             this.panelRightFooter.Controls.Add(this.button1);
             this.panelRightFooter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelRightFooter.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelRightFooter.Location = new System.Drawing.Point(6, 997);
+            this.panelRightFooter.Location = new System.Drawing.Point(3, 869);
             this.panelRightFooter.Name = "panelRightFooter";
             this.panelRightFooter.Padding = new System.Windows.Forms.Padding(6, 6, 12, 6);
-            this.panelRightFooter.Size = new System.Drawing.Size(1782, 48);
+            this.panelRightFooter.Size = new System.Drawing.Size(1394, 48);
             this.panelRightFooter.TabIndex = 15;
             this.panelRightFooter.WrapContents = false;
             // 
@@ -835,7 +856,7 @@ namespace EMS_TEST_SIMULATOR
             this.buttonSavePdf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonSavePdf.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.buttonSavePdf.ForeColor = System.Drawing.Color.White;
-            this.buttonSavePdf.Location = new System.Drawing.Point(1590, 6);
+            this.buttonSavePdf.Location = new System.Drawing.Point(1202, 6);
             this.buttonSavePdf.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.buttonSavePdf.Name = "buttonSavePdf";
             this.buttonSavePdf.Size = new System.Drawing.Size(174, 35);
@@ -852,56 +873,38 @@ namespace EMS_TEST_SIMULATOR
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(1408, 6);
+            this.button1.Location = new System.Drawing.Point(1020, 6);
             this.button1.Margin = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(174, 35);
             this.button1.TabIndex = 10;
             this.button1.Text = "상태저장";
             this.button1.UseVisualStyleBackColor = false;
-            // 
-            // tableLayoutPanelRight
-            // 
-            this.tableLayoutPanelRight.ColumnCount = 1;
-            this.tableLayoutPanelRight.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelRight.Controls.Add(this.panelRightHeader, 0, 0);
-            this.tableLayoutPanelRight.Controls.Add(this.tabControl1, 0, 1);
-            this.tableLayoutPanelRight.Controls.Add(this.panelRightFooter, 0, 2);
-            this.tableLayoutPanelRight.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left);
-            this.tableLayoutPanelRight.Dock = System.Windows.Forms.DockStyle.None;
-            this.tableLayoutPanelRight.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanelRight.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanelRight.MinimumSize = new System.Drawing.Size(1020, 480);
-            this.tableLayoutPanelRight.Name = "tableLayoutPanelRight";
-            this.tableLayoutPanelRight.RowCount = 3;
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.tableLayoutPanelRight.Size = new System.Drawing.Size(1400, 920);
-            this.tableLayoutPanelRight.TabIndex = 0;
-            this.panelRight.Controls.Add(this.tableLayoutPanelRight);
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // splitMain
             // 
             this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitMain.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitMain.IsSplitterFixed = true;
-            this.splitMain.Location = new System.Drawing.Point(0, 56);
+            this.splitMain.Location = new System.Drawing.Point(0, 0);
             this.splitMain.Name = "splitMain";
-            this.splitMain.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.splitMain.Panel1MinSize = 25;
-            this.splitMain.Panel2MinSize = 25;
-            this.splitMain.SplitterDistance = 25;
-            this.splitMain.SplitterWidth = 4;
-            this.splitMain.TabIndex = 19;
+            // 
+            // splitMain.Panel1
+            // 
             this.splitMain.Panel1.Controls.Add(this.panelLeft);
+            // 
+            // splitMain.Panel2
+            // 
             this.splitMain.Panel2.Controls.Add(this.panelRight);
+            this.splitMain.Size = new System.Drawing.Size(1478, 1051);
+            this.splitMain.SplitterDistance = 25;
+            this.splitMain.TabIndex = 19;
             // 
             // IOCheckSheetForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.AutoScroll = false;
-            this.ClientSize = new System.Drawing.Size(1794, 1051);
+            this.ClientSize = new System.Drawing.Size(1478, 1051);
             this.Controls.Add(this.panelTop);
             this.Controls.Add(this.splitMain);
             this.Font = new System.Drawing.Font("맑은 고딕", 9F);
@@ -914,20 +917,22 @@ namespace EMS_TEST_SIMULATOR
             this.Shown += new System.EventHandler(this.IOCheckSheetForm_Shown);
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
-            this.tableLayoutPanelRight.ResumeLayout(false);
+            this.panelLeft.ResumeLayout(false);
+            this.panelLeft.PerformLayout();
             this.panelRight.ResumeLayout(false);
+            this.tableLayoutPanelRight.ResumeLayout(false);
+            this.panelRightHeader.ResumeLayout(false);
+            this.panelRightHeader.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.panelDeviceList.ResumeLayout(false);
             this.panelDeviceListTop.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewIO)).EndInit();
-            this.panelRightHeader.ResumeLayout(false);
-            this.panelRightHeader.PerformLayout();
             this.panelRightFooter.ResumeLayout(false);
             this.panelRightFooter.PerformLayout();
-            this.panelLeft.ResumeLayout(false);
-            this.panelLeft.PerformLayout();
+            this.splitMain.Panel1.ResumeLayout(false);
+            this.splitMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
             this.splitMain.ResumeLayout(false);
             this.ResumeLayout(false);
