@@ -2250,7 +2250,7 @@ namespace EMS_TEST_SIMULATOR
                         bool chk = v is bool b && b || (v != null && (v is DBNull ? false : Convert.ToBoolean(v)));
                         if (!chk)
                         {
-                            MessageBox.Show("I.O LIST에서 사용자가 체크하는 항목(구분=사용자)을 모두 체크한 뒤 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("I.O LIST에서 사용자가 체크하는 항목을 모두 체크한 다음 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return;
                         }
                     }
@@ -2268,7 +2268,7 @@ namespace EMS_TEST_SIMULATOR
                             bool chk = v is bool b && b || (v != null && (v is DBNull ? false : Convert.ToBoolean(v)));
                             if (!chk)
                             {
-                                MessageBox.Show("I.O LIST에서 신호명칭이 있는 모든 항목에 I.O 체크를 한 뒤 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show("I.O LIST에서 신호명칭이 있는 모든 항목에 I.O 체크를 한 뒤에 [상태저장] 해 주세요.", "I.O LIST 미완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 return;
                             }
                         }
@@ -3162,6 +3162,11 @@ namespace EMS_TEST_SIMULATOR
         }
 
         private void listViewDeviceList_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
         {
 
         }
