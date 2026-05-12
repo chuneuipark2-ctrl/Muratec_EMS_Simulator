@@ -34,6 +34,8 @@ namespace EMS_TEST_SIMULATOR
         private ToolTip _deviceListToolTip;
         /// <summary>Shown에서 1회 0.5 스케일 적용 여부 (Main과 유사한 작은 화면)</summary>
         private bool _halfUiScaleApplied;
+        /// <summary>최초 표시 시 폼을 작업 영역 좌상단에 한 번만 둠</summary>
+        private bool _initialFormPlacementDone;
         /// <summary>스플리터·열 너비·우측 최소 크기 등 픽셀 상수에 곱함. 스케일 전 1, 적용 후 0.5</summary>
         private float _layoutDimScale = 1f;
         /// <summary>0.5 UI: Panel1 안에서 옵션 스크롤 영역과 I/O 적용 버튼 행을 나눔(가로 스크롤바보다 아래에 버튼이 가지 않도록).</summary>
@@ -310,6 +312,17 @@ namespace EMS_TEST_SIMULATOR
 
         private void IOCheckSheetForm_Shown(object sender, EventArgs e)
         {
+            if (!DesignMode && !_initialFormPlacementDone)
+            {
+                _initialFormPlacementDone = true;
+                try
+                {
+                    var scr = Screen.FromHandle(Handle);
+                    StartPosition = FormStartPosition.Manual;
+                    Location = new Point(scr.WorkingArea.Left, scr.WorkingArea.Top);
+                }
+                catch { /* 디자이너·핸들 예외 시 무시 */ }
+            }
             if (!DesignMode && !_halfUiScaleApplied)
             {
                 _halfUiScaleApplied = true;
@@ -526,11 +539,13 @@ namespace EMS_TEST_SIMULATOR
             int padR = panelLeft.Padding.Right;
             int padB = panelLeft.Padding.Bottom;
             int gapX = Math.Max(4, (int)Math.Round(8 * s));
-            int gapAfterLabel = Math.Max(2, (int)Math.Round(4 * s));
-            int gapAfterCombo = Math.Max(6, (int)Math.Round(12 * s));
+            int gapAfterLabel = Math.Max(3, (int)Math.Round(5 * s));
+            int gapAfterCombo = Math.Max(8, (int)Math.Round(14 * s));
             int x = padL + gapX;
             int innerW = Math.Max(40, panelLeft.ClientSize.Width - padL - padR - gapX * 2);
-            int y = padT;
+            // 상단 "옵션 설정"·첫 콤보 라벨이 잘리지 않도록 전체 스택을 아래로 내림 (+ 24*s 추가)
+            int topBreathing = Math.Max(16, (int)Math.Round(24 * s)) + (int)Math.Round(24 * s);
+            int y = padT + topBreathing;
 
             void placeTitle(Control t)
             {
