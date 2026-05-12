@@ -47,6 +47,7 @@ namespace EMS_TEST_SIMULATOR
         private void EMS_TCP_UDP_Connect_Load(object sender, EventArgs e)
         {
             button2.Enabled = false;
+            FlatButtonPaintFix.ApplyToTree(this);
         }
 
         // 주기적으로 장비에 현재 상태를 물어봅니다.

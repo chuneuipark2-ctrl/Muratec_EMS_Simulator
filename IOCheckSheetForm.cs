@@ -303,6 +303,7 @@ namespace EMS_TEST_SIMULATOR
 
             LayoutPanelTopReflow();
             LayoutLoadExcelButtonInTopBar();
+            FlatButtonPaintFix.ApplyToTree(this);
         }
 
         private void PanelDeviceListTop_ResizeLayoutExcelButton(object sender, EventArgs e)

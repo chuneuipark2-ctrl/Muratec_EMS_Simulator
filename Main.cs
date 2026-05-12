@@ -76,6 +76,7 @@ namespace EMS_TEST_SIMULATOR
         {
             base.OnShown(e);
             ApplyDarkTheme();
+            FlatButtonPaintFix.ApplyToTree(this);
             // 기본은 EMS 정지. 목적 동작 코드 0/1/2 수신 시에만 이동/승강/하강 GIF 표시.
             if (pictureBox1 != null)
                 pictureBox1.Image = Properties.Resources.EMS_정지;
@@ -170,6 +171,7 @@ namespace EMS_TEST_SIMULATOR
             InitializeCommLogGrid();
             InitializeMainLog();
             CommLogBridge.OnLog += (dir, data, desc) => this.AddCommLog(dir, data, desc);
+            FlatButtonPaintFix.ApplyToTree(this);
         }
 
         /// <summary>EMO 버튼 테두리: true = 초록색 띄, false = 테두리 제거.</summary>
@@ -549,7 +551,7 @@ namespace EMS_TEST_SIMULATOR
             {
                 UpdateRailButtonStatus(false);
                 Rail_io.BackColor = Color.Orange;
-
+                FlatButtonPaintFix.ApplyToButton(Rail_io);
 
                 PANEL_DIO panel = new PANEL_DIO(); //임시사용
                 panel.Show();
@@ -571,11 +573,13 @@ namespace EMS_TEST_SIMULATOR
             if (connected)
             {
                 Rail_io.BackColor = Color.Lime;
+                FlatButtonPaintFix.ApplyToButton(Rail_io);
             }
             else
             {
                 Rail_io.BackColor = Color.FromArgb(37, 99, 235); // 끊김 시 파란색(기본 버튼색) 복귀
                 Rail_io.ForeColor = Color.White;
+                FlatButtonPaintFix.ApplyToButton(Rail_io);
             }
         }
 
@@ -594,6 +598,7 @@ namespace EMS_TEST_SIMULATOR
                 // 연결 성공 시: 녹색
                 Rail_io.BackColor = Color.Lime;
                 Rail_io.Text = "Rail I.O (Connected)";
+                FlatButtonPaintFix.ApplyToButton(Rail_io);
             }
             else
             {
@@ -601,6 +606,7 @@ namespace EMS_TEST_SIMULATOR
                 Rail_io.BackColor = Color.FromArgb(37, 99, 235);
                 Rail_io.ForeColor = Color.White;
                 Rail_io.Text = "Rail I.O (Disconnected)";
+                FlatButtonPaintFix.ApplyToButton(Rail_io);
             }
         }
 
@@ -1252,6 +1258,7 @@ namespace EMS_TEST_SIMULATOR
                         button2.BackColor = Color.Lime; // 또는 Color.GreenYellow
                         button2.ForeColor = Color.Black; // 검은색 글씨가 연두색에서 잘 보입니다.
                         button2.Text = "연결 완료";
+                        FlatButtonPaintFix.ApplyToButton(button2);
                     }
                 };
             }
@@ -1466,6 +1473,7 @@ namespace EMS_TEST_SIMULATOR
             button2.BackColor = Color.FromArgb(37, 99, 235); // 끊김 시 파란색(기본 버튼색) 복귀
             button2.ForeColor = Color.White;
             button2.Text = "Connect"; // 원래 텍스트로 복구
+            FlatButtonPaintFix.ApplyToButton(button2);
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)

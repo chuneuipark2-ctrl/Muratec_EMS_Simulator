@@ -50,6 +50,7 @@ namespace EMS_TEST_SIMULATOR
         private void Line_Setup_Load(object sender, EventArgs e)
         {
             RefreshTypeListByLine();
+            FlatButtonPaintFix.ApplyToTree(this);
         }
 
         private void Line_sel_box_SelectedIndexChanged(object sender, EventArgs e)

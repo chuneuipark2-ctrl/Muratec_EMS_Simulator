@@ -54,6 +54,7 @@ namespace EMS_TEST_SIMULATOR
                 Font = new Font("맑은 고딕", 11F)
             };
             _btnOk.FlatAppearance.BorderSize = 0;
+            FlatButtonPaintFix.ApplyToButton(_btnOk);
             _btnOk.Click += BtnOk_Click;
 
             _calendar.DateSelected += (s, e) => { };

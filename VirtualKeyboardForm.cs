@@ -55,6 +55,8 @@ namespace EMS_TEST_SIMULATOR
 
             Controls.Add(panel);
 
+            FlatButtonPaintFix.ApplyToTree(this);
+
             // 화면 작업 영역 안에 전부 보이게 위치 (하단 중앙, 잘리지 않도록)
             var screen = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 800, 600);
             int x = screen.Left + Math.Max(0, (screen.Width - Width) / 2);

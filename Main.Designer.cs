@@ -1425,9 +1425,11 @@ namespace EMS_TEST_SIMULATOR
             this.Rail_io.Location = new System.Drawing.Point(645, 184);
             this.Rail_io.Margin = new System.Windows.Forms.Padding(4);
             this.Rail_io.Name = "Rail_io";
+            this.Rail_io.Padding = new System.Windows.Forms.Padding(0);
             this.Rail_io.Size = new System.Drawing.Size(169, 50);
             this.Rail_io.TabIndex = 17;
             this.Rail_io.Text = "Rail I.O";
+            this.Rail_io.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.Rail_io.UseVisualStyleBackColor = false;
             this.Rail_io.Click += new System.EventHandler(this.Rail_io_Click);
             // 

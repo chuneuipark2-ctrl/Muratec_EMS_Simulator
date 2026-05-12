@@ -40,6 +40,7 @@ namespace EMS_TEST_SIMULATOR
                     MessageBox.Show("통신 객체가 비어있습니다.\n[Connect] 창에서 연결을 먼저 완료해주세요.");
                 }
             }
+            FlatButtonPaintFix.ApplyToTree(this);
         }
 
         public class command_Data
