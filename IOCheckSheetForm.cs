@@ -40,8 +40,14 @@ namespace EMS_TEST_SIMULATOR
         private float _layoutDimScale = 1f;
         /// <summary>0.5 UI: Panel1 안에서 옵션 스크롤 영역과 I/O 적용 버튼 행을 나눔(가로 스크롤바보다 아래에 버튼이 가지 않도록).</summary>
         private TableLayoutPanel _leftColumnHost;
+        /// <summary>폼 직속 Dock(Top+Fill) 대신 상단(<c>panelTop</c>)과 본문(<c>splitMain</c>)을 2행으로 분리 — 스케일 후 Y 겹침·좌측 가림 방지.</summary>
+        private TableLayoutPanel _rootChromeStack;
+        /// <summary><c>splitMain</c> 전용 부모 — TLP 셀에 스플릿을 직접 넣으면 초기 폭 0·SplitterDistance 미적용으로 본문이 좁게 보일 수 있음.</summary>
+        private Panel _panelMainSplitHost;
         /// <summary>I.O LIST에서 사용자가 직접 체크하는 행만의 키 집합. 키 형식: "IO구분_어드레스_BIT" (예: INPUT_800010_0). 비어 있으면 CSV 미로드 시 기존 동작(신호명칭 있는 행만 편집/검사).</summary>
         private HashSet<string> _userCheckableIoKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        /// <summary>좌측 옵션·스플릿 Panel1·호스트 TLP 공통 배경(스크롤 빈칸·Panel1 비침 방지).</summary>
+        private static readonly Color LeftChromeBackColor = Color.FromArgb(37, 37, 38);
 
         // 내장 INPUT/OUTPUT 데이터 (파일 로드 대신 하드코딩)
         // INPUT 구조: 어드레스, BIT, 기본신호, 기본논리, ... 옵션, 옵션논리(0~23), [24:IO커넥터No, 25:IO PIN-NO, 26:IF 기판명칭, 27:IF 커넥터NO, 28:IF PIN-NO]
@@ -222,8 +228,115 @@ namespace EMS_TEST_SIMULATOR
             InitializeComponent();
         }
 
+        /// <summary>상단 바와 스플릿을 테이블 2행으로 고정해, 픽셀 스케일 후에도 세로 겹침이 나지 않게 한다.</summary>
+        private void EnsureRootChromeStack()
+        {
+            if (DesignMode || _rootChromeStack != null) return;
+            if (panelTop == null || splitMain == null) return;
+
+            int mt = Math.Max(6, (int)Math.Round(10 * Math.Max(_layoutDimScale, 0.5f)));
+            int mb = Math.Max(2, (int)Math.Round(6 * Math.Max(_layoutDimScale, 0.5f)));
+            panelTop.Margin = new Padding(0, mt, 0, mb);
+
+            int topRowH = Math.Max(
+                panelTop.Height + panelTop.Margin.Vertical,
+                panelTop.PreferredSize.Height + panelTop.Margin.Vertical);
+            if (topRowH < 40) topRowH = 56;
+
+            var stack = new TableLayoutPanel
+            {
+                Name = "rootChromeStack",
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                Margin = Padding.Empty,
+                Padding = Padding.Empty,
+                TabStop = false,
+                BackColor = BackColor
+            };
+            stack.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            stack.RowStyles.Add(new RowStyle(SizeType.Absolute, topRowH));
+            stack.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+
+            SuspendLayout();
+            try
+            {
+                Controls.Remove(panelTop);
+                Controls.Remove(splitMain);
+                panelTop.Dock = DockStyle.Top;
+                splitMain.Dock = DockStyle.Fill;
+                splitMain.Margin = Padding.Empty;
+                splitMain.MinimumSize = Size.Empty;
+                splitMain.MaximumSize = Size.Empty;
+                // Panel1 고정이면 창 확대 시 우측만 넓어지고 좌측(옵션) 폭이 픽셀로 묶임 → Panel2 고정으로 좌측이 남는 폭을 흡수
+                splitMain.FixedPanel = FixedPanel.Panel2;
+                splitMain.Panel1.Padding = Padding.Empty;
+                splitMain.Panel2.Padding = Padding.Empty;
+
+                _panelMainSplitHost = new Panel
+                {
+                    Name = "panelMainSplitHost",
+                    Dock = DockStyle.Fill,
+                    Margin = Padding.Empty,
+                    Padding = Padding.Empty,
+                    TabStop = false,
+                    BackColor = BackColor
+                };
+                _panelMainSplitHost.Controls.Add(splitMain);
+                _panelMainSplitHost.Resize -= PanelMainSplitHost_OnResize;
+                _panelMainSplitHost.Resize += PanelMainSplitHost_OnResize;
+
+                stack.Controls.Add(_panelMainSplitHost, 0, 1);
+                stack.Controls.Add(panelTop, 0, 0);
+                Controls.Add(stack);
+                _rootChromeStack = stack;
+                _rootChromeStack.Resize -= RootChromeStack_OnResize;
+                _rootChromeStack.Resize += RootChromeStack_OnResize;
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
+        }
+
+        private void SyncRootChromeTopRow()
+        {
+            if (_rootChromeStack == null || panelTop == null || _rootChromeStack.IsDisposed) return;
+            if (_rootChromeStack.RowStyles.Count < 2) return;
+            int h = Math.Max(1, panelTop.Height + panelTop.Margin.Top + panelTop.Margin.Bottom);
+            h += Math.Max(2, (int)Math.Round(6 * Math.Max(_layoutDimScale, 0.5f)));
+            var rs0 = _rootChromeStack.RowStyles[0];
+            if (!(rs0.SizeType == SizeType.Absolute && Math.Abs(rs0.Height - h) < 0.5f))
+            {
+                _rootChromeStack.SuspendLayout();
+                try
+                {
+                    _rootChromeStack.RowStyles[0] = new RowStyle(SizeType.Absolute, h);
+                }
+                finally
+                {
+                    _rootChromeStack.ResumeLayout(true);
+                }
+            }
+            panelTop.BringToFront();
+            ApplyPreferredSplitDistance();
+        }
+
+        private void RootChromeStack_OnResize(object sender, EventArgs e)
+        {
+            ApplyPreferredSplitDistance();
+            SyncLeftBottomChromeRowToRightFooter();
+        }
+
+        private void PanelMainSplitHost_OnResize(object sender, EventArgs e)
+        {
+            ApplyPreferredSplitDistance();
+            SyncLeftBottomChromeRowToRightFooter();
+        }
+
         private void IOCheckSheetForm_Load(object sender, EventArgs e)
         {
+            EnsureRootChromeStack();
             textBoxTestDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 
             if (panelLeft != null)
@@ -303,6 +416,7 @@ namespace EMS_TEST_SIMULATOR
 
             LayoutPanelTopReflow();
             LayoutLoadExcelButtonInTopBar();
+            SyncRightFilterHeaderRow();
             FlatButtonPaintFix.ApplyToTree(this);
         }
 
@@ -340,7 +454,27 @@ namespace EMS_TEST_SIMULATOR
                 SizeChanged -= IOCheckSheetForm_SizeReflowHalfUi;
                 SizeChanged += IOCheckSheetForm_SizeReflowHalfUi;
             }
+            SyncRootChromeTopRow();
             SyncRightScrollableArea(null, EventArgs.Empty);
+            panelTop?.BringToFront();
+            // 스플릿·TLP 최종 높이가 잡힌 뒤 좌측 행·스크롤·그리드 열을 한 번 더 맞춤
+            BeginInvoke(new Action(() =>
+            {
+                ApplyPreferredSplitDistance();
+                SyncLeftBottomChromeRowToRightFooter();
+                LayoutPanelLeftStacked();
+                SetGridColumnWidths();
+            }));
+        }
+
+        /// <summary>0.5 UI: 좌측 하단 <c>I/O 적용</c> 행 높이·여백(스크롤과 버튼·창 하단 간격). <see cref="EnsureIoApplyButtonDockedToSplitPanel1"/>와 <see cref="SyncLeftBottomChromeRowToRightFooter"/>가 동일 값을 쓴다.</summary>
+        private static void GetIoApplyButtonRowMetrics(float s, out int mx, out int marginTop, out int marginBottom, out int bh, out int btnRowH)
+        {
+            mx = Math.Max(6, (int)Math.Round(14 * s));
+            marginTop = Math.Max(10, (int)Math.Round(14 * s));
+            marginBottom = Math.Max(22, (int)Math.Round(36 * s));
+            bh = Math.Max(56, (int)Math.Round(72 * s));
+            btnRowH = marginTop + bh + marginBottom;
         }
 
         /// <summary>0.5 UI에서 옵션은 <c>panelLeft</c> 스크롤, <c>I/O 적용</c>은 그 아래 전용 행(가로 스크롤바 위에 버튼이 오도록).</summary>
@@ -349,11 +483,11 @@ namespace EMS_TEST_SIMULATOR
             if (!_halfUiScaleApplied || splitMain?.Panel1 == null || buttonApplyOptions == null || splitMain.Panel1.IsDisposed || buttonApplyOptions.IsDisposed)
                 return;
             float s = _layoutDimScale;
-            int mx = Math.Max(6, (int)Math.Round(14 * s));
-            int marginTop = Math.Max(4, (int)Math.Round(8 * s));
-            int marginBottom = Math.Max(12, (int)Math.Round(18 * s));
-            int bh = Math.Max(28, (int)Math.Round(36 * s));
-            int btnRowH = marginTop + bh + marginBottom;
+            splitMain.BackColor = LeftChromeBackColor;
+            splitMain.Panel1.BackColor = LeftChromeBackColor;
+            splitMain.Panel2.BackColor = panelRight?.BackColor ?? LeftChromeBackColor;
+            panelLeft.BackColor = LeftChromeBackColor;
+            GetIoApplyButtonRowMetrics(s, out int mx, out int marginTop, out int marginBottom, out int bh, out int btnRowH);
             buttonApplyOptions.Margin = new Padding(mx, marginTop, mx, marginBottom);
             buttonApplyOptions.Height = bh;
             buttonApplyOptions.Dock = DockStyle.Fill;
@@ -365,11 +499,11 @@ namespace EMS_TEST_SIMULATOR
                     Dock = DockStyle.Fill,
                     ColumnCount = 1,
                     RowCount = 2,
-                    BackColor = panelLeft.BackColor,
+                    BackColor = LeftChromeBackColor,
                     Padding = new Padding(0),
                     Margin = new Padding(0)
                 };
-                _leftColumnHost.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+                _leftColumnHost.RowStyles.Add(new RowStyle(SizeType.Absolute, 200));
                 _leftColumnHost.RowStyles.Add(new RowStyle(SizeType.Absolute, btnRowH));
 
                 splitMain.Panel1.SuspendLayout();
@@ -392,6 +526,8 @@ namespace EMS_TEST_SIMULATOR
                         _leftColumnHost.ResumeLayout(false);
                     }
                     splitMain.Panel1.Controls.Add(_leftColumnHost);
+                    _leftColumnHost.Resize -= LeftColumnHost_OnResizeSyncHeights;
+                    _leftColumnHost.Resize += LeftColumnHost_OnResizeSyncHeights;
                 }
                 finally
                 {
@@ -402,81 +538,104 @@ namespace EMS_TEST_SIMULATOR
             {
                 if (_leftColumnHost.RowStyles.Count >= 2)
                     _leftColumnHost.RowStyles[1] = new RowStyle(SizeType.Absolute, btnRowH);
+                _leftColumnHost.BackColor = LeftChromeBackColor;
             }
             SyncLeftBottomChromeRowToRightFooter();
         }
 
-        /// <summary>좌측 I/O 적용 행 높이를 우측 푸터(상태저장/체크시트) 행과 맞춰 하단 밴드·스크롤 영역 높이를 동기화.</summary>
+        private void LeftColumnHost_OnResizeSyncHeights(object sender, EventArgs e)
+        {
+            SyncLeftBottomChromeRowToRightFooter();
+        }
+
+        /// <summary>좌측 TLP: 0행=옵션(<c>panelLeft</c>)이 호스트 세로 전부, 1행=I/O 적용 고정. Percent 행이 0에 붕괴되어 스크롤·버튼이 위에 몰리는 문제 방지.</summary>
         private void SyncLeftBottomChromeRowToRightFooter()
         {
-            if (!_halfUiScaleApplied || _leftColumnHost == null || tableLayoutPanelRight == null || tableLayoutPanelRight.RowStyles.Count < 3)
+            if (!_halfUiScaleApplied || _leftColumnHost == null || _leftColumnHost.IsDisposed)
                 return;
             if (_leftColumnHost.RowStyles.Count < 2) return;
-            var rs = tableLayoutPanelRight.RowStyles[2];
-            if (rs.SizeType != SizeType.Absolute) return;
-            int footerH = (int)Math.Ceiling(rs.Height);
             float s = _layoutDimScale;
-            int marginTop = Math.Max(4, (int)Math.Round(8 * s));
-            int marginBottom = Math.Max(12, (int)Math.Round(18 * s));
-            int bh = Math.Max(28, (int)Math.Round(36 * s));
-            int btnRowH = marginTop + bh + marginBottom;
-            int row1 = Math.Max(btnRowH, footerH);
-            _leftColumnHost.RowStyles[1] = new RowStyle(SizeType.Absolute, row1);
+            GetIoApplyButtonRowMetrics(s, out _, out _, out _, out _, out int btnRowH);
+
+            int hostH = Math.Max(_leftColumnHost.ClientSize.Height, _leftColumnHost.Height);
+            if (hostH <= 1 && splitMain?.Panel1 != null)
+                hostH = Math.Max(1, splitMain.Panel1.ClientSize.Height);
+            if (hostH <= 1 && _leftColumnHost.Parent != null)
+                hostH = Math.Max(1, _leftColumnHost.Parent.ClientSize.Height);
+
+            int row0 = hostH - btnRowH;
+            if (row0 < 1)
+                row0 = 1;
+
+            _leftColumnHost.SuspendLayout();
+            try
+            {
+                _leftColumnHost.RowStyles[0] = new RowStyle(SizeType.Absolute, row0);
+                _leftColumnHost.RowStyles[1] = new RowStyle(SizeType.Absolute, btnRowH);
+            }
+            finally
+            {
+                _leftColumnHost.ResumeLayout(true);
+            }
         }
 
         private void IOCheckSheetForm_SizeReflowHalfUi(object sender, EventArgs e)
         {
             if (!_halfUiScaleApplied) return;
             LayoutPanelTopReflow();
+            SyncRootChromeTopRow();
             LayoutPanelLeftStacked();
             EnsureRightChromeLayout();
+            SetGridColumnWidths();
         }
 
         private void SplitMain_LayoutSync(object sender, EventArgs e)
         {
             ApplyPreferredSplitDistance();
+            SyncLeftBottomChromeRowToRightFooter();
             SyncRightScrollableArea(sender, e);
         }
 
-        /// <summary>EndInit 시점에는 split 너비가 아직 작을 수 있어 Designer는 최소값만 두고, 여기서 유효 범위로 스플리터 거리·MinSize를 맞춤.</summary>
+        /// <summary>
+        /// 좌측(Panel1)은 라벨·콤보가 보일 정도의 가로만 쓰고, 나머지는 우측(Panel2)에 넘긴다.
+        /// <see cref="FixedPanel.Panel2"/> 및 매 레이아웃마다 상한을 다시 적용해, 창 확대 시 우측이 넓어지고 좌측은 과도하게 늘어나지 않게 한다.
+        /// </summary>
         private void ApplyPreferredSplitDistance()
         {
             if (splitMain == null || splitMain.IsDisposed) return;
             int w = splitMain.Width;
             int sw = splitMain.SplitterWidth;
-            if (w <= sw + 50) return;
+            if (w <= sw + 2) return;
+
             float s = _layoutDimScale;
-            int wantDist = (int)Math.Round(400 * s);
-            if (s < 0.99f)
-                wantDist = Math.Max(wantDist, (int)Math.Round(440 * s));
-            int idealMin1 = (int)Math.Round(360 * s);
-            int idealMin2 = (int)Math.Round(200 * s);
-            int p1min = idealMin1;
-            int p2min = idealMin2;
-            int hi = w - sw - p2min;
-            int lo = p1min;
+            int inner = w - sw;
+
+            // 우측(탭·그리드) 최소 가로
+            int panel2Floor = Math.Max(220, (int)Math.Round(380 * Math.Max(s, 0.45f)));
+            // 좌측(옵션) 최소·최대 가로 — 최대를 두지 않으면 좌측이 전체를 잡아 콤보만 과도하게 늘어남
+            int panel1Floor = Math.Max(160, (int)Math.Round(220 * Math.Max(s, 0.45f)));
+            int leftPreferMax = (int)Math.Round(500 * Math.Max(s, 0.45f));
+            int leftPctCap = (int)Math.Round(inner * 0.36f);
+            int leftCap = Math.Max(panel1Floor, Math.Min(leftPreferMax, leftPctCap));
+
+            splitMain.Panel2MinSize = Math.Min(panel2Floor, Math.Max(120, inner - leftCap - 1));
+            splitMain.Panel1MinSize = Math.Min(panel1Floor, Math.Max(80, inner - splitMain.Panel2MinSize - 1));
+
+            int hi = inner - splitMain.Panel2MinSize;
+            int lo = splitMain.Panel1MinSize;
+            int dist = Math.Min(hi, leftCap);
+
             if (hi < lo)
             {
-                p2min = 25;
-                hi = w - sw - p2min;
+                splitMain.Panel1MinSize = 0;
+                splitMain.Panel2MinSize = 0;
+                dist = Math.Max(1, inner / 2);
             }
-            if (hi < lo)
-            {
-                p1min = Math.Max(25, hi);
-                lo = p1min;
-                hi = w - sw - p2min;
-            }
-            if (hi < lo) return;
-            splitMain.Panel2MinSize = p2min;
-            splitMain.Panel1MinSize = p1min;
-            hi = w - sw - splitMain.Panel2MinSize;
-            lo = splitMain.Panel1MinSize;
-            if (hi < lo) return;
-            int d = wantDist;
-            if (d < lo) d = lo;
-            if (d > hi) d = hi;
-            if (splitMain.SplitterDistance != d)
-                splitMain.SplitterDistance = d;
+            else
+                dist = Math.Max(lo, Math.Min(dist, hi));
+
+            if (splitMain.SplitterDistance != dist)
+                splitMain.SplitterDistance = dist;
         }
 
         /// <summary>왼쪽 패널 클라이언트 폭(세로 스크롤 포함)에 맞춰 콤보 폭을 맞춤 — 고정 250px이 스크롤바에 가려지는 문제 방지.</summary>
@@ -524,9 +683,85 @@ namespace EMS_TEST_SIMULATOR
                 x = c.Right + gap;
                 lineH = Math.Max(lineH, c.Height);
             }
-            int needH = y + lineH + pad;
-            if (panelTop.Height < needH)
-                panelTop.Height = needH;
+            int contentTop = int.MaxValue;
+            int contentBottom = 0;
+            foreach (var c in row)
+            {
+                if (c == null || !c.Visible) continue;
+                contentTop = Math.Min(contentTop, c.Top);
+                contentBottom = Math.Max(contentBottom, c.Bottom);
+            }
+            if (contentTop == int.MaxValue) return;
+
+            int contentH = contentBottom - contentTop;
+            int padBottom = pad;
+            int slack = Math.Max(6, (int)Math.Round(14 * s));
+            int targetH = Math.Max(contentBottom + padBottom + slack, panelTop.Height);
+
+            // 세로 중앙: 한 줄·두 줄 모두 패널 높이 안에서 블록이 가운데쯤 오도록 이동
+            int desiredTop = (targetH - contentH) / 2;
+            int dy = desiredTop - contentTop;
+            int minTop = Math.Max(4, (int)Math.Round(6 * s));
+            if (contentTop + dy < minTop)
+                dy = minTop - contentTop;
+            foreach (var c in row)
+            {
+                if (c == null) continue;
+                c.Top += dy;
+            }
+
+            int maxB = 0;
+            foreach (var c in row)
+            {
+                if (c != null && c.Visible)
+                    maxB = Math.Max(maxB, c.Bottom);
+            }
+            // targetH는 이미 min(필요높이, 기존 높이) 중 큰 값 — 최종 높이가 그보다 작아지면 세로 중앙 기준이 어긋남
+            panelTop.Height = Math.Max(maxB + padBottom + slack, targetH);
+            SyncRootChromeTopRow();
+        }
+
+        /// <summary>
+        /// SKY-RAV 상단(<c>panelTop</c>) 아래 · DEVICE/I.O 탭(<c>tabControl1</c>) 위에만 어드레스 필터 밴드가 오도록 0행 높이·패딩·탭 상단 마진을 고정한다.
+        /// (0행 AutoSize 붕괴 방지 + 탭과 세로 겹침 방지)
+        /// </summary>
+        private void SyncRightFilterHeaderRow()
+        {
+            if (panelRightHeader == null || tableLayoutPanelRight == null || tableLayoutPanelRight.IsDisposed
+                || tableLayoutPanelRight.RowStyles.Count < 3)
+                return;
+            float s = _halfUiScaleApplied ? _layoutDimScale : 1f;
+            int padH = Math.Max(6, (int)Math.Round(10 * s));
+            // 상단 패널과의 시각적 간격 + 글자 상단 클립 방지(패딩 안에서만 흐름 배치)
+            int padVTop = Math.Max(12, (int)Math.Round(22 * Math.Max(s, 0.45f)));
+            int padVBottom = Math.Max(10, (int)Math.Round(18 * Math.Max(s, 0.45f)));
+            // 필터 밴드 하단과 탭 헤더 사이 — 탭은 항상 필터보다 아래
+            int gapBeforeTabs = Math.Max(8, (int)Math.Round(14 * Math.Max(s, 0.45f)));
+
+            panelRightHeader.Padding = new Padding(padH, padVTop, padH, padVBottom);
+            panelRightHeader.Margin = Padding.Empty;
+            if (tabControl1 != null && !tabControl1.IsDisposed)
+                tabControl1.Margin = new Padding(0, gapBeforeTabs, 0, 0);
+
+            panelRightHeader.PerformLayout();
+            int w = Math.Max(80, panelRightHeader.ClientSize.Width > 0 ? panelRightHeader.ClientSize.Width : panelRightHeader.Width);
+            var pref = panelRightHeader.GetPreferredSize(new Size(w, 0));
+            int h = pref.Height + panelRightHeader.Margin.Vertical + Math.Max(2, (int)Math.Round(4 * s));
+            int minBand = Math.Max(52, (int)Math.Round(76 * Math.Max(s, 0.45f)));
+            h = Math.Max(h, minBand);
+
+            tableLayoutPanelRight.SuspendLayout();
+            try
+            {
+                tableLayoutPanelRight.RowStyles[0] = new RowStyle(SizeType.Absolute, h);
+            }
+            finally
+            {
+                tableLayoutPanelRight.ResumeLayout(true);
+            }
+
+            // 형제 순서상 탭이 나중에 그려지면 필터 위로 덮일 수 있음 → 필터를 항상 위로
+            panelRightHeader.BringToFront();
         }
 
         /// <summary>0.5 스케일 후 콤보 최소 높이로 세로 간격이 무너질 때 — 라벨+콤보 세로 스택·스크롤 영역 갱신.</summary>
@@ -544,8 +779,8 @@ namespace EMS_TEST_SIMULATOR
             int gapAfterCombo = Math.Max(8, (int)Math.Round(14 * s));
             int x = padL + gapX;
             int innerW = Math.Max(40, panelLeft.ClientSize.Width - padL - padR - gapX * 2);
-            // 상단 "옵션 설정"·첫 콤보 라벨이 잘리지 않도록 전체 스택을 아래로 내림 (+ 24*s 추가)
-            int topBreathing = Math.Max(16, (int)Math.Round(24 * s)) + (int)Math.Round(24 * s);
+            // 과도한 topBreathing은 뷰포트가 작을 때 첫 줄이 위로 밀려 잘리거나 스크롤만 도드라짐
+            int topBreathing = Math.Max(6, (int)Math.Round(10 * Math.Max(s, 0.45f)));
             int y = padT + topBreathing;
 
             void placeTitle(Control t)
@@ -590,9 +825,12 @@ namespace EMS_TEST_SIMULATOR
             }
             // 가로 최소 폭을 뷰 폭에 맞춤 — 불필요한 가로 스크롤이 생기면 H스크롤이 버튼 행과 겹쳐 보임
             int cw = Math.Max(1, panelLeft.ClientSize.Width);
-            int bottomSlack = (int)Math.Round(72 * s);
-            int scrollH = Math.Max((int)Math.Round(400 * s), maxBottom + padB + bottomSlack);
-            panelLeft.AutoScrollMinSize = new Size(cw, scrollH);
+            int bottomSlack = (int)Math.Round(24 * s);
+            int scrollH = maxBottom + padB + bottomSlack;
+            // Client+1 강제는 내용이 짧아도 항상 세로 스크롤을 만들어 첫 줄이 잘려 보이기 쉬움
+            panelLeft.AutoScrollMinSize = new Size(cw, Math.Max(1, scrollH));
+            panelLeft.AutoScrollPosition = Point.Empty;
+            panelLeft.BackColor = LeftChromeBackColor;
             EnsureIoApplyButtonDockedToSplitPanel1();
             SyncLeftBottomChromeRowToRightFooter();
         }
@@ -620,6 +858,7 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>축소 UI에서 파란 버튼(파일 불러오기·상태저장·체크시트 출력)이 잘리지 않도록 우측·DEVICE 상단 바 높이 보정.</summary>
         private void EnsureRightChromeLayout()
         {
+            SyncRightFilterHeaderRow();
             if (!_halfUiScaleApplied) return;
 
             LayoutLoadExcelButtonInTopBar();
@@ -1649,13 +1888,18 @@ namespace EMS_TEST_SIMULATOR
         {
             if (dataGridViewIO.Columns.Count == 0) return;
             dataGridViewIO.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-            // 어드레스, IO구분(숨김), BIT, I.O기판/커넥터No., IO기판/PIN-NO, 중계기판/기판명칭, 중계기판/커넥터NO, 중계기판 PIN-NO., 신호명칭, 논리, I.O 체크, 비고
-            int[] widths = { 115, 0, 50, 185, 130, 170, 160, 155, 320, 72, 95, 120 };
+            // 1.0 기준 픽셀. s=0.5만 곱하면 헤더·어드레스·신호명이 과도하게 잘림 → 열 전용 스케일을 s보다 높게
+            int[] widths = { 132, 0, 54, 205, 148, 195, 182, 175, 400, 78, 102, 148 };
             float s = _layoutDimScale;
+            float colScale = s < 0.99f ? Math.Max(s, 0.84f) : s;
+            // 축소 UI에서도 읽을 수 있는 하한(픽셀)
+            int[] minPx = { 100, 0, 46, 128, 100, 128, 118, 118, 240, 62, 90, 104 };
             for (int i = 0; i < dataGridViewIO.Columns.Count && i < widths.Length; i++)
             {
                 var col = dataGridViewIO.Columns[i];
-                int cw = widths[i] > 0 ? (int)Math.Round(widths[i] * s) : 0;
+                int cw = widths[i] > 0 ? (int)Math.Round(widths[i] * colScale) : 0;
+                if (widths[i] > 0 && s < 0.99f && i < minPx.Length)
+                    cw = Math.Max(cw, minPx[i]);
                 int minW = widths[i] > 0 ? Math.Max(20, cw) : Math.Max(15, (int)Math.Round(30 * s));
                 col.MinimumWidth = minW;
                 col.Width = cw;
@@ -1720,6 +1964,7 @@ namespace EMS_TEST_SIMULATOR
             if (!usedSignalOnly)
             {
                 dataGridViewIO.DataSource = source;
+                SetGridColumnWidths();
                 return;
             }
             // 사용신호 필터링 체크 시 = 신호명이 있는 행만 표시
@@ -1731,6 +1976,7 @@ namespace EMS_TEST_SIMULATOR
                     AddRowByColumn(filtered, row);
             }
             dataGridViewIO.DataSource = filtered;
+            SetGridColumnWidths();
         }
 
         /// <summary>열 순서/이름으로 복사해 행 추가 (ItemArray 열 매핑 이슈 방지).</summary>
@@ -3528,6 +3774,11 @@ namespace EMS_TEST_SIMULATOR
         }
 
         private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panelLeft_Paint(object sender, PaintEventArgs e)
         {
 
         }

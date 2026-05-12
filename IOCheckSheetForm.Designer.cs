@@ -55,6 +55,7 @@ namespace EMS_TEST_SIMULATOR
             this.labelHoistType = new System.Windows.Forms.Label();
             this.labelOptionTitle = new System.Windows.Forms.Label();
             this.buttonApplyOptions = new System.Windows.Forms.Button();
+            this.splitMain = new System.Windows.Forms.SplitContainer();
             this.panelRight = new System.Windows.Forms.Panel();
             this.tableLayoutPanelRight = new System.Windows.Forms.TableLayoutPanel();
             this.panelRightHeader = new System.Windows.Forms.FlowLayoutPanel();
@@ -75,9 +76,12 @@ namespace EMS_TEST_SIMULATOR
             this.panelRightFooter = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonSavePdf = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.splitMain = new System.Windows.Forms.SplitContainer();
             this.panelTop.SuspendLayout();
             this.panelLeft.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
+            this.splitMain.Panel1.SuspendLayout();
+            this.splitMain.Panel2.SuspendLayout();
+            this.splitMain.SuspendLayout();
             this.panelRight.SuspendLayout();
             this.tableLayoutPanelRight.SuspendLayout();
             this.panelRightHeader.SuspendLayout();
@@ -88,10 +92,6 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewIO)).BeginInit();
             this.panelRightFooter.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
-            this.splitMain.Panel1.SuspendLayout();
-            this.splitMain.Panel2.SuspendLayout();
-            this.splitMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelTop
@@ -201,6 +201,7 @@ namespace EMS_TEST_SIMULATOR
             this.panelLeft.Padding = new System.Windows.Forms.Padding(14, 10, 12, 10);
             this.panelLeft.Size = new System.Drawing.Size(25, 1051);
             this.panelLeft.TabIndex = 1;
+            this.panelLeft.Paint += new System.Windows.Forms.PaintEventHandler(this.panelLeft_Paint);
             // 
             // comboBox3
             // 
@@ -584,13 +585,32 @@ namespace EMS_TEST_SIMULATOR
             this.buttonApplyOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonApplyOptions.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.buttonApplyOptions.ForeColor = System.Drawing.Color.White;
-            this.buttonApplyOptions.Location = new System.Drawing.Point(12, 990);
+            this.buttonApplyOptions.Location = new System.Drawing.Point(12, 978);
             this.buttonApplyOptions.Name = "buttonApplyOptions";
             this.buttonApplyOptions.Size = new System.Drawing.Size(174, 36);
             this.buttonApplyOptions.TabIndex = 16;
             this.buttonApplyOptions.Text = "I/O 적용";
             this.buttonApplyOptions.UseVisualStyleBackColor = false;
             this.buttonApplyOptions.Click += new System.EventHandler(this.buttonApplyOptions_Click);
+            // 
+            // splitMain
+            // 
+            this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitMain.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitMain.IsSplitterFixed = true;
+            this.splitMain.Location = new System.Drawing.Point(0, 0);
+            this.splitMain.Name = "splitMain";
+            // 
+            // splitMain.Panel1
+            // 
+            this.splitMain.Panel1.Controls.Add(this.panelLeft);
+            // 
+            // splitMain.Panel2
+            // 
+            this.splitMain.Panel2.Controls.Add(this.panelRight);
+            this.splitMain.Size = new System.Drawing.Size(1478, 1051);
+            this.splitMain.SplitterDistance = 25;
+            this.splitMain.TabIndex = 19;
             // 
             // panelRight
             // 
@@ -777,7 +797,6 @@ namespace EMS_TEST_SIMULATOR
             // 
             // buttonLoadExcel
             // 
-            this.buttonLoadExcel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonLoadExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
             this.buttonLoadExcel.FlatAppearance.BorderSize = 0;
             this.buttonLoadExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -882,25 +901,6 @@ namespace EMS_TEST_SIMULATOR
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // splitMain
-            // 
-            this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitMain.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitMain.IsSplitterFixed = true;
-            this.splitMain.Location = new System.Drawing.Point(0, 0);
-            this.splitMain.Name = "splitMain";
-            // 
-            // splitMain.Panel1
-            // 
-            this.splitMain.Panel1.Controls.Add(this.panelLeft);
-            // 
-            // splitMain.Panel2
-            // 
-            this.splitMain.Panel2.Controls.Add(this.panelRight);
-            this.splitMain.Size = new System.Drawing.Size(1478, 1051);
-            this.splitMain.SplitterDistance = 25;
-            this.splitMain.TabIndex = 19;
-            // 
             // IOCheckSheetForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -919,6 +919,10 @@ namespace EMS_TEST_SIMULATOR
             this.panelTop.PerformLayout();
             this.panelLeft.ResumeLayout(false);
             this.panelLeft.PerformLayout();
+            this.splitMain.Panel1.ResumeLayout(false);
+            this.splitMain.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
+            this.splitMain.ResumeLayout(false);
             this.panelRight.ResumeLayout(false);
             this.tableLayoutPanelRight.ResumeLayout(false);
             this.panelRightHeader.ResumeLayout(false);
@@ -931,10 +935,6 @@ namespace EMS_TEST_SIMULATOR
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewIO)).EndInit();
             this.panelRightFooter.ResumeLayout(false);
             this.panelRightFooter.PerformLayout();
-            this.splitMain.Panel1.ResumeLayout(false);
-            this.splitMain.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
-            this.splitMain.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -948,18 +948,7 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.TextBox textBoxTestDate;
         private System.Windows.Forms.Panel panelLeft;
         private System.Windows.Forms.SplitContainer splitMain;
-        private System.Windows.Forms.Panel panelRight;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelRight;
-        private System.Windows.Forms.FlowLayoutPanel panelRightHeader;
-        private System.Windows.Forms.FlowLayoutPanel panelRightFooter;
-        private System.Windows.Forms.ComboBox comboFilter;
-        private System.Windows.Forms.Label labelFilter;
-        private System.Windows.Forms.Button buttonSavePdf;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.CheckBox checkBoxUsedSignalFilter;
-        private System.Windows.Forms.Label labelLegend;
-        private System.Windows.Forms.Label labelLegendInput;
-        private System.Windows.Forms.Label labelLegendOutput;
         private System.Windows.Forms.Label labelOptionTitle;
         private System.Windows.Forms.Label labelHoistType;
         private System.Windows.Forms.ComboBox comboHoistType;
@@ -990,14 +979,25 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox comboBox3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Panel panelRight;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelRight;
+        private System.Windows.Forms.FlowLayoutPanel panelRightHeader;
+        private System.Windows.Forms.Label labelFilter;
+        private System.Windows.Forms.ComboBox comboFilter;
+        private System.Windows.Forms.CheckBox checkBoxUsedSignalFilter;
+        private System.Windows.Forms.Label labelLegend;
+        private System.Windows.Forms.Label labelLegendInput;
+        private System.Windows.Forms.Label labelLegendOutput;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Panel panelDeviceList;
+        private System.Windows.Forms.ListView listViewDeviceList;
         private System.Windows.Forms.Panel panelDeviceListTop;
         private System.Windows.Forms.Button buttonLoadExcel;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DataGridView dataGridViewIO;
-        private System.Windows.Forms.ListView listViewDeviceList;
+        private System.Windows.Forms.FlowLayoutPanel panelRightFooter;
+        private System.Windows.Forms.Button buttonSavePdf;
+        private System.Windows.Forms.Button button1;
     }
 }
