@@ -597,7 +597,6 @@ namespace EMS_TEST_SIMULATOR
             {
                 // 연결 성공 시: 녹색
                 Rail_io.BackColor = Color.Lime;
-                Rail_io.Text = "Rail I.O (Connected)";
                 FlatButtonPaintFix.ApplyToButton(Rail_io);
             }
             else
@@ -605,7 +604,6 @@ namespace EMS_TEST_SIMULATOR
                 // 연결 실패/해제 시: 파란색(기본 버튼색) 복귀
                 Rail_io.BackColor = Color.FromArgb(37, 99, 235);
                 Rail_io.ForeColor = Color.White;
-                Rail_io.Text = "Rail I.O (Disconnected)";
                 FlatButtonPaintFix.ApplyToButton(Rail_io);
             }
         }

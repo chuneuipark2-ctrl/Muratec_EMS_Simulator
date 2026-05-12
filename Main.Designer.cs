@@ -135,7 +135,7 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_respons_code = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.Rail_io = new System.Windows.Forms.Button();
+            this.Rail_io = new StableTextFlatButton();
             this.tBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btn_Command = new System.Windows.Forms.Button();
@@ -1661,7 +1661,7 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.Button btn_Command;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tBox1;
-        private System.Windows.Forms.Button Rail_io;
+        private StableTextFlatButton Rail_io;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;

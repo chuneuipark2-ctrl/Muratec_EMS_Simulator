@@ -74,6 +74,9 @@
     </Compile>
     <Compile Include="EMS_Protocol.cs" />
     <Compile Include="FlatButtonPaintFix.cs" />
+    <Compile Include="StableTextFlatButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="EMS_TCP_UDP_Connect.cs">
       <SubType>Form</SubType>
     </Compile>
