@@ -41,6 +41,9 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>EMS 상태 패널 실시간 갱신용 타이머 (UI 스레드에서만 라벨 갱신 → 스레드 안전)</summary>
         private System.Windows.Forms.Timer _emsStatusUpdateTimer;
 
+        /// <summary>AUTO·EMO가 아닐 때 레일 5대 연결 상태 변화를 타워램프에 반영 (출력 스레드는 DO만 갱신)</summary>
+        private System.Windows.Forms.Timer _towerIdleRefreshTimer;
+
         /// <summary>통신 로그: 최대 행 수 제한(초과 시 오래된 행 삭제), 뻑남 방지</summary>
         private const int _commLogMaxRows = 3000;
         private bool _commLogPaused = false;
@@ -53,6 +56,9 @@ namespace EMS_TEST_SIMULATOR
 
         /// <summary>AUTO 버튼: 클릭 시 초록 띄 토글만 (한번 누르면 띄, 두번째 누르면 띄 제거, 무한 반복)</summary>
         private bool _autoGreenBorderOn = false;
+
+        /// <summary>제목(SKY-RAV…) 비밀번호 1 통과 시: AUTO에서 레일 8비트 인터록 생략, 1초 대기 후 H4 진행.</summary>
+        public bool BypassRailInterlockForAuto { get; set; }
 
         /// <summary>EMO 눌려 있는 동안 기체 이상정지 H4(05) 주기 전송용 타이머. 해제 시 중지 후 H4(06) 1회 전송.</summary>
         private System.Windows.Forms.Timer _emoH4AbnormalStopTimer;
@@ -166,6 +172,12 @@ namespace EMS_TEST_SIMULATOR
             _emsStatusUpdateTimer.Interval = 300;
             _emsStatusUpdateTimer.Tick += (s, ev) => RefreshEmsStatusPanel();
             _emsStatusUpdateTimer.Start();
+
+            TowerLamp.SetMode(TowerLampVisualMode.IdleRedSteady);
+            _towerIdleRefreshTimer = new System.Windows.Forms.Timer();
+            _towerIdleRefreshTimer.Interval = 1000;
+            _towerIdleRefreshTimer.Tick += (s, ev) => RefreshTowerLampAfterAutoOrRail();
+            _towerIdleRefreshTimer.Start();
 
             // ★ 통신 로그: 그리드 준비 + 정적 이벤트 구독 (Connect 폼 참조 없이 로그 수신)
             InitializeCommLogGrid();
@@ -544,6 +556,9 @@ namespace EMS_TEST_SIMULATOR
                 UpdateRailButtonStatus(true);
                 tBox1.AppendText("모든 장비 연결 성공 (192.168.0.20 ~ 24)" + Environment.NewLine);
 
+                if (!_autoRunning && !_emoGreenBorderOn)
+                    TowerLamp.SetMode(TowerLampVisualMode.RailAllOkBlueSteady);
+
                 PANEL_DIO panel = new PANEL_DIO();
                 panel.Show();
             }
@@ -563,9 +578,38 @@ namespace EMS_TEST_SIMULATOR
                     tBox1.AppendText($"[실패] {errorIp}" + Environment.NewLine);
                 }
 
+                if (!_autoRunning && !_emoGreenBorderOn)
+                {
+                    if (Rail_DIO.Instance.IsAnySlaveConnected())
+                        TowerLamp.SetMode(TowerLampVisualMode.RailErrorRedBlink);
+                    else
+                        TowerLamp.SetMode(TowerLampVisualMode.IdleRedSteady);
+                }
+
                 MessageBox.Show("일부 장비 연결에 실패했습니다. 텍스트박스를 확인하세요.");
             }
 
+        }
+
+        /// <summary>
+        /// AUTO 가동 중이 아닐 때 레일·EMO 상태에 맞춰 타워램프 논리 모드 갱신.
+        /// EMS 동작이상 등으로 적색 상시(EmsFaultRedSteady)인 경우 덮어쓰지 않음(해제: AUTO 재시도 등 SetMode).
+        /// </summary>
+        public void RefreshTowerLampAfterAutoOrRail()
+        {
+            if (_autoRunning) return;
+            if (TowerLamp.GetMode() == TowerLampVisualMode.EmsFaultRedSteady) return;
+            if (_emoGreenBorderOn)
+            {
+                TowerLamp.SetMode(TowerLampVisualMode.EmoRedBlink);
+                return;
+            }
+            if (Rail_DIO.Instance.AreAllFiveSlavesConnected())
+                TowerLamp.SetMode(TowerLampVisualMode.RailAllOkBlueSteady);
+            else if (Rail_DIO.Instance.IsAnySlaveConnected())
+                TowerLamp.SetMode(TowerLampVisualMode.RailErrorRedBlink);
+            else
+                TowerLamp.SetMode(TowerLampVisualMode.IdleRedSteady);
         }
 
         public void UpdateConnectionStatus(bool connected)
@@ -1173,6 +1217,47 @@ namespace EMS_TEST_SIMULATOR
 
         }
 
+        private void label4_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new Form())
+            {
+                dlg.Text = "패스워드";
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MinimizeBox = false;
+                dlg.MaximizeBox = false;
+                dlg.ShowInTaskbar = false;
+                dlg.ClientSize = new Size(288, 118);
+                dlg.BackColor = Color.FromArgb(62, 62, 66);
+                dlg.ForeColor = Color.White;
+
+                var lbl = new Label { Text = "비밀번호 입력", Location = new Point(12, 12), AutoSize = true, ForeColor = Color.White };
+                var tb = new System.Windows.Forms.TextBox { PasswordChar = '*', Location = new Point(12, 36), Width = 256 };
+                var btnOk = new System.Windows.Forms.Button { Text = "확인", Location = new Point(96, 72), DialogResult = DialogResult.OK, Size = new Size(78, 28) };
+                var btnCancel = new System.Windows.Forms.Button { Text = "취소", Location = new Point(184, 72), DialogResult = DialogResult.Cancel, Size = new Size(78, 28) };
+                dlg.Controls.Add(lbl);
+                dlg.Controls.Add(tb);
+                dlg.Controls.Add(btnOk);
+                dlg.Controls.Add(btnCancel);
+                dlg.AcceptButton = btnOk;
+                dlg.CancelButton = btnCancel;
+
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return;
+                if (tb.Text == "1")
+                {
+                    BypassRailInterlockForAuto = true;
+                    MessageBox.Show(this,
+                        "AUTO 실행 시 레일 8비트 인터록을 건너뜁니다. H4 전송 전 1초만 대기합니다.\r\n※ 해제: 프로그램 재시작",
+                        "개발 모드",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                else
+                    MessageBox.Show(this, "비밀번호가 맞지 않습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void label5_Click(object sender, EventArgs e)
         {
 
@@ -1310,17 +1395,21 @@ namespace EMS_TEST_SIMULATOR
                 ApplyAutoButtonGreenBorder(false);
                 _cycleStopRequestedByUser = true;
                 EMS_Mode_Sequence.CycleStopRequested = true;
+                TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink);
                 MessageBox.Show("사이클 정지 요청되었습니다. 현재 동작을 마친 뒤 101번 위치로 복귀하여 타이어를 내려놓은 후 정지합니다.");
                 return;
             }
-            // 7) 실행 확인
+            // 7) 실행 확인 (대화상자 전: 녹색 점멸)
+            TowerLamp.SetMode(TowerLampVisualMode.AutoConfirmGreenBlink);
             DialogResult result = MessageBox.Show("자동모드를 실행하시겠습니까?", "상태확인", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result != DialogResult.Yes)
             {
                 MessageBox.Show("취소하였습니다.");
+                RefreshTowerLampAfterAutoOrRail();
                 return;
             }
 
+            TowerLamp.SetMode(TowerLampVisualMode.AutoAfterConfirmBlueBlink);
             MessageBox.Show("레일 주변에 장애물이 없는지 확인한 후 진행하시기 바랍니다.");
 
             _autoGreenBorderOn = true;
@@ -1340,25 +1429,31 @@ namespace EMS_TEST_SIMULATOR
             var autoTask = emsSeq.RunAutoSequenceAsync(command_Form, this, _autoCts.Token);
             autoTask.ContinueWith(_ =>
             {
-                if (!this.IsDisposed && this.InvokeRequired)
-                    this.Invoke(new Action(() =>
+                void Done()
+                {
+                    if (this.IsDisposed) return;
+                    _autoRunning = false;
+                    _autoGreenBorderOn = false;
+                    ApplyAutoButtonGreenBorder(false);
+                    button7.Text = "";
+                    if (_autoStoppedByEmo)
                     {
-                        _autoRunning = false;
-                        _autoGreenBorderOn = false;
-                        ApplyAutoButtonGreenBorder(false);
-                        button7.Text = "";
-                        if (_autoStoppedByEmo)
-                        {
-                            _autoStoppedByEmo = false;
-                            MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }
-                        else if (_cycleStopRequestedByUser)
-                        {
-                            _cycleStopRequestedByUser = false;
-                            IOCheckSheetForm.AutoCycleCompleted = true;  // 사이클 정지 완료 시점 → I.O 자동 체크 대상 반영용
-                            MessageBox.Show("자동모드를 정지하였습니다. (101번 위치, 타이어 하차 완료)");
-                        }
-                    }));
+                        _autoStoppedByEmo = false;
+                        MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (_cycleStopRequestedByUser)
+                    {
+                        _cycleStopRequestedByUser = false;
+                        IOCheckSheetForm.AutoCycleCompleted = true;  // 사이클 정지 완료 시점 → I.O 자동 체크 대상 반영용
+                        MessageBox.Show("자동모드를 정지하였습니다. (101번 위치, 타이어 하차 완료)");
+                    }
+                    RefreshTowerLampAfterAutoOrRail();
+                }
+                if (!this.IsDisposed)
+                {
+                    if (InvokeRequired) Invoke(new Action(Done));
+                    else Done();
+                }
             }, System.Threading.Tasks.TaskScheduler.Default);
         }
 
@@ -1375,6 +1470,7 @@ namespace EMS_TEST_SIMULATOR
                 ApplyAutoButtonGreenBorder(false); // EMO 눌림 = AUTO 꺼짐 → 초록 띄 즉시 제거
                 ApplyEmoButtonGreenBorder(true);
                 _emoGreenBorderOn = true;
+                TowerLamp.SetMode(TowerLampVisualMode.EmoRedBlink);
                 EmoFirstTapSequence();
             }
             else
@@ -1382,6 +1478,7 @@ namespace EMS_TEST_SIMULATOR
                 ApplyEmoButtonGreenBorder(false);
                 _emoGreenBorderOn = false;
                 EmoSecondTapSequence();
+                RefreshTowerLampAfterAutoOrRail();
             }
         }
 
@@ -1491,12 +1588,15 @@ namespace EMS_TEST_SIMULATOR
         {
 
         }
-    }
 
-    /// <summary>통신 로그를 Connect 폼 참조 없이 Main으로 전달하는 정적 브릿지. Main이 Form_Load에서 구독.</summary>
-    public static class CommLogBridge
-    {
-        public static event Action<string, byte[], string> OnLog;
-        public static void Raise(string direction, byte[] data, string description) => OnLog?.Invoke(direction, data, description);
+        private void 통신로그_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void 엔코더설정_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

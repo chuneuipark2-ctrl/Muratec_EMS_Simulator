@@ -27,6 +27,25 @@ namespace EMS_TEST_SIMULATOR
 
         public bool io_test_flag = false; // 테스트 모드 활성화 플래그 (평상시 제어 차단)
 
+        public bool AreAllFiveSlavesConnected()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (!fastech_connects[i]) return false;
+            }
+            return true;
+        }
+
+        /// <summary>5대 중 하나라도 연결된 상태인지(부분 연결 판별용)</summary>
+        public bool IsAnySlaveConnected()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (fastech_connects[i]) return true;
+            }
+            return false;
+        }
+
         // 4. 이벤트 핸들러 (UI 갱신을 위해 외부 윈폼에서 구독)
         public delegate void InputUpdateHandler(int index, uint[] status);
         public event InputUpdateHandler OnInputUpdated;
@@ -213,6 +232,7 @@ namespace EMS_TEST_SIMULATOR
                 FASTECH.EziMOTIONPlusELib.FAS_SetOutput(targetId, 0, 0xFFFFFFFF); // 출력 모두 끔
                 FASTECH.EziMOTIONPlusELib.FAS_Close(targetId);
             }
+            TowerLamp.SetMode(TowerLampVisualMode.IdleRedSteady);
         }
 
         /// <summary>
@@ -397,37 +417,10 @@ namespace EMS_TEST_SIMULATOR
 
 
 
-        public void gcp_dio ()
-            {
-            uint switch_status = 0;
-
-
-            //승강무 타입의경우,  레일측이 슬레이브
-            //승강유 타입의경우,  레일측 마스터
-            //MS 비트에 N24가 들어가면 슬레이브, 안들어가면 마스터 기능 동작
-
-
-            switch (switch_status)
-            {
-                case 0: //에러 상태일때 RED 출력
-                    FASTECH.EziMOTIONPlusELib.FAS_SetOutput(2, 0x80000000, 0x7FFFFFFF);
-                    break;
-                case 1: //Manual일때 BLUE 출력
-                   FASTECH.EziMOTIONPlusELib.FAS_SetOutput(2, 0x10000000, 0xEFFFFFFF);
-                    break;
-                case 2: //Semi auto 일때 YELLOW 출력
-                    FASTECH.EziMOTIONPlusELib.FAS_SetOutput(2, 0x4AAA0000, 0xB555FFFF);//MASTER SLAVE 설정, 레일측이 슬레이브
-                    break;
-                case 3: //auto일떄 GREEN 출력
-                    FASTECH.EziMOTIONPlusELib.FAS_SetOutput(2, 0x2AAA0000, 0xD555FFFF);//MASTER SLAVE 설정, 레일측이 슬레이브
-                    break;
-                
-            }
-
-
-
-
-            }
+        public void gcp_dio()
+        {
+            TowerLamp.ApplyHardware();
+        }
 
 
 

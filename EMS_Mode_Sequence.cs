@@ -525,6 +525,7 @@ namespace EMS_TEST_SIMULATOR
         {
             try
             {
+                TowerLamp.SetMode(TowerLampVisualMode.AutoAfterConfirmBlueBlink);
                 var proto = form._emsProto;
                 var comm = form._comm;
                 string enc101 = GetEncoderValueForSection(form, AUTO_SECTION_101) ?? "0000";
@@ -545,36 +546,54 @@ namespace EMS_TEST_SIMULATOR
                     {
                         await SendH3ClearAsync(form);
                         if (!mainForm.IsDisposed)
-                            mainForm.Invoke(new Action(() => MessageBox.Show("EMS 동작이상 에러", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error)));
+                            mainForm.Invoke(new Action(() =>
+                            {
+                                TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
+                                MessageBox.Show("EMS 동작이상 에러", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }));
                         return;
                     }
                 }
 
-                // AUTO 시 레일 8비트 센서 인터록 활성화. 인터록 충족까지 대기(타임아웃 없음).
-                // 8비트 인터록 신호는 AUTO 활성화 중 별도 POLLING으로 계속 감시하며, 시퀀스는 인터록 사양서에 따라 동작.
+                // AUTO 시 레일 8비트 센서 인터록: 기본은 충족까지 대기. Main 제목 비밀(1) 통과 시 생략 후 1초만 대기.
                 Rail_DIO.Instance.io_test_flag = false;
-                while (!Rail_DIO.Instance.Is8BitSensorInterlockOkForAuto())
+                if (mainForm != null && mainForm.BypassRailInterlockForAuto)
                 {
-                    await Task.Delay(200, cancelToken);
+                    await Task.Delay(1000, cancelToken);
                     if (cancelToken.IsCancellationRequested) return;
+                }
+                else
+                {
+                    while (!Rail_DIO.Instance.Is8BitSensorInterlockOkForAuto())
+                    {
+                        await Task.Delay(200, cancelToken);
+                        if (cancelToken.IsCancellationRequested) return;
+                    }
                 }
 
                 // AUTO 최초 1회만 H4 자동(1) 전송, 이후 스텝은 H2만 전송
                 byte[] h4Auto = EMS_Order.EMS_Item_order("1");
                 if (h4Auto != null) await comm.SendData(Encoding.ASCII.GetString(h4Auto));
+                TowerLamp.SetMode(TowerLampVisualMode.AutoH4WaitGreenBlink);
                 if (!await WaitForTransferCommandAcceptAfterH4Async(proto, cancelToken))
                 {
                     await SendH3ClearAsync(form);
                     if (!mainForm.IsDisposed)
-                        mainForm.Invoke(new Action(() => MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "AUTO", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                        mainForm.Invoke(new Action(() =>
+                        {
+                            TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
+                            MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "AUTO", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }));
                     return;
                 }
 
+                TowerLamp.SetMode(TowerLampVisualMode.AutoH2RunGreenBlink);
                 bool firstLoop = true;
                 while (!cancelToken.IsCancellationRequested)
                 {
                     if (CycleStopRequested)
                     {
+                        TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink);
                         bool arrived = await ReturnTo101AndUnload(form, enc101, cancelToken);
                         CycleStopRequested = false;
                         if (!arrived)
@@ -588,24 +607,24 @@ namespace EMS_TEST_SIMULATOR
                     }
                     if (firstLoop)
                     {
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "1", enc101, cancelToken) == false) { await SendH3ClearAsync(form); break; }
-                        if (CycleStopRequested) { bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_110, "2", enc110, cancelToken) == false) { await SendH3ClearAsync(form); break; }
-                        if (CycleStopRequested) { bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_110, "1", enc110, cancelToken) == false) { await SendH3ClearAsync(form); break; }
-                        if (CycleStopRequested) { bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "2", enc113, cancelToken) == false) { await SendH3ClearAsync(form); break; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "1", enc101, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_110, "2", enc110, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_110, "1", enc110, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "2", enc113, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
                         firstLoop = false;
                     }
                     else
                     {
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "1", enc113, cancelToken) == false) { await SendH3ClearAsync(form); break; }
-                        if (CycleStopRequested) { bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "2", enc101, cancelToken) == false) { await SendH3ClearAsync(form); break; }
-                        if (CycleStopRequested) { bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "1", enc101, cancelToken) == false) { await SendH3ClearAsync(form); break; }
-                        if (CycleStopRequested) { bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "2", enc113, cancelToken) == false) { await SendH3ClearAsync(form); break; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "1", enc113, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "2", enc101, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "1", enc101, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
+                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "2", enc113, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
                     }
                 }
                 await SendH4ManualAsync(form);

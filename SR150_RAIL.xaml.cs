@@ -44,22 +44,22 @@ namespace EMS_TEST_SIMULATOR
                 Rectangle rect = new Rectangle { Width = 35, Height = 25, Stroke = Brushes.Black, StrokeThickness = 1, RadiusX = 3, RadiusY = 3 };
                 TextBlock text = new TextBlock { FontSize = 10, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Foreground = Brushes.White };
 
-                // --- 업데이트 버전의 Tag 기반 타입 설정 ---
+                // --- Tag 기반 타입 (표시: ST01~ST03) ---
                 if (i == 0)
                 {
-                    text.Text = "U/D";
+                    text.Text = "ST01";
                     rect.Fill = Brushes.SteelBlue;
                     rect.Tag = "UD";
                 }
                 else if (i == 12)
                 {
-                    text.Text = "L/D";
+                    text.Text = "ST03";
                     rect.Fill = Brushes.IndianRed;
                     rect.Tag = "LD";
                 }
                 else if (i == 9)
                 {
-                    text.Text = "Wait";
+                    text.Text = "ST02";
                     rect.Fill = Brushes.Violet;
                     rect.Tag = "wait";
                 }

@@ -135,12 +135,12 @@ namespace EMS_TEST_SIMULATOR
             this.lbl_respons_code = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.Rail_io = new StableTextFlatButton();
             this.tBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btn_Command = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.Rail_io = new EMS_TEST_SIMULATOR.StableTextFlatButton();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
@@ -201,6 +201,7 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.label4.AutoSize = true;
             this.tableLayoutPanel2.SetColumnSpan(this.label4, 5);
+            this.label4.Cursor = System.Windows.Forms.Cursors.Hand;
             this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label4.Font = new System.Drawing.Font("맑은 고딕", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label4.ForeColor = System.Drawing.Color.White;
@@ -211,6 +212,7 @@ namespace EMS_TEST_SIMULATOR
             this.label4.TabIndex = 22;
             this.label4.Text = "SKY-RAV GHC Simulator";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // tabControl1
             // 
@@ -271,21 +273,21 @@ namespace EMS_TEST_SIMULATOR
             // 
             // tabControl2
             // 
-            this.tableLayoutPanel2.SetColumnSpan(this.tabControl2, 6);
+            this.tableLayoutPanel2.SetColumnSpan(this.tabControl2, 7);
             this.tabControl2.Controls.Add(this.통신로그);
             this.tabControl2.Controls.Add(this.코드리스트);
             this.tabControl2.Controls.Add(this.엔코더설정);
             this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl2.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.tabControl2.ForeColor = System.Drawing.Color.White;
-            this.tabControl2.Location = new System.Drawing.Point(467, 474);
+            this.tabControl2.Location = new System.Drawing.Point(378, 474);
             this.tabControl2.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl2.MinimumSize = new System.Drawing.Size(400, 200);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.Padding = new System.Drawing.Point(8, 5);
             this.tableLayoutPanel2.SetRowSpan(this.tabControl2, 5);
             this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(526, 284);
+            this.tabControl2.Size = new System.Drawing.Size(615, 284);
             this.tabControl2.TabIndex = 21;
             // 
             // 통신로그
@@ -296,9 +298,10 @@ namespace EMS_TEST_SIMULATOR
             this.통신로그.Location = new System.Drawing.Point(4, 38);
             this.통신로그.Name = "통신로그";
             this.통신로그.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.통신로그.Size = new System.Drawing.Size(518, 242);
+            this.통신로그.Size = new System.Drawing.Size(607, 242);
             this.통신로그.TabIndex = 0;
             this.통신로그.Text = "통신로그";
+            this.통신로그.Click += new System.EventHandler(this.통신로그_Click);
             // 
             // Communication_log
             // 
@@ -309,7 +312,7 @@ namespace EMS_TEST_SIMULATOR
             this.Communication_log.Location = new System.Drawing.Point(6, 4);
             this.Communication_log.Name = "Communication_log";
             this.Communication_log.SelectedIndex = 0;
-            this.Communication_log.Size = new System.Drawing.Size(506, 232);
+            this.Communication_log.Size = new System.Drawing.Size(595, 232);
             this.Communication_log.TabIndex = 0;
             // 
             // tabPage3
@@ -320,7 +323,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage3.Location = new System.Drawing.Point(4, 34);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(498, 194);
+            this.tabPage3.Size = new System.Drawing.Size(587, 194);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "주요로그";
             // 
@@ -334,7 +337,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(3, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(492, 36);
+            this.groupBox2.Size = new System.Drawing.Size(581, 36);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "주요 로그";
@@ -345,7 +348,7 @@ namespace EMS_TEST_SIMULATOR
             this.button3.FlatAppearance.BorderSize = 0;
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button3.ForeColor = System.Drawing.Color.White;
-            this.button3.Location = new System.Drawing.Point(686, 0);
+            this.button3.Location = new System.Drawing.Point(261, 0);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(119, 34);
             this.button3.TabIndex = 1;
@@ -358,7 +361,7 @@ namespace EMS_TEST_SIMULATOR
             this.button4.FlatAppearance.BorderSize = 0;
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button4.ForeColor = System.Drawing.Color.White;
-            this.button4.Location = new System.Drawing.Point(526, 0);
+            this.button4.Location = new System.Drawing.Point(118, 0);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(119, 34);
             this.button4.TabIndex = 0;
@@ -376,7 +379,7 @@ namespace EMS_TEST_SIMULATOR
             this.event_log_listview.HideSelection = false;
             this.event_log_listview.Location = new System.Drawing.Point(-1, 33);
             this.event_log_listview.Name = "event_log_listview";
-            this.event_log_listview.Size = new System.Drawing.Size(774, 157);
+            this.event_log_listview.Size = new System.Drawing.Size(863, 157);
             this.event_log_listview.TabIndex = 0;
             this.event_log_listview.UseCompatibleStateImageBehavior = false;
             this.event_log_listview.SelectedIndexChanged += new System.EventHandler(this.event_log_listview_SelectedIndexChanged);
@@ -389,7 +392,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabPage4.Location = new System.Drawing.Point(4, 34);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(498, 194);
+            this.tabPage4.Size = new System.Drawing.Size(587, 194);
             this.tabPage4.TabIndex = 1;
             this.tabPage4.Text = "통신로그";
             // 
@@ -403,7 +406,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox1.ForeColor = System.Drawing.Color.White;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(492, 36);
+            this.groupBox1.Size = new System.Drawing.Size(581, 36);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "통신 로그";
@@ -414,7 +417,7 @@ namespace EMS_TEST_SIMULATOR
             this.btn_log_save.FlatAppearance.BorderSize = 0;
             this.btn_log_save.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_log_save.ForeColor = System.Drawing.Color.White;
-            this.btn_log_save.Location = new System.Drawing.Point(686, 0);
+            this.btn_log_save.Location = new System.Drawing.Point(261, 0);
             this.btn_log_save.Name = "btn_log_save";
             this.btn_log_save.Size = new System.Drawing.Size(119, 34);
             this.btn_log_save.TabIndex = 1;
@@ -427,7 +430,7 @@ namespace EMS_TEST_SIMULATOR
             this.btn_log_stop.FlatAppearance.BorderSize = 0;
             this.btn_log_stop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_log_stop.ForeColor = System.Drawing.Color.White;
-            this.btn_log_stop.Location = new System.Drawing.Point(526, 0);
+            this.btn_log_stop.Location = new System.Drawing.Point(118, 0);
             this.btn_log_stop.Name = "btn_log_stop";
             this.btn_log_stop.Size = new System.Drawing.Size(119, 34);
             this.btn_log_stop.TabIndex = 0;
@@ -452,7 +455,7 @@ namespace EMS_TEST_SIMULATOR
             this.dgvCommLog.RowHeadersVisible = false;
             this.dgvCommLog.RowHeadersWidth = 62;
             this.dgvCommLog.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvCommLog.Size = new System.Drawing.Size(492, 188);
+            this.dgvCommLog.Size = new System.Drawing.Size(581, 188);
             this.dgvCommLog.TabIndex = 2;
             // 
             // 코드리스트
@@ -462,7 +465,7 @@ namespace EMS_TEST_SIMULATOR
             this.코드리스트.Location = new System.Drawing.Point(4, 38);
             this.코드리스트.Name = "코드리스트";
             this.코드리스트.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.코드리스트.Size = new System.Drawing.Size(518, 242);
+            this.코드리스트.Size = new System.Drawing.Size(607, 242);
             this.코드리스트.TabIndex = 1;
             this.코드리스트.Text = "코드리스트";
             // 
@@ -478,7 +481,7 @@ namespace EMS_TEST_SIMULATOR
             this.tabControl3.Location = new System.Drawing.Point(6, 4);
             this.tabControl3.Name = "tabControl3";
             this.tabControl3.SelectedIndex = 0;
-            this.tabControl3.Size = new System.Drawing.Size(506, 232);
+            this.tabControl3.Size = new System.Drawing.Size(595, 232);
             this.tabControl3.TabIndex = 0;
             // 
             // 응답코드
@@ -488,7 +491,7 @@ namespace EMS_TEST_SIMULATOR
             this.응답코드.Location = new System.Drawing.Point(4, 34);
             this.응답코드.Name = "응답코드";
             this.응답코드.Padding = new System.Windows.Forms.Padding(3);
-            this.응답코드.Size = new System.Drawing.Size(498, 194);
+            this.응답코드.Size = new System.Drawing.Size(587, 194);
             this.응답코드.TabIndex = 0;
             this.응답코드.Text = "응답코드";
             // 
@@ -501,7 +504,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView4.HideSelection = false;
             this.listView4.Location = new System.Drawing.Point(3, 3);
             this.listView4.Name = "listView4";
-            this.listView4.Size = new System.Drawing.Size(492, 188);
+            this.listView4.Size = new System.Drawing.Size(581, 188);
             this.listView4.TabIndex = 0;
             this.listView4.UseCompatibleStateImageBehavior = false;
             this.listView4.SelectedIndexChanged += new System.EventHandler(this.listView4_SelectedIndexChanged_1);
@@ -522,7 +525,7 @@ namespace EMS_TEST_SIMULATOR
             this.목적동작코드.Location = new System.Drawing.Point(4, 34);
             this.목적동작코드.Name = "목적동작코드";
             this.목적동작코드.Padding = new System.Windows.Forms.Padding(3);
-            this.목적동작코드.Size = new System.Drawing.Size(498, 194);
+            this.목적동작코드.Size = new System.Drawing.Size(587, 194);
             this.목적동작코드.TabIndex = 1;
             this.목적동작코드.Text = "목적동작코드";
             // 
@@ -535,7 +538,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView3.HideSelection = false;
             this.listView3.Location = new System.Drawing.Point(3, 3);
             this.listView3.Name = "listView3";
-            this.listView3.Size = new System.Drawing.Size(492, 188);
+            this.listView3.Size = new System.Drawing.Size(581, 188);
             this.listView3.TabIndex = 0;
             this.listView3.UseCompatibleStateImageBehavior = false;
             this.listView3.SelectedIndexChanged += new System.EventHandler(this.listView3_SelectedIndexChanged_1);
@@ -556,7 +559,7 @@ namespace EMS_TEST_SIMULATOR
             this.동작코드.Location = new System.Drawing.Point(4, 34);
             this.동작코드.Name = "동작코드";
             this.동작코드.Padding = new System.Windows.Forms.Padding(3);
-            this.동작코드.Size = new System.Drawing.Size(498, 194);
+            this.동작코드.Size = new System.Drawing.Size(587, 194);
             this.동작코드.TabIndex = 2;
             this.동작코드.Text = "동작코드";
             // 
@@ -569,7 +572,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(3, 3);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(492, 188);
+            this.listView1.Size = new System.Drawing.Size(581, 188);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
@@ -589,7 +592,7 @@ namespace EMS_TEST_SIMULATOR
             this.에러코드.Location = new System.Drawing.Point(4, 34);
             this.에러코드.Name = "에러코드";
             this.에러코드.Padding = new System.Windows.Forms.Padding(3);
-            this.에러코드.Size = new System.Drawing.Size(498, 194);
+            this.에러코드.Size = new System.Drawing.Size(587, 194);
             this.에러코드.TabIndex = 3;
             this.에러코드.Text = "에러코드";
             // 
@@ -602,7 +605,7 @@ namespace EMS_TEST_SIMULATOR
             this.listView2.HideSelection = false;
             this.listView2.Location = new System.Drawing.Point(3, 3);
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(492, 188);
+            this.listView2.Size = new System.Drawing.Size(581, 188);
             this.listView2.TabIndex = 0;
             this.listView2.UseCompatibleStateImageBehavior = false;
             // 
@@ -631,9 +634,10 @@ namespace EMS_TEST_SIMULATOR
             this.엔코더설정.Location = new System.Drawing.Point(4, 38);
             this.엔코더설정.Name = "엔코더설정";
             this.엔코더설정.Padding = new System.Windows.Forms.Padding(6, 4, 6, 6);
-            this.엔코더설정.Size = new System.Drawing.Size(518, 242);
+            this.엔코더설정.Size = new System.Drawing.Size(607, 242);
             this.엔코더설정.TabIndex = 2;
             this.엔코더설정.Text = "엔코더설정";
+            this.엔코더설정.Click += new System.EventHandler(this.엔코더설정_Click);
             // 
             // button9
             // 
@@ -641,9 +645,9 @@ namespace EMS_TEST_SIMULATOR
             this.button9.FlatAppearance.BorderSize = 0;
             this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button9.ForeColor = System.Drawing.Color.White;
-            this.button9.Location = new System.Drawing.Point(687, 186);
+            this.button9.Location = new System.Drawing.Point(516, 177);
             this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(123, 44);
+            this.button9.Size = new System.Drawing.Size(82, 47);
             this.button9.TabIndex = 14;
             this.button9.Text = "초기화";
             this.button9.UseVisualStyleBackColor = false;
@@ -683,7 +687,7 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel3.Controls.Add(this.label10, 2, 0);
             this.tableLayoutPanel3.Controls.Add(this.LBL_101ENCPOS, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.label11, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(331, 12);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(231, 12);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 8;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -941,9 +945,9 @@ namespace EMS_TEST_SIMULATOR
             this.button6.FlatAppearance.BorderSize = 0;
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button6.ForeColor = System.Drawing.Color.White;
-            this.button6.Location = new System.Drawing.Point(689, 102);
+            this.button6.Location = new System.Drawing.Point(518, 93);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(120, 44);
+            this.button6.Size = new System.Drawing.Size(79, 47);
             this.button6.TabIndex = 8;
             this.button6.Text = "현재값 갱신";
             this.button6.UseVisualStyleBackColor = false;
@@ -955,9 +959,9 @@ namespace EMS_TEST_SIMULATOR
             this.button5.FlatAppearance.BorderSize = 0;
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button5.ForeColor = System.Drawing.Color.White;
-            this.button5.Location = new System.Drawing.Point(689, 24);
+            this.button5.Location = new System.Drawing.Point(518, 15);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(123, 44);
+            this.button5.Size = new System.Drawing.Size(82, 47);
             this.button5.TabIndex = 7;
             this.button5.Text = "저장";
             this.button5.UseVisualStyleBackColor = false;
@@ -968,9 +972,9 @@ namespace EMS_TEST_SIMULATOR
             this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.textBox1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.textBox1.ForeColor = System.Drawing.Color.White;
-            this.textBox1.Location = new System.Drawing.Point(141, 152);
+            this.textBox1.Location = new System.Drawing.Point(120, 152);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(171, 31);
+            this.textBox1.Size = new System.Drawing.Size(104, 31);
             this.textBox1.TabIndex = 6;
             // 
             // label8
@@ -978,7 +982,7 @@ namespace EMS_TEST_SIMULATOR
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label8.ForeColor = System.Drawing.Color.White;
-            this.label8.Location = new System.Drawing.Point(21, 154);
+            this.label8.Location = new System.Drawing.Point(10, 154);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(102, 25);
             this.label8.TabIndex = 5;
@@ -1004,9 +1008,9 @@ namespace EMS_TEST_SIMULATOR
             "111",
             "112",
             "113"});
-            this.comboBox2.Location = new System.Drawing.Point(141, 82);
+            this.comboBox2.Location = new System.Drawing.Point(123, 82);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(171, 33);
+            this.comboBox2.Size = new System.Drawing.Size(101, 33);
             this.comboBox2.TabIndex = 4;
             // 
             // label7
@@ -1014,7 +1018,7 @@ namespace EMS_TEST_SIMULATOR
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label7.ForeColor = System.Drawing.Color.White;
-            this.label7.Location = new System.Drawing.Point(23, 86);
+            this.label7.Location = new System.Drawing.Point(12, 86);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(102, 25);
             this.label7.TabIndex = 3;
@@ -1043,9 +1047,9 @@ namespace EMS_TEST_SIMULATOR
             "14호기",
             "15호기",
             "16호기"});
-            this.comboBox1.Location = new System.Drawing.Point(141, 21);
+            this.comboBox1.Location = new System.Drawing.Point(122, 21);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(171, 33);
+            this.comboBox1.Size = new System.Drawing.Size(97, 33);
             this.comboBox1.TabIndex = 2;
             // 
             // label6
@@ -1053,7 +1057,7 @@ namespace EMS_TEST_SIMULATOR
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label6.ForeColor = System.Drawing.Color.White;
-            this.label6.Location = new System.Drawing.Point(21, 24);
+            this.label6.Location = new System.Drawing.Point(10, 24);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(84, 25);
             this.label6.TabIndex = 1;
@@ -1413,26 +1417,6 @@ namespace EMS_TEST_SIMULATOR
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // Rail_io
-            // 
-            this.Rail_io.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Rail_io.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
-            this.tableLayoutPanel2.SetColumnSpan(this.Rail_io, 2);
-            this.Rail_io.FlatAppearance.BorderSize = 0;
-            this.Rail_io.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Rail_io.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.Rail_io.ForeColor = System.Drawing.Color.White;
-            this.Rail_io.Location = new System.Drawing.Point(645, 184);
-            this.Rail_io.Margin = new System.Windows.Forms.Padding(4);
-            this.Rail_io.Name = "Rail_io";
-            this.Rail_io.Padding = new System.Windows.Forms.Padding(0);
-            this.Rail_io.Size = new System.Drawing.Size(169, 50);
-            this.Rail_io.TabIndex = 17;
-            this.Rail_io.Text = "Rail I.O";
-            this.Rail_io.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.Rail_io.UseVisualStyleBackColor = false;
-            this.Rail_io.Click += new System.EventHandler(this.Rail_io_Click);
-            // 
             // tBox1
             // 
             this.tBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
@@ -1525,7 +1509,7 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel2.Controls.Add(this.button2, 8, 4);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel1, 1, 8);
             this.tableLayoutPanel2.Controls.Add(this.label3, 4, 1);
-            this.tableLayoutPanel2.Controls.Add(this.tabControl2, 6, 8);
+            this.tableLayoutPanel2.Controls.Add(this.tabControl2, 5, 8);
             this.tableLayoutPanel2.Controls.Add(this.tabControl1, 1, 5);
             this.tableLayoutPanel2.Controls.Add(this.label4, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.pictureBox1, 1, 2);
@@ -1559,6 +1543,24 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel2.Size = new System.Drawing.Size(1024, 768);
             this.tableLayoutPanel2.TabIndex = 1;
             this.tableLayoutPanel2.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel2_Paint);
+            // 
+            // Rail_io
+            // 
+            this.Rail_io.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.Rail_io.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
+            this.tableLayoutPanel2.SetColumnSpan(this.Rail_io, 2);
+            this.Rail_io.FlatAppearance.BorderSize = 0;
+            this.Rail_io.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Rail_io.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.Rail_io.ForeColor = System.Drawing.Color.White;
+            this.Rail_io.Location = new System.Drawing.Point(645, 184);
+            this.Rail_io.Margin = new System.Windows.Forms.Padding(4);
+            this.Rail_io.Name = "Rail_io";
+            this.Rail_io.Size = new System.Drawing.Size(169, 50);
+            this.Rail_io.TabIndex = 17;
+            this.Rail_io.Text = "Rail I.O";
+            this.Rail_io.UseVisualStyleBackColor = false;
+            this.Rail_io.Click += new System.EventHandler(this.Rail_io_Click);
             // 
             // pictureBox1
             // 

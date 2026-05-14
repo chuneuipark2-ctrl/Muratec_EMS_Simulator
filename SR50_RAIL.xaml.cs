@@ -63,22 +63,22 @@ namespace EMS_TEST_SIMULATOR
                     Foreground = Brushes.White
                 };
 
-                // --- 조건별 색상 및 문구 설정 ---
-                if (i == 0) // 4번째 박스를 U/D로 설정
+                // --- 조건별 색상 및 문구 설정 (ST01~ST03 표기) ---
+                if (i == 0)
                 {
-                    text.Text = "U/D";
-                    rect.Fill = Brushes.SteelBlue; // U/D는 파란 계열
-                    rect.Tag = "UD"; // 나중에 UpdateSensors에서 색 복원용으로 사용
+                    text.Text = "ST01";
+                    rect.Fill = Brushes.SteelBlue;
+                    rect.Tag = "UD";
                 }
-                else if (i == 12) // 8번째 박스를 L/D로 설정
+                else if (i == 12)
                 {
-                    text.Text = "L/D";
-                    rect.Fill = Brushes.IndianRed; // L/D는 붉은 계열
+                    text.Text = "ST03";
+                    rect.Fill = Brushes.IndianRed;
                     rect.Tag = "LD";
                 }
-                else if(i==9)
+                else if (i == 9)
                 {
-                    text.Text = "Wait";
+                    text.Text = "ST02";
                     rect.Fill = Brushes.Violet;
                     rect.Tag = "wait";
                 }
