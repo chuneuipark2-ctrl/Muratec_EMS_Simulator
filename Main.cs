@@ -60,6 +60,11 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>제목(SKY-RAV…) 비밀번호 1 통과 시: AUTO에서 레일 8비트 인터록 생략, 1초 대기 후 H4 진행.</summary>
         public bool BypassRailInterlockForAuto { get; set; }
 
+        /// <summary>메인·비밀번호 대화상자용 가상 키보드 (한 번에 하나)</summary>
+        private VirtualKeyboardForm _mainVirtualKeyboard;
+        /// <summary>가상 키보드 생성 짧은 구간 재진입 방지</summary>
+        private bool _mainVirtualKeyboardOpening;
+
         /// <summary>EMO 눌려 있는 동안 기체 이상정지 H4(05) 주기 전송용 타이머. 해제 시 중지 후 H4(06) 1회 전송.</summary>
         private System.Windows.Forms.Timer _emoH4AbnormalStopTimer;
 
@@ -1217,6 +1222,43 @@ namespace EMS_TEST_SIMULATOR
 
         }
 
+        /// <summary>터치 PC: 대상 TextBox에 가상 키보드 표시. <paramref name="owner"/>가 비밀번호 대화상자면 그 위에 뜸.</summary>
+        private void ShowVirtualKeyboardFor(System.Windows.Forms.TextBox target, bool numericOnly, Form owner)
+        {
+            if (target == null || target.IsDisposed) return;
+            Form o = owner ?? this;
+
+            if (_mainVirtualKeyboard != null && !_mainVirtualKeyboard.IsDisposed)
+            {
+                try
+                {
+                    if (_mainVirtualKeyboard.Visible)
+                        _mainVirtualKeyboard.Close();
+                    _mainVirtualKeyboard.Dispose();
+                }
+                catch { /* ignore */ }
+                _mainVirtualKeyboard = null;
+            }
+
+            if (_mainVirtualKeyboardOpening) return;
+            _mainVirtualKeyboardOpening = true;
+            try
+            {
+                _mainVirtualKeyboard = new VirtualKeyboardForm(target, numericOnly);
+                _mainVirtualKeyboard.FormClosed += (_, __) => { _mainVirtualKeyboard = null; };
+                _mainVirtualKeyboard.Show(o);
+            }
+            finally
+            {
+                _mainVirtualKeyboardOpening = false;
+            }
+        }
+
+        private void textBox1_Click(object sender, EventArgs e)
+        {
+            ShowVirtualKeyboardFor(textBox1, numericOnly: true, this);
+        }
+
         private void label4_Click(object sender, EventArgs e)
         {
             using (var dlg = new Form())
@@ -1233,6 +1275,7 @@ namespace EMS_TEST_SIMULATOR
 
                 var lbl = new Label { Text = "비밀번호 입력", Location = new Point(12, 12), AutoSize = true, ForeColor = Color.White };
                 var tb = new System.Windows.Forms.TextBox { PasswordChar = '*', Location = new Point(12, 36), Width = 256 };
+                tb.Click += (s, ev) => ShowVirtualKeyboardFor(tb, numericOnly: false, dlg);
                 var btnOk = new System.Windows.Forms.Button { Text = "확인", Location = new Point(96, 72), DialogResult = DialogResult.OK, Size = new Size(78, 28) };
                 var btnCancel = new System.Windows.Forms.Button { Text = "취소", Location = new Point(184, 72), DialogResult = DialogResult.Cancel, Size = new Size(78, 28) };
                 dlg.Controls.Add(lbl);
@@ -1244,7 +1287,7 @@ namespace EMS_TEST_SIMULATOR
 
                 if (dlg.ShowDialog(this) != DialogResult.OK)
                     return;
-                if (tb.Text == "1")
+                if (tb.Text == "1")//패스워드 1
                 {
                     BypassRailInterlockForAuto = true;
                     MessageBox.Show(this,

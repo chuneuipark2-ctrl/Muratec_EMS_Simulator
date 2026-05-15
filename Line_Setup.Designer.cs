@@ -76,6 +76,7 @@ namespace EMS_TEST_SIMULATOR
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.tableLayoutPanel1.ColumnCount = 40;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
@@ -87,8 +88,8 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.369668F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.505078F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
@@ -184,7 +185,6 @@ namespace EMS_TEST_SIMULATOR
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1477, 892);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -192,12 +192,12 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.button2, 5);
             this.button2.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.button2.ForeColor = System.Drawing.Color.White;
             this.button2.Location = new System.Drawing.Point(147, 357);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(174, 53);
             this.button2.TabIndex = 40;
             this.button2.Text = "상태갱신";
-            this.button2.ForeColor = System.Drawing.Color.White;
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -606,8 +606,8 @@ namespace EMS_TEST_SIMULATOR
             // type_sel_box
             // 
             this.type_sel_box.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.SetColumnSpan(this.type_sel_box, 5);
             this.type_sel_box.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.tableLayoutPanel1.SetColumnSpan(this.type_sel_box, 5);
             this.type_sel_box.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.type_sel_box.ForeColor = System.Drawing.Color.White;
             this.type_sel_box.FormattingEnabled = true;
@@ -639,8 +639,8 @@ namespace EMS_TEST_SIMULATOR
             // no_sel_box
             // 
             this.no_sel_box.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.SetColumnSpan(this.no_sel_box, 5);
             this.no_sel_box.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.tableLayoutPanel1.SetColumnSpan(this.no_sel_box, 5);
             this.no_sel_box.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.no_sel_box.ForeColor = System.Drawing.Color.White;
             this.no_sel_box.FormattingEnabled = true;
@@ -699,8 +699,8 @@ namespace EMS_TEST_SIMULATOR
             // line_sel_box
             // 
             this.line_sel_box.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.SetColumnSpan(this.line_sel_box, 5);
             this.line_sel_box.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.tableLayoutPanel1.SetColumnSpan(this.line_sel_box, 5);
             this.line_sel_box.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.line_sel_box.ForeColor = System.Drawing.Color.White;
             this.line_sel_box.FormattingEnabled = true;
@@ -740,12 +740,12 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.button1, 5);
             this.button1.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.button1.ForeColor = System.Drawing.Color.White;
             this.button1.Location = new System.Drawing.Point(147, 239);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(174, 53);
             this.button1.TabIndex = 39;
             this.button1.Text = "상태저장";
-            this.button1.ForeColor = System.Drawing.Color.White;
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 

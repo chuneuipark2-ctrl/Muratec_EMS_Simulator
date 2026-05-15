@@ -976,6 +976,7 @@ namespace EMS_TEST_SIMULATOR
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(104, 31);
             this.textBox1.TabIndex = 6;
+            this.textBox1.Click += new System.EventHandler(this.textBox1_Click);
             // 
             // label8
             // 
