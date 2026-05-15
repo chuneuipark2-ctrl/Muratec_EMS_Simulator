@@ -4,6 +4,8 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -32,6 +34,11 @@ namespace EMS_TEST_SIMULATOR
         private bool _showingVirtualKeyboard;
         /// <summary>DEVICE LIST 셀 전체 데이터 툴팁 (잘린 데이터 확인용)</summary>
         private ToolTip _deviceListToolTip;
+        /// <summary>DEVICE LIST 대량 로드 중 열 너비·스크롤 동기화를 건너뛰어 리페인트 폭주·플리커 완화</summary>
+        private bool _deviceListBulkLoad;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
         /// <summary>Shown에서 1회 0.5 스케일 적용 여부 (Main과 유사한 작은 화면)</summary>
         private bool _halfUiScaleApplied;
         /// <summary>최초 표시 시 폼을 작업 영역 좌상단에 한 번만 둠</summary>
@@ -1011,7 +1018,6 @@ namespace EMS_TEST_SIMULATOR
             listViewDeviceList.DrawItem += listViewDeviceList_DrawItem;
             listViewDeviceList.DrawSubItem += listViewDeviceList_DrawSubItem;
             listViewDeviceList.Resize += listViewDeviceList_Resize;
-            listViewDeviceList.Layout += listViewDeviceList_Resize;
             listViewDeviceList.MouseDown += listViewDeviceList_MouseDown;
             listViewDeviceList.MouseMove += listViewDeviceList_MouseMove;
             if (_deviceListToolTip == null)
@@ -1023,6 +1029,38 @@ namespace EMS_TEST_SIMULATOR
             panelDeviceList.AllowDrop = true;
             panelDeviceList.DragEnter += listViewDeviceList_DragEnter;
             panelDeviceList.DragDrop += listViewDeviceList_DragDrop;
+            listViewDeviceList.HandleCreated -= ListViewDeviceList_OnHandleCreated;
+            listViewDeviceList.HandleCreated += ListViewDeviceList_OnHandleCreated;
+            if (listViewDeviceList.IsHandleCreated)
+                TryEnableDeviceListViewDoubleBuffer();
+        }
+
+        /// <summary>ListView 확장 스타일 LVS_EX_DOUBLEBUFFER + Control.DoubleBuffered로 OWNERDRAW 시 깜빡임 완화.</summary>
+        private void TryEnableDeviceListViewDoubleBuffer()
+        {
+            if (listViewDeviceList == null || listViewDeviceList.IsDisposed || !listViewDeviceList.IsHandleCreated) return;
+            const int LVM_FIRST = 0x1000;
+            const int LVM_SETEXTENDEDLISTVIEWSTYLE = LVM_FIRST + 54;
+            const int LVS_EX_DOUBLEBUFFER = 0x00010000;
+            try
+            {
+                SendMessage(listViewDeviceList.Handle, LVM_SETEXTENDEDLISTVIEWSTYLE, (IntPtr)LVS_EX_DOUBLEBUFFER, (IntPtr)LVS_EX_DOUBLEBUFFER);
+            }
+            catch { /* 구버전 컨트롤 등 */ }
+            try
+            {
+                typeof(Control).InvokeMember("DoubleBuffered",
+                    BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
+                    null, listViewDeviceList, new object[] { true });
+            }
+            catch { }
+        }
+
+        private void ListViewDeviceList_OnHandleCreated(object sender, EventArgs e)
+        {
+            if (listViewDeviceList == null) return;
+            listViewDeviceList.HandleCreated -= ListViewDeviceList_OnHandleCreated;
+            TryEnableDeviceListViewDoubleBuffer();
         }
 
         /// <summary>ListView 클라이언트 너비에 맞춰 열 너비 배분 (디자인 비율 유지, 합이 뷰 너비를 넘지 않게)</summary>
@@ -1110,6 +1148,7 @@ namespace EMS_TEST_SIMULATOR
 
         private void listViewDeviceList_Resize(object sender, EventArgs e)
         {
+            if (_deviceListBulkLoad) return;
             ApplyDeviceListColumnWidths();
         }
 
@@ -1178,15 +1217,8 @@ namespace EMS_TEST_SIMULATOR
             {
                 if (e.Item?.Tag as string != "Category")
                 {
-                    int boxSize = Math.Min(16, Math.Min(e.Bounds.Width, e.Bounds.Height) - 4);
-                    if (boxSize > 0)
-                    {
-                        int x = e.Bounds.X + (e.Bounds.Width - boxSize) / 2;
-                        int y = e.Bounds.Y + (e.Bounds.Height - boxSize) / 2;
-                        var boxRect = new Rectangle(x, y, boxSize, boxSize);
-                        var state = e.Item.Checked ? System.Windows.Forms.VisualStyles.CheckBoxState.CheckedNormal : System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal;
-                        System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(e.Graphics, boxRect.Location, state);
-                    }
+                    if (e.Bounds.Width >= 10 && e.Bounds.Height >= 10)
+                        DrawDeviceListConfirmGlyph(e.Graphics, e.Bounds, e.Item.Checked, e.Item.Selected);
                 }
                 return;
             }
@@ -2963,11 +2995,16 @@ namespace EMS_TEST_SIMULATOR
                     if (idxSpec < 0) idxSpec = FindColumnIndexContains(headerArr, new[] { "SPECIFICATION", "규격", "사양", "세부" });
                     int idxManufacture = FindColumnIndex(headerArr, new[] { "MANUFACTURE", "Manufacture", "제조사", "제조사명", "MAKER" });
                     if (idxManufacture < 0) idxManufacture = FindColumnIndexContains(headerArr, new[] { "MANUFACTURE", "제조사", "MAKER" });
+                    int idxConfirm = FindColumnIndex(headerArr, new[] { "확인", "체크", "CHECK", "확인여부", "Hwagin" });
+                    if (idxConfirm < 0) idxConfirm = FindColumnIndexContains(headerArr, new[] { "확인", "체크", "check" });
                     if (idxPdm < 0 || idxDesc < 0 || idxSpec < 0)
                     {
                         MessageBox.Show("필수 열을 찾을 수 없습니다. (PDM No, DESCRIPTION, SPECIFICATION 또는 규격/사양 등)\r\n\r\n엑셀 첫 시트 상단에 위 열 이름이 있는지 확인해 주세요.", "엑셀 로드", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
+                    _deviceListBulkLoad = true;
+                    if (panelDeviceList != null && !panelDeviceList.IsDisposed)
+                        panelDeviceList.SuspendLayout();
                     listViewDeviceList.BeginUpdate();
                     try
                     {
@@ -2988,14 +3025,19 @@ namespace EMS_TEST_SIMULATOR
                             item.SubItems.Add(spec);
                             item.SubItems.Add(manufacture);
                             item.SubItems.Add("");
-                            item.Checked = false;
-                            if (IsDeviceListCategoryRow(desc)) item.Tag = "Category";
+                            bool isCat = IsDeviceListCategoryRow(desc);
+                            if (isCat) item.Tag = "Category";
+                            item.Checked = !isCat && idxConfirm >= 0 && ParseDeviceListConfirmCell(GetCellString(row.GetCell(idxConfirm)));
                             listViewDeviceList.Items.Add(item);
                         }
                     }
                     finally
                     {
                         listViewDeviceList.EndUpdate();
+                        if (panelDeviceList != null && !panelDeviceList.IsDisposed)
+                            panelDeviceList.ResumeLayout(false);
+                        _deviceListBulkLoad = false;
+                        ApplyDeviceListColumnWidths();
                     }
                 }
             }
@@ -3143,6 +3185,9 @@ namespace EMS_TEST_SIMULATOR
                         return !string.IsNullOrEmpty(d) || !string.IsNullOrEmpty(s);
                     }).ToList();
                 }
+                _deviceListBulkLoad = true;
+                if (panelDeviceList != null && !panelDeviceList.IsDisposed)
+                    panelDeviceList.SuspendLayout();
                 listViewDeviceList.BeginUpdate();
                 try
                 {
@@ -3170,6 +3215,10 @@ namespace EMS_TEST_SIMULATOR
                 finally
                 {
                     listViewDeviceList.EndUpdate();
+                    if (panelDeviceList != null && !panelDeviceList.IsDisposed)
+                        panelDeviceList.ResumeLayout(false);
+                    _deviceListBulkLoad = false;
+                    ApplyDeviceListColumnWidths();
                 }
                 if (dataRows.Count == 0)
                 {
@@ -3756,6 +3805,65 @@ namespace EMS_TEST_SIMULATOR
                         return i;
             }
             return -1;
+        }
+
+        /// <summary>DEVICE LIST 엑셀의 확인 열 값을 체크 여부로 해석 (저장 시 "O" 등과 동일 규칙).</summary>
+        private static bool ParseDeviceListConfirmCell(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return false;
+            var t = raw.Trim();
+            if (t.Length == 0) return false;
+            if (t.Length == 1)
+            {
+                char c = char.ToUpperInvariant(t[0]);
+                if (c == 'O' || c == 'V' || c == 'Y' || c == '1') return true;
+                if (c == 'X' || c == 'N' || c == '0' || c == '-') return false;
+                if (t[0] == '\u2713' || t[0] == '\u2714') return true; // ✓ ✔
+            }
+            if (bool.TryParse(t, out bool b)) return b;
+            if (int.TryParse(t, out int n)) return n != 0;
+            var u = t.ToUpperInvariant();
+            if (u == "YES" || u == "TRUE" || u == "OK" || u == "ON" || u == "COMPLETE") return true;
+            if (u == "NO" || u == "FALSE" || u == "OFF") return false;
+            if (t == "완료" || t == "체크" || t == "확인완료") return true;
+            return false;
+        }
+
+        /// <summary>DEVICE LIST 확인 열: 다크 배경에서도 켜짐이 분명히 보이도록 수동 그리기.</summary>
+        private static void DrawDeviceListConfirmGlyph(Graphics g, Rectangle bounds, bool isChecked, bool rowSelected)
+        {
+            int boxSize = Math.Min(18, Math.Min(bounds.Width, bounds.Height) - 6);
+            if (boxSize < 10) return;
+            int x = bounds.X + (bounds.Width - boxSize) / 2;
+            int y = bounds.Y + (bounds.Height - boxSize) / 2;
+            var r = new Rectangle(x, y, boxSize, boxSize);
+            if (isChecked)
+            {
+                using (var br = new SolidBrush(Color.FromArgb(56, 160, 80)))
+                    g.FillRectangle(br, r);
+                using (var p = new Pen(Color.FromArgb(150, 230, 170), 1f))
+                    g.DrawRectangle(p, r.X, r.Y, r.Width - 1, r.Height - 1);
+                float t = boxSize / 10f;
+                using (var pen = new Pen(Color.White, Math.Max(1.6f, boxSize / 9f)))
+                {
+                    pen.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                    pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    g.DrawLines(pen, new[]
+                    {
+                        new PointF(r.X + 2.2f * t, r.Y + 5f * t),
+                        new PointF(r.X + 4.3f * t, r.Y + 7.2f * t),
+                        new PointF(r.X + 8.2f * t, r.Y + 2.8f * t)
+                    });
+                }
+            }
+            else
+            {
+                using (var br = new SolidBrush(Color.FromArgb(48, 48, 52)))
+                    g.FillRectangle(br, r);
+                var border = rowSelected ? Color.FromArgb(200, 210, 230) : Color.FromArgb(130, 130, 145);
+                using (var p = new Pen(border, 1f))
+                    g.DrawRectangle(p, r.X, r.Y, r.Width - 1, r.Height - 1);
+            }
         }
 
         private void listViewDeviceList_SelectedIndexChanged(object sender, EventArgs e)
