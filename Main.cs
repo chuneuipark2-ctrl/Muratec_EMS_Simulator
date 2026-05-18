@@ -1394,6 +1394,13 @@ namespace EMS_TEST_SIMULATOR
         }
 
 
+        /// <summary>
+        /// 
+        /// 체크시트가 나올 수 있는조건? 또는 바자동 명령이 나올 수 있는조건
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
 
         private void button7_Click(object sender, EventArgs e)
         {

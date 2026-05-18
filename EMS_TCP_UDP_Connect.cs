@@ -24,6 +24,8 @@ namespace EMS_TEST_SIMULATOR
         private Timer _statusTimer;
         /// <summary>통신 로그를 찍을 Main 폼 (Main에서 열 때 명시적으로 설정)</summary>
         private Main _mainFormForLog;
+        private VirtualKeyboardForm _virtualKeyboardForm;
+        private bool _virtualKeyboardOpening;
 
         public EMS_TCP_UDP_Connect()
         {
@@ -48,6 +50,67 @@ namespace EMS_TEST_SIMULATOR
         {
             button2.Enabled = false;
             FlatButtonPaintFix.ApplyToTree(this);
+            SetupConnectNumericKeypad();
+        }
+
+        /// <summary>IP·Port 입력란 클릭 시 숫자 키패드(터치 PC).</summary>
+        private void SetupConnectNumericKeypad()
+        {
+            textBox1.MaxLength = 3;
+            textBox2.MaxLength = 3;
+            textBox3.MaxLength = 3;
+            textBox4.MaxLength = 3;
+            textBox5.MaxLength = 5;
+
+            WireNumericKeypad(textBox1);
+            WireNumericKeypad(textBox2);
+            WireNumericKeypad(textBox3);
+            WireNumericKeypad(textBox4);
+            WireNumericKeypad(textBox5);
+        }
+
+        private void WireNumericKeypad(TextBox tb)
+        {
+            if (tb == null) return;
+            tb.Click -= ConnectTextBox_Click;
+            tb.Click += ConnectTextBox_Click;
+        }
+
+        private void ConnectTextBox_Click(object sender, EventArgs e)
+        {
+            if (sender is TextBox tb)
+                ShowConnectVirtualKeyboard(tb);
+        }
+
+        private void ShowConnectVirtualKeyboard(TextBox target)
+        {
+            if (target == null || target.IsDisposed) return;
+
+            if (_virtualKeyboardForm != null && !_virtualKeyboardForm.IsDisposed)
+            {
+                try
+                {
+                    if (_virtualKeyboardForm.Visible)
+                        _virtualKeyboardForm.Close();
+                    _virtualKeyboardForm.Dispose();
+                }
+                catch { /* ignore */ }
+                _virtualKeyboardForm = null;
+            }
+
+            if (_virtualKeyboardOpening) return;
+            _virtualKeyboardOpening = true;
+            try
+            {
+                target.Focus();
+                _virtualKeyboardForm = new VirtualKeyboardForm(target, numericOnly: true);
+                _virtualKeyboardForm.FormClosed += (_, __) => { _virtualKeyboardForm = null; };
+                _virtualKeyboardForm.Show(this);
+            }
+            finally
+            {
+                _virtualKeyboardOpening = false;
+            }
         }
 
         // 주기적으로 장비에 현재 상태를 물어봅니다.

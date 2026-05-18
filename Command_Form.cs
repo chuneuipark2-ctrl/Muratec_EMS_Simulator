@@ -33,8 +33,9 @@ namespace EMS_TEST_SIMULATOR
             {
                 // 2. [핵심] 이제 창을 찾지 않고, 메인 폼이 보관 중인 GlobalComm을 바로 가져옵니다.
                 this._comm = mainForm.GlobalComm;
+                if (mainForm.GlobalEmsProto != null)
+                    this._emsProto = mainForm.GlobalEmsProto;
 
-                // 3. 만약 여전히 null이라면, 정말로 연결을 한 번도 안 한 것입니다.
                 if (this._comm == null)
                 {
                     MessageBox.Show("통신 객체가 비어있습니다.\n[Connect] 창에서 연결을 먼저 완료해주세요.");
@@ -53,6 +54,14 @@ namespace EMS_TEST_SIMULATOR
             public int loop_command = 0;
         }
 
+        
+        /// <summary>
+        /// 반자동 명령을 동작시키기 위한 조건들
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        
+        
         private async void button1_Click(object sender, EventArgs e)
         {
             // [추가] 통신 객체가 제대로 넘어왔는지 확인하는 안전장치
@@ -83,8 +92,8 @@ namespace EMS_TEST_SIMULATOR
             {
                 currentData.rail_data = comboBox4.Text;
                 currentData.EMS_NO = comboBox3.Text;
-                int.TryParse(comboBox5.Text, out currentData.Start_count);
-                int.TryParse(comboBox2.Text, out currentData.End_count);
+                int.TryParse(comboBox5.Text, out currentData.Start_count); //시작위치
+                int.TryParse(comboBox2.Text, out currentData.End_count); //앤드위치
                 int.TryParse(comboBox1.Text, out currentData.command_alloc);
                // int.TryParse(textBox1.Text, out currentData.loop_command);
 

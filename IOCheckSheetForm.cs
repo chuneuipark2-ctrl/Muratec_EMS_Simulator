@@ -32,10 +32,14 @@ namespace EMS_TEST_SIMULATOR
         private VirtualKeyboardForm _virtualKeyboardForm;
         /// <summary>가상 키보드 표시 중 재진입 방지 (클릭/포커스 동시 발생 시 멈춤 방지)</summary>
         private bool _showingVirtualKeyboard;
-        /// <summary>DEVICE LIST 셀 전체 데이터 툴팁 (잘린 데이터 확인용)</summary>
-        private ToolTip _deviceListToolTip;
+        /// <summary>DEVICE LIST: 마우스가 올라간 셀(부분 무효화 시 글자·체크가 비어 보이는 현상 방지)</summary>
+        private string _deviceListHoverCellKey = "";
         /// <summary>DEVICE LIST 대량 로드 중 열 너비·스크롤 동기화를 건너뛰어 리페인트 폭주·플리커 완화</summary>
         private bool _deviceListBulkLoad;
+        /// <summary>DEVICE LIST 행 높이(SmallImageList)용</summary>
+        private ImageList _deviceListRowImageList;
+        /// <summary>휠·스크롤 후 OwnerDraw 잔상 제거</summary>
+        private DeviceListScrollInvalidateHook _deviceListScrollHook;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
@@ -412,6 +416,13 @@ namespace EMS_TEST_SIMULATOR
             dataGridViewIO.CellFormatting += dataGridViewIO_CellFormatting;
 
             SetupDeviceListGrid();
+            SetupIoListTabChrome();
+            SetupIoListGridTouch();
+            if (tabControl1 != null)
+            {
+                tabControl1.SelectedIndexChanged -= tabControl1_SelectedIndexChanged;
+                tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
+            }
 
             // AUTO 사이클 정지 완료 플래그가 켜져 있으면 구분=자동 행들 I.O 체크 true 반영 후 플래그 리셋
             if (AutoCycleCompleted)
@@ -457,6 +468,8 @@ namespace EMS_TEST_SIMULATOR
                 LayoutPanelTopReflow();
                 LayoutPanelLeftStacked();
                 SetGridColumnWidths();
+                ApplyDeviceListRowHeight();
+                ApplyIoListRowHeight();
                 ApplyDeviceListColumnWidths();
                 SizeChanged -= IOCheckSheetForm_SizeReflowHalfUi;
                 SizeChanged += IOCheckSheetForm_SizeReflowHalfUi;
@@ -471,6 +484,7 @@ namespace EMS_TEST_SIMULATOR
                 SyncLeftBottomChromeRowToRightFooter();
                 LayoutPanelLeftStacked();
                 SetGridColumnWidths();
+                ApplyIoListRowHeight();
             }));
         }
 
@@ -1014,17 +1028,26 @@ namespace EMS_TEST_SIMULATOR
             listViewDeviceList.Columns.Add("MANUFACTURE", 140);
             listViewDeviceList.Columns.Add("확인", 70);
             listViewDeviceList.OwnerDraw = true;
+            listViewDeviceList.HotTracking = false;
+            listViewDeviceList.ShowItemToolTips = false;
             listViewDeviceList.DrawColumnHeader += listViewDeviceList_DrawColumnHeader;
             listViewDeviceList.DrawItem += listViewDeviceList_DrawItem;
             listViewDeviceList.DrawSubItem += listViewDeviceList_DrawSubItem;
             listViewDeviceList.Resize += listViewDeviceList_Resize;
             listViewDeviceList.MouseDown += listViewDeviceList_MouseDown;
             listViewDeviceList.MouseMove += listViewDeviceList_MouseMove;
-            if (_deviceListToolTip == null)
+            listViewDeviceList.MouseLeave += listViewDeviceList_MouseLeave;
+            listViewDeviceList.CheckBoxes = false;
+            if (panelDeviceList != null)
             {
-                _deviceListToolTip = new ToolTip { AutoPopDelay = 15000, InitialDelay = 400, ReshowDelay = 200 };
-                _deviceListToolTip.SetToolTip(listViewDeviceList, "");
+                panelDeviceList.BackColor = tabPage1?.BackColor ?? _deviceListItemBack;
+                panelDeviceList.Paint -= panelDeviceList_Paint;
+                panelDeviceList.Paint += panelDeviceList_Paint;
             }
+            listViewDeviceList.Paint -= listViewDeviceList_Paint;
+            listViewDeviceList.Paint += listViewDeviceList_Paint;
+            ApplyDeviceListRowHeight();
+            EnsureDeviceListScrollHook();
             ApplyDeviceListColumnWidths();
             panelDeviceList.AllowDrop = true;
             panelDeviceList.DragEnter += listViewDeviceList_DragEnter;
@@ -1061,86 +1084,134 @@ namespace EMS_TEST_SIMULATOR
             if (listViewDeviceList == null) return;
             listViewDeviceList.HandleCreated -= ListViewDeviceList_OnHandleCreated;
             TryEnableDeviceListViewDoubleBuffer();
+            EnsureDeviceListScrollHook();
         }
 
-        /// <summary>ListView 클라이언트 너비에 맞춰 열 너비 배분 (디자인 비율 유지, 합이 뷰 너비를 넘지 않게)</summary>
+        /// <summary>터치 PC: DEVICE LIST·I.O LIST 공통 행 높이.</summary>
+        private int GetDeviceListRowHeightPx()
+        {
+            return Math.Max(44, (int)Math.Round(52 * Math.Max(_layoutDimScale, 0.75f)));
+        }
+
+        private void ApplyIoListRowHeight()
+        {
+            if (dataGridViewIO == null || dataGridViewIO.IsDisposed) return;
+            int h = GetDeviceListRowHeightPx();
+            dataGridViewIO.RowTemplate.Height = h;
+            dataGridViewIO.ColumnHeadersHeight = Math.Max(36, (int)Math.Round(h * 0.75f));
+            dataGridViewIO.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewIO.DefaultCellStyle.Padding = new Padding(6, 4, 6, 4);
+            foreach (DataGridViewRow row in dataGridViewIO.Rows)
+                row.Height = h;
+            if (dataGridViewIO.Columns.Contains("I.O 체크"))
+            {
+                var checkCol = dataGridViewIO.Columns["I.O 체크"];
+                checkCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                checkCol.DefaultCellStyle.Padding = new Padding(4, 2, 4, 2);
+                if (checkCol is DataGridViewCheckBoxColumn cbCol)
+                {
+                    cbCol.FlatStyle = FlatStyle.Flat;
+                    cbCol.ThreeState = false;
+                }
+            }
+            dataGridViewIO.Invalidate();
+        }
+
+        private void ApplyDeviceListRowHeight()
+        {
+            if (listViewDeviceList == null || listViewDeviceList.IsDisposed) return;
+            int h = GetDeviceListRowHeightPx();
+            if (_deviceListRowImageList == null)
+            {
+                _deviceListRowImageList = new ImageList();
+                listViewDeviceList.SmallImageList = _deviceListRowImageList;
+            }
+            if (_deviceListRowImageList.ImageSize.Height == h && _deviceListRowImageList.Images.Count > 0)
+                return;
+            _deviceListRowImageList.ImageSize = new Size(1, h);
+            _deviceListRowImageList.Images.Clear();
+            using (var bmp = new Bitmap(1, h))
+                _deviceListRowImageList.Images.Add(bmp, Color.Transparent);
+            listViewDeviceList.Invalidate();
+        }
+
+        private void EnsureDeviceListScrollHook()
+        {
+            if (listViewDeviceList == null || listViewDeviceList.IsDisposed) return;
+            if (_deviceListScrollHook == null)
+                _deviceListScrollHook = new DeviceListScrollInvalidateHook(listViewDeviceList);
+            else
+                _deviceListScrollHook.Reattach(listViewDeviceList);
+        }
+
+        private void InvalidateDeviceListItem(ListViewItem item)
+        {
+            if (item == null || listViewDeviceList == null || listViewDeviceList.IsDisposed) return;
+            try
+            {
+                listViewDeviceList.Invalidate(item.GetBounds(ItemBoundsPortion.Entire));
+            }
+            catch
+            {
+                listViewDeviceList.Invalidate();
+            }
+        }
+
+        private bool IsDeviceListConfirmColumnHit(ListViewItem item, Point clientPoint)
+        {
+            if (item == null || listViewDeviceList?.Columns == null || listViewDeviceList.Columns.Count < 5)
+                return false;
+            int x = 0;
+            for (int c = 0; c < 4; c++)
+                x += listViewDeviceList.Columns[c].Width;
+            Rectangle row;
+            try { row = item.GetBounds(ItemBoundsPortion.Entire); }
+            catch { return false; }
+            var confirmRect = new Rectangle(x, row.Top, listViewDeviceList.Columns[4].Width, row.Height);
+            return confirmRect.Contains(clientPoint);
+        }
+
+        private static int MeasureUiTextWidth(string text, Font font)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+            return TextRenderer.MeasureText(text, font, new Size(int.MaxValue, int.MaxValue),
+                TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding).Width;
+        }
+
+        /// <summary>DEVICE LIST: 로드된 문자열·헤더가 잘리지 않도록 열 너비 산출(합이 뷰보다 크면 가로 스크롤).</summary>
         private void ApplyDeviceListColumnWidths()
         {
             if (listViewDeviceList?.Columns == null || listViewDeviceList.Columns.Count < 5) return;
-            int total = listViewDeviceList.ClientSize.Width;
-            if (total <= 0) return;
-            int sb = 0;
-            if (listViewDeviceList.Items.Count > 0)
-            {
-                try
-                {
-                    var r = listViewDeviceList.GetItemRect(0);
-                    if (r.Height * listViewDeviceList.Items.Count > listViewDeviceList.ClientSize.Height)
-                        sb = SystemInformation.VerticalScrollBarWidth;
-                }
-                catch { /* 레이아웃 전 등에서 GetItemRect(0) 예외 시 스크롤바 없음으로 처리 */ }
-            }
-            int available = total - sb;
-            if (available < 120) return;
-            float s = _layoutDimScale;
-            // 디자인 비율: PDM 100, DESCRIPTION 280, SPEC 280, MANUF 140, 확인 70 (합 870)
-            int[] weight = { 100, 280, 280, 140, 70 };
-            const int sumW = 100 + 280 + 280 + 140 + 70;
-            int[] minCol = {
-                Math.Max(40, (int)Math.Round(72 * s)),
-                Math.Max(56, (int)Math.Round(96 * s)),
-                Math.Max(56, (int)Math.Round(96 * s)),
-                Math.Max(48, (int)Math.Round(88 * s)),
-                Math.Max(32, (int)Math.Round(52 * s))
-            };
-            int sumMin = minCol[0] + minCol[1] + minCol[2] + minCol[3] + minCol[4];
-            if (available < sumMin)
-            {
-                int acc = 0;
-                for (int i = 0; i < 4; i++)
-                {
-                    int wi = Math.Max(18, (int)((long)available * minCol[i] / sumMin));
-                    listViewDeviceList.Columns[i].Width = wi;
-                    acc += wi;
-                }
-                listViewDeviceList.Columns[4].Width = Math.Max(18, available - acc);
-                SyncRightScrollableArea(null, EventArgs.Empty);
-                return;
-            }
+
+            float s = Math.Max(_layoutDimScale, 0.75f);
+            Font font = listViewDeviceList.Font;
+            int pad = Math.Max(14, (int)Math.Round(18 * s));
+            string[] headers = { "PDM No", "DESCRIPTION", "SPECIFICATION", "MANUFACTURE", "확인" };
+            int confirmMin = Math.Max(64, (int)Math.Round(72 * s));
+
             var w = new int[5];
-            int used = 0;
-            for (int i = 0; i < 5; i++)
+            for (int col = 0; col < 5; col++)
             {
-                w[i] = Math.Max(minCol[i], (int)Math.Round((double)available * weight[i] / sumW));
-                used += w[i];
-            }
-            if (used > available)
-            {
-                int over = used - available;
-                for (int guard = 0; over > 0 && guard < 32; guard++)
+                if (col == 4)
                 {
-                    for (int c = 2; c >= 1 && over > 0; c--)
-                    {
-                        int d = Math.Min(over, Math.Max(0, w[c] - minCol[c]));
-                        if (d <= 0) continue;
-                        w[c] -= d;
-                        over -= d;
-                    }
-                    for (int c = 3; c >= 0 && over > 0; c--)
-                    {
-                        int d = Math.Min(over, Math.Max(0, w[c] - minCol[c]));
-                        if (d <= 0) continue;
-                        w[c] -= d;
-                        over -= d;
-                    }
+                    w[col] = Math.Max(confirmMin, MeasureUiTextWidth(headers[col], font) + pad);
+                    continue;
                 }
+                int maxW = MeasureUiTextWidth(headers[col], font);
+                foreach (ListViewItem item in listViewDeviceList.Items)
+                {
+                    string text;
+                    if (col == 0)
+                        text = item.Text ?? "";
+                    else if (col < item.SubItems.Count)
+                        text = item.SubItems[col].Text ?? "";
+                    else
+                        text = "";
+                    maxW = Math.Max(maxW, MeasureUiTextWidth(text, font));
+                }
+                w[col] = maxW + pad;
             }
-            else if (used < available)
-            {
-                int rest = available - used;
-                w[1] += rest / 2;
-                w[2] += rest - rest / 2;
-            }
+
             for (int i = 0; i < 5; i++)
                 listViewDeviceList.Columns[i].Width = w[i];
             SyncRightScrollableArea(null, EventArgs.Empty);
@@ -1155,77 +1226,123 @@ namespace EMS_TEST_SIMULATOR
         private void listViewDeviceList_MouseDown(object sender, MouseEventArgs e)
         {
             var info = listViewDeviceList.HitTest(e.Location);
-            if (info.Item == null || info.SubItem == null) return;
+            if (info.Item == null) return;
             if (info.Item.Tag as string == "Category") return;
-            int subIdx = info.Item.SubItems.IndexOf(info.SubItem);
-            if (subIdx != 4) return;  // 4 = "확인" 열(체크박스)
+            bool confirmHit = false;
+            if (info.SubItem != null)
+                confirmHit = info.Item.SubItems.IndexOf(info.SubItem) == 4;
+            if (!confirmHit)
+                confirmHit = IsDeviceListConfirmColumnHit(info.Item, e.Location);
+            if (!confirmHit) return;
             info.Item.Checked = !info.Item.Checked;
-            listViewDeviceList.Invalidate(info.Item.Bounds);
-        }
-
-        /// <summary>마우스가 올라간 셀의 전체 데이터를 툴팁으로 표시 (잘려 보이는 데이터 확인용)</summary>
-        private void listViewDeviceList_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_deviceListToolTip == null) return;
-            var info = listViewDeviceList.HitTest(e.Location);
-            string cellText = "";
-            if (info.Item != null)
-            {
-                if (info.SubItem != null)
-                {
-                    int subIdx = info.Item.SubItems.IndexOf(info.SubItem);
-                    if (subIdx == 4)
-                        cellText = info.Item.Tag as string == "Category" ? "분류 행" : (info.Item.Checked ? "확인됨" : "미확인");
-                    else
-                        cellText = info.SubItem.Text ?? "";
-                }
-                else
-                    cellText = info.Item.Text ?? "";
-            }
-            _deviceListToolTip.SetToolTip(listViewDeviceList, cellText);
+            InvalidateDeviceListItem(info.Item);
         }
 
         private static readonly Color _deviceListHeaderBack = Color.FromArgb(37, 99, 235);
         private static readonly Color _deviceListItemBack = Color.FromArgb(62, 62, 66);
         private static readonly Color _deviceListFore = Color.White;
+        private static readonly Brush _deviceListItemBackBrush = new SolidBrush(_deviceListItemBack);
 
         private void listViewDeviceList_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
-            e.Graphics.FillRectangle(new SolidBrush(_deviceListHeaderBack), e.Bounds);
+            using (var br = new SolidBrush(_deviceListHeaderBack))
+                e.Graphics.FillRectangle(br, e.Bounds);
             const int pad = 6;
             var textRect = new Rectangle(e.Bounds.X + pad, e.Bounds.Y, Math.Max(0, e.Bounds.Width - pad * 2), e.Bounds.Height);
             TextRenderer.DrawText(e.Graphics, e.Header?.Text ?? "", e.Font ?? listViewDeviceList.Font, textRect, _deviceListFore, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPrefix);
+        }
+
+        private Rectangle GetDeviceListRowBounds(ListViewItem item, int fallbackTop, int fallbackHeight)
+        {
+            if (item == null) return Rectangle.Empty;
+            try { return item.GetBounds(ItemBoundsPortion.Entire); }
+            catch
+            {
+                return new Rectangle(0, fallbackTop, listViewDeviceList.ClientSize.Width, fallbackHeight);
+            }
         }
 
         private void listViewDeviceList_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
             e.DrawDefault = false;
             if (e.ItemIndex < 0) return;
-            var back = e.Item.Selected ? SystemColors.Highlight : _deviceListItemBack;
-            using (var br = new SolidBrush(back))
-                e.Graphics.FillRectangle(br, e.Bounds);
+            var rowBounds = GetDeviceListRowBounds(e.Item, e.Bounds.Top, e.Bounds.Height);
+            if (rowBounds.Width <= 0 || rowBounds.Height <= 0) return;
+            e.Graphics.FillRectangle(e.Item.Selected ? SystemBrushes.Highlight : _deviceListItemBackBrush, rowBounds);
+        }
+
+        private void FillDeviceListSubItemBackground(Graphics g, Rectangle bounds, bool selected)
+        {
+            if (bounds.Width <= 0 || bounds.Height <= 0) return;
+            var cell = bounds;
+            if (cell.Width > 0)
+                cell.Width += 1;
+            g.FillRectangle(selected ? SystemBrushes.Highlight : _deviceListItemBackBrush, cell);
+        }
+
+        private static string GetDeviceListCellText(ListViewItem item, int columnIndex)
+        {
+            if (item == null) return "";
+            if (columnIndex == 0) return item.Text ?? "";
+            if (columnIndex < item.SubItems.Count) return item.SubItems[columnIndex].Text ?? "";
+            return "";
+        }
+
+        private void InvalidateDeviceListRowByIndex(int itemIndex)
+        {
+            if (itemIndex < 0 || itemIndex >= listViewDeviceList.Items.Count) return;
+            InvalidateDeviceListItem(listViewDeviceList.Items[itemIndex]);
+        }
+
+        /// <summary>ListView가 SubItem만 무효화할 때 해당 행 전체를 다시 그려 셀이 꺼져 보이지 않게 함.</summary>
+        private void listViewDeviceList_MouseMove(object sender, MouseEventArgs e)
+        {
+            var info = listViewDeviceList.HitTest(e.Location);
+            int idx = info.Item?.Index ?? -1;
+            int col = info.SubItem != null && info.Item != null
+                ? info.Item.SubItems.IndexOf(info.SubItem)
+                : (idx >= 0 ? 0 : -1);
+            string cellKey = idx + ":" + col;
+            if (cellKey == _deviceListHoverCellKey) return;
+            int prevIdx = -1;
+            if (_deviceListHoverCellKey.Length > 0)
+            {
+                int sep = _deviceListHoverCellKey.IndexOf(':');
+                if (sep > 0) int.TryParse(_deviceListHoverCellKey.Substring(0, sep), out prevIdx);
+            }
+            _deviceListHoverCellKey = cellKey;
+            if (prevIdx >= 0 && prevIdx != idx)
+                InvalidateDeviceListRowByIndex(prevIdx);
+            if (idx >= 0)
+                InvalidateDeviceListRowByIndex(idx);
+        }
+
+        private void listViewDeviceList_MouseLeave(object sender, EventArgs e)
+        {
+            if (_deviceListHoverCellKey.Length == 0) return;
+            int prevIdx = -1;
+            int sep = _deviceListHoverCellKey.IndexOf(':');
+            if (sep > 0) int.TryParse(_deviceListHoverCellKey.Substring(0, sep), out prevIdx);
+            _deviceListHoverCellKey = "";
+            InvalidateDeviceListRowByIndex(prevIdx);
         }
 
         private void listViewDeviceList_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
             if (e.ItemIndex < 0) return;
-            var back = e.Item.Selected ? SystemColors.Highlight : _deviceListItemBack;
-            e.Graphics.FillRectangle(new SolidBrush(back), e.Bounds);
+            FillDeviceListSubItemBackground(e.Graphics, e.Bounds, e.Item.Selected);
             var fore = e.Item.Selected ? SystemColors.HighlightText : _deviceListFore;
             // 오른쪽 끝 "확인" 열: 분류 행([SENSOR PART] 등)은 체크박스 없음, 일반 행만 체크박스 그리기
             if (e.ColumnIndex == 4)
             {
                 if (e.Item?.Tag as string != "Category")
-                {
-                    if (e.Bounds.Width >= 10 && e.Bounds.Height >= 10)
-                        DrawDeviceListConfirmGlyph(e.Graphics, e.Bounds, e.Item.Checked, e.Item.Selected);
-                }
+                    DrawDeviceListConfirmGlyph(e.Graphics, e.Bounds, e.Item.Checked, e.Item.Selected);
                 return;
             }
-            var text = e.ColumnIndex == 0 ? e.Item.Text : (e.SubItem?.Text ?? "");
-            const int pad = 6;
+            var text = GetDeviceListCellText(e.Item, e.ColumnIndex);
+            const int pad = 8;
             var textRect = new Rectangle(e.Bounds.X + pad, e.Bounds.Y, Math.Max(0, e.Bounds.Width - pad * 2), e.Bounds.Height);
-            var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis;
+            var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.SingleLine;
             TextRenderer.DrawText(e.Graphics, text, e.SubItem?.Font ?? listViewDeviceList.Font, textRect, fore, flags);
         }
 
@@ -1860,25 +1977,56 @@ namespace EMS_TEST_SIMULATOR
             MessageBox.Show(msg, "적용 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        /// <summary>I.O 체크 셀: CSV 구분=사용자 행만 편집 가능. 그 외(AUTO 플래그 대상)는 편집 불가. CSV 미로드 시 신호명칭 있는 행만 편집 가능.</summary>
-        private void dataGridViewIO_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        /// <summary>I.O 체크 셀 편집 가능 여부(CSV 구분=사용자 또는 신호명칭 있는 행).</summary>
+        private bool IsIoCheckRowEditable(int rowIndex)
         {
-            if (dataGridViewIO.Columns[e.ColumnIndex].Name != "I.O 체크") return;
-            var dt = dataGridViewIO.DataSource as DataTable;
-            if (dt == null || e.RowIndex < 0 || e.RowIndex >= dt.Rows.Count) return;
+            var dt = dataGridViewIO?.DataSource as DataTable;
+            if (dt == null || rowIndex < 0 || rowIndex >= dt.Rows.Count) return false;
             if (_userCheckableIoKeys.Count > 0)
             {
-                DataRow row = dt.Rows[e.RowIndex];
+                DataRow row = dt.Rows[rowIndex];
                 string io = row["IO구분"]?.ToString()?.Trim() ?? "";
                 string addr = row["어드레스"]?.ToString()?.Trim() ?? "";
                 string bit = row["BIT"]?.ToString()?.Trim() ?? "";
-                if (!_userCheckableIoKeys.Contains($"{io}_{addr}_{bit}"))
-                    e.Cancel = true;
-                return;
+                return _userCheckableIoKeys.Contains($"{io}_{addr}_{bit}");
             }
-            string sig = dt.Rows[e.RowIndex]["신호명칭"]?.ToString()?.Trim() ?? "";
-            if (string.IsNullOrEmpty(sig))
+            string sig = dt.Rows[rowIndex]["신호명칭"]?.ToString()?.Trim() ?? "";
+            return !string.IsNullOrEmpty(sig);
+        }
+
+        /// <summary>I.O 체크는 커스텀 그리기·CellClick으로 토글(기본 소형 체크박스 편집기 사용 안 함).</summary>
+        private void dataGridViewIO_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            if (e.ColumnIndex >= 0 && e.ColumnIndex < dataGridViewIO.Columns.Count
+                && dataGridViewIO.Columns[e.ColumnIndex].Name == "I.O 체크")
                 e.Cancel = true;
+        }
+
+        private void dataGridViewIO_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            if (dataGridViewIO.Columns[e.ColumnIndex].Name != "I.O 체크") return;
+
+            e.Paint(e.CellBounds, DataGridViewPaintParts.Background | DataGridViewPaintParts.Border
+                | DataGridViewPaintParts.SelectionBackground);
+
+            bool isChecked = dataGridViewIO.Rows[e.RowIndex].Cells[e.ColumnIndex].Value is bool b && b;
+            bool selected = (e.State & DataGridViewElementStates.Selected) != 0;
+            bool editable = IsIoCheckRowEditable(e.RowIndex);
+            DrawDeviceListConfirmGlyph(e.Graphics, e.CellBounds, isChecked, selected, editable);
+            e.Handled = true;
+        }
+
+        private void dataGridViewIO_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            if (dataGridViewIO.Columns[e.ColumnIndex].Name != "I.O 체크") return;
+            if (!IsIoCheckRowEditable(e.RowIndex)) return;
+
+            var cell = dataGridViewIO.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            bool cur = cell.Value is bool bv && bv;
+            cell.Value = !cur;
+            dataGridViewIO.InvalidateCell(e.ColumnIndex, e.RowIndex);
         }
 
         /// <summary>INPUT=빨강, OUTPUT=초록 글씨 / I.O 체크 셀: 구분=사용자 아닌 행(자동 체크 대상)은 회색 비활성 표시.</summary>
@@ -1915,29 +2063,132 @@ namespace EMS_TEST_SIMULATOR
             }
         }
 
-        /// <summary>열 너비 설정 (머리글 줄바꿈 없음, 정렬은 Designer에서).</summary>
+        private static int GetIoGridColumnMinWidth(string columnName, float scale)
+        {
+            float s = Math.Max(scale, 0.75f);
+            if (columnName == "I.O 체크")
+                return Math.Max(64, (int)Math.Round(72 * s));
+            if (columnName == "BIT")
+                return Math.Max(36, (int)Math.Round(40 * s));
+            return Math.Max(40, (int)Math.Round(44 * s));
+        }
+
+        /// <summary>I.O LIST 탭 배경·탭 전환 시 DEVICE LIST 잔상 방지.</summary>
+        private void SetupIoListTabChrome()
+        {
+            if (tabPage2 != null)
+            {
+                tabPage2.UseVisualStyleBackColor = false;
+                tabPage2.BackColor = _deviceListItemBack;
+            }
+        }
+
+        private void SetupIoListGridTouch()
+        {
+            if (dataGridViewIO == null || dataGridViewIO.IsDisposed) return;
+            TryEnableControlDoubleBuffer(dataGridViewIO);
+            dataGridViewIO.CellPainting -= dataGridViewIO_CellPainting;
+            dataGridViewIO.CellPainting += dataGridViewIO_CellPainting;
+            dataGridViewIO.CellClick -= dataGridViewIO_CellClick;
+            dataGridViewIO.CellClick += dataGridViewIO_CellClick;
+            ApplyIoListRowHeight();
+        }
+
+        private static void TryEnableControlDoubleBuffer(Control control)
+        {
+            if (control == null || control.IsDisposed) return;
+            try
+            {
+                typeof(Control).InvokeMember("DoubleBuffered",
+                    BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
+                    null, control, new object[] { true });
+            }
+            catch { }
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1?.SelectedTab == tabPage1)
+                RefreshDeviceListTabSurface();
+        }
+
+        private void RefreshDeviceListTabSurface()
+        {
+            tabPage1?.Invalidate(true);
+            panelDeviceList?.Invalidate(true);
+            if (listViewDeviceList == null || listViewDeviceList.IsDisposed) return;
+            listViewDeviceList.Invalidate(true);
+            listViewDeviceList.Update();
+        }
+
+        private void panelDeviceList_Paint(object sender, PaintEventArgs e)
+        {
+            var back = panelDeviceList?.BackColor ?? _deviceListItemBack;
+            using (var br = new SolidBrush(back))
+                e.Graphics.FillRectangle(br, panelDeviceList.ClientRectangle);
+        }
+
+        /// <summary>열 합이 ListView 클라이언트보다 좁을 때 오른쪽 빈 영역(탭 전환 잔상)을 배경색으로 채움.</summary>
+        private void listViewDeviceList_Paint(object sender, PaintEventArgs e)
+        {
+            if (listViewDeviceList?.Columns == null || listViewDeviceList.Columns.Count == 0) return;
+            int colTotal = 0;
+            foreach (ColumnHeader c in listViewDeviceList.Columns)
+                colTotal += c.Width;
+            int gap = listViewDeviceList.ClientSize.Width - colTotal;
+            if (gap <= 0) return;
+            var fill = new Rectangle(colTotal, 0, gap, listViewDeviceList.ClientSize.Height);
+            using (var br = new SolidBrush(listViewDeviceList.BackColor))
+                e.Graphics.FillRectangle(br, fill);
+        }
+
+        /// <summary>I.O LIST: DEVICE LIST와 동일하게 헤더·모든 행 문자열 기준 열 너비(가로 스크롤 허용).</summary>
         private void SetGridColumnWidths()
         {
             if (dataGridViewIO.Columns.Count == 0) return;
+            float s = Math.Max(_layoutDimScale, 0.75f);
+            int pad = Math.Max(14, (int)Math.Round(18 * s));
+            Font font = dataGridViewIO.Font;
+            var dt = dataGridViewIO.DataSource as DataTable;
             dataGridViewIO.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-            // 1.0 기준 픽셀. s=0.5만 곱하면 헤더·어드레스·신호명이 과도하게 잘림 → 열 전용 스케일을 s보다 높게
-            int[] widths = { 132, 0, 54, 205, 148, 195, 182, 175, 400, 78, 102, 148 };
-            float s = _layoutDimScale;
-            float colScale = s < 0.99f ? Math.Max(s, 0.84f) : s;
-            // 축소 UI에서도 읽을 수 있는 하한(픽셀)
-            int[] minPx = { 100, 0, 46, 128, 100, 128, 118, 118, 240, 62, 90, 104 };
-            for (int i = 0; i < dataGridViewIO.Columns.Count && i < widths.Length; i++)
+
+            foreach (DataGridViewColumn col in dataGridViewIO.Columns)
             {
-                var col = dataGridViewIO.Columns[i];
-                int cw = widths[i] > 0 ? (int)Math.Round(widths[i] * colScale) : 0;
-                if (widths[i] > 0 && s < 0.99f && i < minPx.Length)
-                    cw = Math.Max(cw, minPx[i]);
-                int minW = widths[i] > 0 ? Math.Max(20, cw) : Math.Max(15, (int)Math.Round(30 * s));
-                col.MinimumWidth = minW;
-                col.Width = cw;
                 if (col.Name == "IO구분")
+                {
                     col.Visible = false;
+                    continue;
+                }
+                if (!col.Visible) continue;
+
+                int minW = GetIoGridColumnMinWidth(col.Name, s);
+                int maxW = MeasureUiTextWidth(col.HeaderText ?? col.Name ?? "", font);
+
+                if (dt != null && dt.Columns.Contains(col.Name))
+                {
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        string text = row[col.Name]?.ToString() ?? "";
+                        maxW = Math.Max(maxW, MeasureUiTextWidth(text, font));
+                    }
+                }
+                else
+                {
+                    foreach (DataGridViewRow row in dataGridViewIO.Rows)
+                    {
+                        if (row.IsNewRow) continue;
+                        string text = row.Cells[col.Index].FormattedValue?.ToString()
+                            ?? row.Cells[col.Index].Value?.ToString() ?? "";
+                        maxW = Math.Max(maxW, MeasureUiTextWidth(text, font));
+                    }
+                }
+
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                col.Width = Math.Max(minW, maxW + pad);
+                col.MinimumWidth = minW;
+                col.DefaultCellStyle.WrapMode = DataGridViewTriState.False;
             }
+            ApplyIoListRowHeight();
         }
 
         private void FillAddressFilterCombo()
@@ -2116,10 +2367,10 @@ namespace EMS_TEST_SIMULATOR
             ws.Cell(2, 5).Value = "확인";
 
             ws.Column(1).Width = 14;
-            ws.Column(2).Width = 38;
-            ws.Column(3).Width = 38;
-            ws.Column(4).Width = 28;
-            ws.Column(5).Width = 8;
+            ws.Column(2).Width = 70;
+            ws.Column(3).Width = 70;
+            ws.Column(4).Width = 20;
+            ws.Column(5).Width = 4;
 
             for (int c = 1; c <= lastCol; c++)
             {
@@ -2839,11 +3090,6 @@ namespace EMS_TEST_SIMULATOR
 
         }
 
-        private void dataGridViewIO_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
         /// <summary>[상태저장] 클릭: (1) DEVICE LIST 확인 체크 전부 완료 (2) I.O LIST 사용신호 필터링 시 표시된 행의 I.O 체크 전부 완료 → 둘 다 만족 시에만 저장.</summary>
         private void IOCheckSheetForm_StateSaveClick(object sender, EventArgs e)
         {
@@ -3003,6 +3249,7 @@ namespace EMS_TEST_SIMULATOR
                         return;
                     }
                     _deviceListBulkLoad = true;
+                    _deviceListHoverCellKey = "";
                     if (panelDeviceList != null && !panelDeviceList.IsDisposed)
                         panelDeviceList.SuspendLayout();
                     listViewDeviceList.BeginUpdate();
@@ -3037,6 +3284,7 @@ namespace EMS_TEST_SIMULATOR
                         if (panelDeviceList != null && !panelDeviceList.IsDisposed)
                             panelDeviceList.ResumeLayout(false);
                         _deviceListBulkLoad = false;
+                        ApplyDeviceListRowHeight();
                         ApplyDeviceListColumnWidths();
                     }
                 }
@@ -3186,6 +3434,7 @@ namespace EMS_TEST_SIMULATOR
                     }).ToList();
                 }
                 _deviceListBulkLoad = true;
+                _deviceListHoverCellKey = "";
                 if (panelDeviceList != null && !panelDeviceList.IsDisposed)
                     panelDeviceList.SuspendLayout();
                 listViewDeviceList.BeginUpdate();
@@ -3218,6 +3467,7 @@ namespace EMS_TEST_SIMULATOR
                     if (panelDeviceList != null && !panelDeviceList.IsDisposed)
                         panelDeviceList.ResumeLayout(false);
                     _deviceListBulkLoad = false;
+                    ApplyDeviceListRowHeight();
                     ApplyDeviceListColumnWidths();
                 }
                 if (dataRows.Count == 0)
@@ -3829,38 +4079,49 @@ namespace EMS_TEST_SIMULATOR
             return false;
         }
 
-        /// <summary>DEVICE LIST 확인 열: 다크 배경에서도 켜짐이 분명히 보이도록 수동 그리기.</summary>
-        private static void DrawDeviceListConfirmGlyph(Graphics g, Rectangle bounds, bool isChecked, bool rowSelected)
+        /// <summary>DEVICE LIST·I.O LIST 공통 확인 체크 글리프(터치용 크기).</summary>
+        private static void DrawDeviceListConfirmGlyph(Graphics g, Rectangle bounds, bool isChecked, bool rowSelected, bool enabled = true)
         {
-            int boxSize = Math.Min(18, Math.Min(bounds.Width, bounds.Height) - 6);
-            if (boxSize < 10) return;
+            int boxSize = Math.Min(34, Math.Min(bounds.Width - 8, bounds.Height - 8));
+            boxSize = Math.Max(26, boxSize);
+            if (boxSize < 20) return;
             int x = bounds.X + (bounds.Width - boxSize) / 2;
             int y = bounds.Y + (bounds.Height - boxSize) / 2;
             var r = new Rectangle(x, y, boxSize, boxSize);
             if (isChecked)
             {
-                using (var br = new SolidBrush(Color.FromArgb(56, 160, 80)))
+                var fill = enabled ? Color.FromArgb(56, 160, 80) : Color.FromArgb(45, 110, 58);
+                var border = enabled ? Color.FromArgb(150, 230, 170) : Color.FromArgb(90, 140, 100);
+                using (var br = new SolidBrush(fill))
                     g.FillRectangle(br, r);
-                using (var p = new Pen(Color.FromArgb(150, 230, 170), 1f))
+                using (var p = new Pen(border, 1f))
                     g.DrawRectangle(p, r.X, r.Y, r.Width - 1, r.Height - 1);
-                float t = boxSize / 10f;
-                using (var pen = new Pen(Color.White, Math.Max(1.6f, boxSize / 9f)))
+                if (enabled)
                 {
-                    pen.StartCap = System.Drawing.Drawing2D.LineCap.Round;
-                    pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
-                    g.DrawLines(pen, new[]
+                    float t = boxSize / 10f;
+                    using (var pen = new Pen(Color.White, Math.Max(1.6f, boxSize / 9f)))
                     {
-                        new PointF(r.X + 2.2f * t, r.Y + 5f * t),
-                        new PointF(r.X + 4.3f * t, r.Y + 7.2f * t),
-                        new PointF(r.X + 8.2f * t, r.Y + 2.8f * t)
-                    });
+                        pen.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                        pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                        g.DrawLines(pen, new[]
+                        {
+                            new PointF(r.X + 2.2f * t, r.Y + 5f * t),
+                            new PointF(r.X + 4.3f * t, r.Y + 7.2f * t),
+                            new PointF(r.X + 8.2f * t, r.Y + 2.8f * t)
+                        });
+                    }
                 }
             }
             else
             {
-                using (var br = new SolidBrush(Color.FromArgb(48, 48, 52)))
+                var fill = enabled ? Color.FromArgb(48, 48, 52) : Color.FromArgb(40, 40, 44);
+                using (var br = new SolidBrush(fill))
                     g.FillRectangle(br, r);
-                var border = rowSelected ? Color.FromArgb(200, 210, 230) : Color.FromArgb(130, 130, 145);
+                Color border;
+                if (!enabled)
+                    border = Color.FromArgb(90, 90, 100);
+                else
+                    border = rowSelected ? Color.FromArgb(200, 210, 230) : Color.FromArgb(130, 130, 145);
                 using (var p = new Pen(border, 1f))
                     g.DrawRectangle(p, r.X, r.Y, r.Width - 1, r.Height - 1);
             }
@@ -3889,6 +4150,67 @@ namespace EMS_TEST_SIMULATOR
         private void panelLeft_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        /// <summary>DEVICE LIST ListView: 스크롤·휠 후 OwnerDraw 영역 전체 갱신.</summary>
+        private sealed class DeviceListScrollInvalidateHook : NativeWindow
+        {
+            private ListView _listView;
+
+            public DeviceListScrollInvalidateHook(ListView listView)
+            {
+                Reattach(listView);
+            }
+
+            public void Reattach(ListView listView)
+            {
+                if (_listView != null)
+                {
+                    _listView.HandleCreated -= ListView_HandleCreated;
+                    _listView.HandleDestroyed -= ListView_HandleDestroyed;
+                }
+                _listView = listView;
+                if (_listView == null) return;
+                _listView.HandleCreated += ListView_HandleCreated;
+                _listView.HandleDestroyed += ListView_HandleDestroyed;
+                if (_listView.IsHandleCreated)
+                    AssignHandle(_listView.Handle);
+            }
+
+            private void ListView_HandleCreated(object sender, EventArgs e)
+            {
+                if (_listView != null && _listView.IsHandleCreated)
+                    AssignHandle(_listView.Handle);
+            }
+
+            private void ListView_HandleDestroyed(object sender, EventArgs e)
+            {
+                ReleaseHandle();
+            }
+
+            protected override void WndProc(ref Message m)
+            {
+                const int WM_ERASEBKGND = 0x0014;
+                const int WM_VSCROLL = 0x0115;
+                const int WM_HSCROLL = 0x0114;
+                const int WM_MOUSEWHEEL = 0x020A;
+                if (m.Msg == WM_ERASEBKGND && _listView != null && !_listView.IsDisposed)
+                {
+                    try
+                    {
+                        using (var g = Graphics.FromHdc(m.WParam))
+                        using (var br = new SolidBrush(_listView.BackColor))
+                            g.FillRectangle(br, 0, 0, _listView.ClientSize.Width, _listView.ClientSize.Height);
+                        m.Result = (IntPtr)1;
+                        return;
+                    }
+                    catch { /* HDC 실패 시 기본 처리 */ }
+                }
+                bool scrollMsg = m.Msg == WM_VSCROLL || m.Msg == WM_HSCROLL || m.Msg == WM_MOUSEWHEEL;
+                base.WndProc(ref m);
+                if (scrollMsg && _listView != null && !_listView.IsDisposed && _listView.IsHandleCreated)
+                    _listView.Invalidate(_listView.ClientRectangle, false);
+            }
         }
     }
 }
