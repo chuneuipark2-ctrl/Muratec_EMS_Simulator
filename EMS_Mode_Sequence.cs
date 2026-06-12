@@ -31,7 +31,18 @@ namespace EMS_TEST_SIMULATOR
         private const int EmsPollIntervalMs = 200;
         private const int EmsTimeoutPollCount = 50;
         private const int EmsTimeoutSeconds = 10;
-        private const string SemiOriginSection101 = "0101";
+
+        private static void LogSeqError(string category, string message, string title = null, MessageBoxIcon icon = MessageBoxIcon.Warning)
+        {
+            AppErrorLog.Raise(category, message);
+            MessageBox.Show(message, title ?? category, MessageBoxButtons.OK, icon);
+        }
+
+        private static void InvokeLogSeqError(Main mainForm, string category, string message, string title = null, MessageBoxIcon icon = MessageBoxIcon.Warning)
+        {
+            if (mainForm == null || mainForm.IsDisposed) return;
+            mainForm.Invoke(new Action(() => LogSeqError(category, message, title, icon)));
+        }
 
         /// <summary>
         /// 도그 카운트(101~113 등)를 프로토콜용 4자리 문자열로 변환.
@@ -51,12 +62,13 @@ namespace EMS_TEST_SIMULATOR
             return int.TryParse(numPart, out int n) ? n.ToString("D2") : "01";
         }
 
-        private string GetEncoderValueForSection(Command_Form form, string section4Digit)
+        private string GetEncoderValueForSection(Main mainForm, Command_Form form, string section4Digit)
         {
-            string vehicleID = GetVehicleIDFromForm(form);
+            string vehicleId = form.currentData.EMS_NO ?? "";
             string posKey = int.TryParse(section4Digit, out int sec) ? sec.ToString() : "";
             if (string.IsNullOrEmpty(posKey)) return null;
-            int v = _encManager.GetStoredValue(vehicleID, posKey);
+            var encMgr = mainForm?._EncManager ?? _encManager;
+            int v = encMgr.GetStoredValue(vehicleId, posKey);
             if (v >= 0 && v <= 500) return v.ToString().PadLeft(4, '0');
             return null;
         }
@@ -74,12 +86,36 @@ namespace EMS_TEST_SIMULATOR
             return proto?.Parser?.CurrentStatus?.CurrentSectionCount?.Trim() ?? "";
         }
 
+        /// <summary>AUTO 등: 응답 00·자동·접수가능</summary>
         private static bool IsEmsRunStatusOk(SKY_RAV_Status status)
         {
             return status != null
                 && status.ResponseCode == "00"
                 && status.MachineMode == "2"
                 && status.CommandAcceptStatus == "1";
+        }
+
+        /// <summary>반자동·AUTO H4 전: 응답 00·접수가능·ErrorCode 무에러 (기체 자동은 H2 직전에 확인)</summary>
+        private static bool IsEmsPreConditionForH4(SKY_RAV_Status status)
+        {
+            return status != null
+                && status.ResponseCode == "00"
+                && status.CommandAcceptStatus == "1"
+                && IsEmsErrorCodeClear(status);
+        }
+
+        /// <summary>반자동 H2 전 / 원점 잡힘: H4 전제 + 기체 자동</summary>
+        private static bool IsEmsReadyForH2(SKY_RAV_Status status)
+        {
+            return IsEmsPreConditionForH4(status)
+                && status.MachineMode == "2";
+        }
+
+        private static bool IsEmsErrorCodeClear(SKY_RAV_Status status)
+        {
+            if (status == null) return false;
+            string ec = status.ErrorCode?.Trim();
+            return string.IsNullOrEmpty(ec) || ec == "00";
         }
 
         private static bool SectionMatches(string a, string b)
@@ -90,49 +126,91 @@ namespace EMS_TEST_SIMULATOR
             return false;
         }
 
-        private async Task<bool> SendH4AutoAndWaitAcceptAsync(Command_Form form, EMS_Protocol proto, CancellationToken cancelToken)
-        {
-            if (form?._comm == null) return false;
-            if (!IsEmsRunStatusOk(proto?.Parser?.CurrentStatus))
-                return false;
+        private const int SemiPositionChangePollCount = 10; // 200ms × 10 = 2초
+        private static readonly int[] SemiStationDogCounts = { 101, 110, 113 };
 
-            byte[] h4 = EMS_Order.EMS_Item_order("1");
-            if (h4 == null) return false;
-            await form._comm.SendData(Encoding.ASCII.GetString(h4));
-            return await WaitForTransferCommandAcceptAfterH4Async(proto, cancelToken);
+        private static bool IsSemiStationSection(string section4)
+        {
+            foreach (int dog in SemiStationDogCounts)
+            {
+                if (SectionMatches(section4, DogCountToSectionNumber(dog)))
+                    return true;
+            }
+            return false;
         }
 
-        /// <summary>H4 후 CurrentSectionCount 갱신 = 원점 잡힘. EMS는 원점 전 H2 불가.</summary>
-        private async Task<bool> WaitForOriginHomingAsync(Command_Form form, EMS_Protocol proto, Main mainForm, CancellationToken cancelToken)
+        /// <summary>탑재/이재 leg: 시작·목적·스테이션(101/110/113)에서는 2초 위치변화 감시 생략</summary>
+        private static bool IsPositionChangeMonitorExempt(string targetSection, string actionMode, string startPos, string endPos)
         {
-            string initialSection = GetCurrentSection4(proto);
-            for (int i = 0; i < EmsTimeoutPollCount; i++)
+            if (actionMode != "1" && actionMode != "2") return false;
+            return SectionMatches(targetSection, startPos)
+                || SectionMatches(targetSection, endPos)
+                || IsSemiStationSection(targetSection);
+        }
+
+        private async Task<bool> WaitForPositionChangeWithin2SecAsync(EMS_Protocol proto, string baselineSection, CancellationToken cancelToken)
+        {
+            for (int i = 0; i < SemiPositionChangePollCount; i++)
             {
                 if (cancelToken.IsCancellationRequested) return false;
                 await Task.Delay(EmsPollIntervalMs, cancelToken);
-
-                var status = proto?.Parser?.CurrentStatus;
-                if (!IsEmsRunStatusOk(status))
-                {
-                    await SendH3ClearAsync(form);
-                    if (!mainForm.IsDisposed)
-                        mainForm.Invoke(new Action(() =>
-                            MessageBox.Show($"EMS 상태 이상 (응답:{status?.ResponseCode}, 모드:{status?.MachineMode}, 접수:{status?.CommandAcceptStatus})",
-                                "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
-                    return false;
-                }
-
                 string current = GetCurrentSection4(proto);
-                if (!string.IsNullOrEmpty(current) && current != initialSection)
+                if (!string.IsNullOrEmpty(current) && !SectionMatches(current, baselineSection))
                     return true;
             }
-
-            await SendH3ClearAsync(form);
-            if (!mainForm.IsDisposed)
-                mainForm.Invoke(new Action(() =>
-                    MessageBox.Show($"원점(현재위치 갱신) 대기 시간 초과 ({EmsTimeoutSeconds}초).", "반자동",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error)));
             return false;
+        }
+
+        private async Task<bool> WaitForWorkReadyAsync(EMS_Protocol proto, CancellationToken cancelToken)
+        {
+            for (int i = 0; i < EmsTimeoutPollCount; i++)
+            {
+                if (cancelToken.IsCancellationRequested) return false;
+                if (IsEmsReadyForH2(proto?.Parser?.CurrentStatus))
+                    return true;
+                await Task.Delay(EmsPollIntervalMs, cancelToken);
+            }
+            return false;
+        }
+
+        /// <summary>반자동·AUTO 공통: H4(1) 1회 → 2초 내 위치변화 → 작업가능(원점) 대기. 101 정렬 없음.</summary>
+        private async Task<bool> RunSemiAutoHomingAsync(Command_Form form, EMS_Protocol proto, Main mainForm,
+            CancellationToken cancelToken, string dialogTitle = "반자동")
+        {
+            if (form?._comm == null) return false;
+
+            if (!IsEmsPreConditionForH4(proto?.Parser?.CurrentStatus))
+            {
+                var s = proto?.Parser?.CurrentStatus;
+                if (!mainForm.IsDisposed)
+                    InvokeLogSeqError(mainForm, dialogTitle,
+                        $"H4 전 EMS 조건 미충족 (응답:{s?.ResponseCode}, 접수:{s?.CommandAcceptStatus}, 에러:{s?.ErrorCode})",
+                        dialogTitle, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            string baselineSection = GetCurrentSection4(proto);
+            byte[] h4 = EMS_Order.EMS_Item_order("1");
+            if (h4 == null) return false;
+            await form._comm.SendData(Encoding.ASCII.GetString(h4));
+
+            if (!await WaitForPositionChangeWithin2SecAsync(proto, baselineSection, cancelToken))
+            {
+                await SendH3ClearAsync(form);
+                if (!mainForm.IsDisposed)
+                    InvokeLogSeqError(mainForm, dialogTitle, "H4 후 2초 안에 현재 위치값이 변하지 않았습니다.", dialogTitle, MessageBoxIcon.Error);
+                return false;
+            }
+
+            if (!await WaitForWorkReadyAsync(proto, cancelToken))
+            {
+                await SendH3ClearAsync(form);
+                if (!mainForm.IsDisposed)
+                    InvokeLogSeqError(mainForm, dialogTitle, $"원점(작업가능) 대기 시간 초과 ({EmsTimeoutSeconds}초).", dialogTitle, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
         }
 
         private async Task<bool> WaitSectionArrivalAsync(EMS_Protocol proto, string section4, CancellationToken cancelToken)
@@ -141,7 +219,7 @@ namespace EMS_TEST_SIMULATOR
             {
                 if (cancelToken.IsCancellationRequested) return false;
                 var status = proto?.Parser?.CurrentStatus;
-                if (!IsEmsRunStatusOk(status)) return false;
+                if (!IsEmsReadyForH2(status)) return false;
                 if (SectionMatches(GetCurrentSection4(proto), section4))
                     return true;
                 await Task.Delay(EmsPollIntervalMs, cancelToken);
@@ -149,17 +227,17 @@ namespace EMS_TEST_SIMULATOR
             return false;
         }
 
-        /// <summary>H4·원점 확보 후 H2 1회 전송 및 도착 대기(이동/탑재/이재 공통).</summary>
-        private async Task<bool> SendH2LegAsync(Command_Form form, EMS_Protocol proto, Main mainForm, string section4,
-            string actionMode, string encoderValue, CancellationToken cancelToken)
+        /// <summary>반자동·AUTO H2 1회 전송 및 leg 완료 대기</summary>
+        private async Task<bool> SendSemiAutoH2LegAsync(Command_Form form, EMS_Protocol proto, Main mainForm,
+            string section4, string actionMode, string encoderValue, string startPos, string endPos,
+            CancellationToken cancelToken, string dialogTitle = "반자동")
         {
             if (form?._comm == null) return false;
-            if (!IsEmsRunStatusOk(proto?.Parser?.CurrentStatus))
+
+            if (!IsEmsReadyForH2(proto?.Parser?.CurrentStatus))
             {
                 if (!mainForm.IsDisposed)
-                    mainForm.Invoke(new Action(() =>
-                        MessageBox.Show("H2 전송 전 EMS 상태가 정상(00·자동·접수가능)이 아닙니다.", "반자동",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                    InvokeLogSeqError(mainForm, dialogTitle, "H2 전송 전 EMS 작업가능 상태(00·접수1·자동·에러없음)가 아닙니다.", dialogTitle, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -175,40 +253,102 @@ namespace EMS_TEST_SIMULATOR
                 }
             });
             if (h2 == null) return false;
+
+            string baselineAtSend = GetCurrentSection4(proto);
+            bool monitorPositionChange = !IsPositionChangeMonitorExempt(section4, actionMode, startPos, endPos);
+
             await form._comm.SendData(Encoding.ASCII.GetString(h2));
             await Task.Delay(500, cancelToken);
+
+            if (monitorPositionChange)
+            {
+                if (!await WaitForPositionChangeWithin2SecAsync(proto, baselineAtSend, cancelToken))
+                {
+                    await SendH3ClearAsync(form);
+                    if (!mainForm.IsDisposed)
+                        InvokeLogSeqError(mainForm, dialogTitle,
+                            $"H2 후 2초 안에 현재 위치값이 변하지 않았습니다. (목적:{section4})", dialogTitle, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
+
+            if (SectionMatches(GetCurrentSection4(proto), section4))
+                return true;
 
             if (await WaitSectionArrivalAsync(proto, section4, cancelToken))
                 return true;
 
+            await SendH3ClearAsync(form);
             if (!mainForm.IsDisposed)
-                mainForm.Invoke(new Action(() =>
-                    MessageBox.Show($"목적 위치({section4}) 도착 대기 시간 초과 ({EmsTimeoutSeconds}초).", "반자동",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                InvokeLogSeqError(mainForm, dialogTitle, $"목적 위치({section4}) 도착 대기 시간 초과 ({EmsTimeoutSeconds}초).", dialogTitle, MessageBoxIcon.Warning);
             return false;
         }
 
-        /// <summary>반자동 공통: H4 → 원점(현재위치 갱신) → H2로 101 정렬.</summary>
-        private async Task<bool> RunSemiAutoHomingAndAlign101Async(Command_Form form, EMS_Protocol proto, Main mainForm,
-            CancellationToken cancelToken)
+        private async Task<bool> AutoSendH2StepAsync(Command_Form form, EMS_Protocol proto, Main mainForm,
+            string section4, string actionMode, string encoder, CancellationToken cancelToken)
         {
-            if (!await SendH4AutoAndWaitAcceptAsync(form, proto, cancelToken))
+            return await SendSemiAutoH2LegAsync(form, proto, mainForm, section4, actionMode, encoder,
+                Start_position, End_position, cancelToken, "AUTO");
+        }
+
+        private static bool ValidateSemiAutoCargoForMode(int mode, SKY_RAV_Status status, out string message)
+        {
+            message = null;
+            if (mode == 2 && status?.CargoStatus == "1")
             {
-                await SendH3ClearAsync(form);
-                if (!mainForm.IsDisposed)
-                    mainForm.Invoke(new Action(() =>
-                        MessageBox.Show($"H4 후 반송지령 접수(1) 대기 시간 초과 ({EmsTimeoutSeconds}초).", "반자동",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                message = "이미 화물이 탑재되어 있습니다.";
                 return false;
             }
-
-            if (!await WaitForOriginHomingAsync(form, proto, mainForm, cancelToken))
+            if (mode == 3 && status?.CargoStatus == "0")
+            {
+                message = "화물이 없습니다. 이재 명령을 취소합니다.";
                 return false;
+            }
+            return true;
+        }
 
-            if (SectionMatches(GetCurrentSection4(proto), SemiOriginSection101))
-                return true;
+        private static bool ValidateSemiAutoFormSetup(Command_Form form, out string message)
+        {
+            message = null;
+            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo) || string.IsNullOrEmpty(Line_Setup.SavedLineName))
+            {
+                message = "저장된 정보가 없습니다. Line_Setup에서 [상태저장]을 실행해 주세요.";
+                return false;
+            }
+            if (form.currentData.EMS_NO != Line_Setup.SavedVehicleNo)
+            {
+                message = "Line_Setup에 저장된 호기와 반자동 명령의 호기가 일치하지 않습니다.";
+                return false;
+            }
+            if (form.currentData.rail_data != Line_Setup.SavedLineName)
+            {
+                message = "Line_Setup에 저장된 레일과 반자동 명령의 레일선택이 일치하지 않습니다.";
+                return false;
+            }
+            return true;
+        }
 
-            return await SendH2LegAsync(form, proto, mainForm, SemiOriginSection101, "0", "0000", cancelToken);
+        /// <summary>원점 잡힌 뒤 시작카운트≠EMS현재면 시작→목적, 같으면 목적만</summary>
+        private async Task<bool> RunSemiAutoLegsAfterHomingAsync(Command_Form form, EMS_Protocol proto, Main mainForm,
+            string finalActionMode, string finalEncoder, CancellationToken cancelToken)
+        {
+            string emsPos = GetCurrentSection4(proto);
+
+            if (!SectionMatches(Start_position, emsPos))
+            {
+                if (!await SendSemiAutoH2LegAsync(form, proto, mainForm, Start_position, "0", "0000",
+                        Start_position, End_position, cancelToken))
+                    return false;
+            }
+
+            if (string.Equals(finalActionMode, "0", StringComparison.Ordinal))
+            {
+                if (SectionMatches(GetCurrentSection4(proto), End_position))
+                    return true;
+            }
+
+            return await SendSemiAutoH2LegAsync(form, proto, mainForm, End_position, finalActionMode, finalEncoder,
+                Start_position, End_position, cancelToken);
         }
 
         public void ProcessMode(int mode, Command_Form form, Main mainForm)
@@ -225,7 +365,7 @@ namespace EMS_TEST_SIMULATOR
         }
 
 
-        /// <summary>반자동: H4 → 원점(현재위치 갱신) → H2(101) → Command Form 경로. 탑재/이재는 화물·엔코더 조건 추가.</summary>
+        /// <summary>반자동: H4 → 원점 → H2 leg(시작/목적). 탑재/이재는 화물·엔코더 조건 추가.</summary>
         public async Task<bool> SemiAuto_Sequence(Command_Form form, Main mainForm)
         {
             BindSemiAutoCommAndProto(form, mainForm);
@@ -234,31 +374,26 @@ namespace EMS_TEST_SIMULATOR
 
             if (form._comm == null)
             {
-                MessageBox.Show("통신이 연결되지 않았습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("반자동", "통신이 연결되지 않았습니다.", "반자동", MessageBoxIcon.Warning);
                 return false;
             }
 
             var status = proto?.Parser?.CurrentStatus;
-            if (status == null || status.ResponseCode == null || status.MachineMode == null)
+            if (status == null || status.ResponseCode == null)
             {
-                MessageBox.Show("EMS로부터 응답이 없습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-            if (!IsEmsRunStatusOk(status))
-            {
-                MessageBox.Show($"조건 미충족 (응답:{status.ResponseCode}, 모드:{status.MachineMode}, 접수:{status.CommandAcceptStatus})",
-                    "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("반자동", "EMS로부터 응답이 없습니다.", "반자동", MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
+            if (!ValidateSemiAutoFormSetup(form, out string setupMsg))
             {
-                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.");
+                LogSeqError("반자동", setupMsg, "반자동", MessageBoxIcon.Warning);
                 return false;
             }
-            if (form.currentData.EMS_NO != Line_Setup.SavedVehicleNo)
+
+            if (!ValidateSemiAutoCargoForMode(mode, status, out string cargoMsg))
             {
-                MessageBox.Show("Line_Setup에 저장된 호기와 반자동 명령의 호기가 일치하지 않습니다.");
+                LogSeqError("반자동", cargoMsg, "반자동", MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -283,13 +418,13 @@ namespace EMS_TEST_SIMULATOR
                         if (ok) MessageBox.Show("이재 시퀀스 완료", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return ok;
                     default:
-                        MessageBox.Show("지원하지 않는 반자동 명령입니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        LogSeqError("반자동", "지원하지 않는 반자동 명령입니다.", "반자동", MessageBoxIcon.Warning);
                         return false;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "반자동", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogSeqError("반자동", ex.Message, "반자동", MessageBoxIcon.Error);
                 return false;
             }
             finally
@@ -302,135 +437,77 @@ namespace EMS_TEST_SIMULATOR
         {
             Start_position = DogCountToSectionNumber(form.currentData.Start_count);
             End_position = DogCountToSectionNumber(form.currentData.End_count);
-            Current_position = GetCurrentSection4(proto);
 
             if (Start_position == End_position)
             {
-                MessageBox.Show("시작위치와 목적위치가 같습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-            if (SectionMatches(Current_position, End_position))
-            {
-                MessageBox.Show("현재 위치가 목적위치와 같습니다. 이동할 수 없습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("반자동", "시작위치와 목적위치가 같습니다.", "반자동", MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (!await RunSemiAutoHomingAndAlign101Async(form, proto, mainForm, cancelToken))
+            if (!await RunSemiAutoHomingAsync(form, proto, mainForm, cancelToken))
                 return false;
 
-            if (!SectionMatches(Start_position, SemiOriginSection101))
-            {
-                if (!await SendH2LegAsync(form, proto, mainForm, Start_position, "0", "0000", cancelToken))
-                    return false;
-            }
-
-            if (!SectionMatches(GetCurrentSection4(proto), End_position))
-            {
-                if (!await SendH2LegAsync(form, proto, mainForm, End_position, "0", "0000", cancelToken))
-                    return false;
-            }
-
-            return true;
+            return await RunSemiAutoLegsAfterHomingAsync(form, proto, mainForm, "0", "0000", cancelToken);
         }
 
         private async Task<bool> SemiAuto_RunLoadAsync(Command_Form form, EMS_Protocol proto, Main mainForm, CancellationToken cancelToken)
         {
             Start_position = DogCountToSectionNumber(form.currentData.Start_count);
             End_position = DogCountToSectionNumber(form.currentData.End_count);
-            Current_position = GetCurrentSection4(proto);
 
-            string encEnd = GetEncoderValueForSection(form, End_position);
+            string encEnd = GetEncoderValueForSection(mainForm, form, End_position);
             if (encEnd == null)
             {
-                MessageBox.Show("엔코더 설정에 해당 목적위치 값이 존재하지 않습니다.", "엔코더 값 없음", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("엔코더", "엔코더 설정에 해당 목적위치 값이 존재하지 않습니다.", "엔코더 값 없음", MessageBoxIcon.Warning);
                 return false;
             }
 
             if (Start_position == End_position)
             {
-                MessageBox.Show("시작위치와 목적위치가 같습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("반자동", "시작위치와 목적위치가 같습니다.", "반자동", MessageBoxIcon.Warning);
                 return false;
             }
-            if (SectionMatches(Current_position, End_position))
+
+            if (!await RunSemiAutoHomingAsync(form, proto, mainForm, cancelToken))
+                return false;
+
+            if (!ValidateSemiAutoCargoForMode(2, proto.Parser.CurrentStatus, out string cargoMsg))
             {
-                MessageBox.Show("현재 위치가 목적위치와 같습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("탑재", cargoMsg, "탑재", MessageBoxIcon.Warning);
                 return false;
             }
 
-            var status = proto.Parser.CurrentStatus;
-            if (status.CargoStatus == "1")
-            {
-                MessageBox.Show("이미 화물이 탑재되어 있습니다.", "탑재", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-
-            if (!await RunSemiAutoHomingAndAlign101Async(form, proto, mainForm, cancelToken))
-                return false;
-
-            if (!SectionMatches(Start_position, SemiOriginSection101))
-            {
-                if (!await SendH2LegAsync(form, proto, mainForm, Start_position, "0", "0000", cancelToken))
-                    return false;
-            }
-
-            status = proto.Parser.CurrentStatus;
-            if (status.CargoStatus == "1")
-            {
-                MessageBox.Show("이미 화물이 탑재되어 있습니다.", "탑재", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-
-            return await SendH2LegAsync(form, proto, mainForm, End_position, "1", encEnd, cancelToken);
+            return await RunSemiAutoLegsAfterHomingAsync(form, proto, mainForm, "1", encEnd, cancelToken);
         }
 
         private async Task<bool> SemiAuto_RunUnloadAsync(Command_Form form, EMS_Protocol proto, Main mainForm, CancellationToken cancelToken)
         {
             Start_position = DogCountToSectionNumber(form.currentData.Start_count);
             End_position = DogCountToSectionNumber(form.currentData.End_count);
-            Current_position = GetCurrentSection4(proto);
 
-            string encEnd = GetEncoderValueForSection(form, End_position);
+            string encEnd = GetEncoderValueForSection(mainForm, form, End_position);
             if (encEnd == null)
             {
-                MessageBox.Show("엔코더 설정에 해당 목적위치 값이 존재하지 않습니다.", "엔코더 값 없음", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("엔코더", "엔코더 설정에 해당 목적위치 값이 존재하지 않습니다.", "엔코더 값 없음", MessageBoxIcon.Warning);
                 return false;
             }
 
             if (Start_position == End_position)
             {
-                MessageBox.Show("시작위치와 목적위치가 같습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("반자동", "시작위치와 목적위치가 같습니다.", "반자동", MessageBoxIcon.Warning);
                 return false;
             }
-            if (SectionMatches(Current_position, End_position))
+
+            if (!await RunSemiAutoHomingAsync(form, proto, mainForm, cancelToken))
+                return false;
+
+            if (!ValidateSemiAutoCargoForMode(3, proto.Parser.CurrentStatus, out string cargoMsg))
             {
-                MessageBox.Show("현재 위치가 목적위치와 같습니다.", "반자동", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LogSeqError("이재", cargoMsg, "이재", MessageBoxIcon.Warning);
                 return false;
             }
 
-            var status = proto.Parser.CurrentStatus;
-            if (status.CargoStatus == "0")
-            {
-                MessageBox.Show("화물이 없습니다. 이재 명령을 취소합니다.", "이재", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-
-            if (!await RunSemiAutoHomingAndAlign101Async(form, proto, mainForm, cancelToken))
-                return false;
-
-            if (!SectionMatches(Start_position, SemiOriginSection101))
-            {
-                if (!await SendH2LegAsync(form, proto, mainForm, Start_position, "0", "0000", cancelToken))
-                    return false;
-            }
-
-            status = proto.Parser.CurrentStatus;
-            if (status.CargoStatus == "0")
-            {
-                MessageBox.Show("화물이 없습니다. 이재 명령을 취소합니다.", "이재", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-
-            return await SendH2LegAsync(form, proto, mainForm, End_position, "2", encEnd, cancelToken);
+            return await RunSemiAutoLegsAfterHomingAsync(form, proto, mainForm, "2", encEnd, cancelToken);
         }
 
         private const string AUTO_SECTION_101 = "0101";
@@ -440,33 +517,25 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>true로 설정 시 현재 사이클 끝난 뒤 101번으로 복귀하여 타이어 이재 후 정지</summary>
         public static bool CycleStopRequested { get; set; }
 
-        /// <summary>AUTO 시퀀스: 스텝마다 H2만 전송 (H4는 시퀀스 시작 시 1회만)</summary>
-        private async Task<bool> SendAndWaitArrival(Command_Form form, string section4, string actionMode, string encoder, System.Threading.CancellationToken cancelToken)
+        /// <summary>AUTO 사이클 H2 스텝 (반자동과 동일 leg 로직)</summary>
+        private async Task<bool> ReturnTo101AndUnload(Command_Form form, Main mainForm, string enc101, CancellationToken cancelToken)
         {
-            var proto = form._emsProto;
-            var comm = form._comm;
-            Order_no = _globalCommandCount.ToString("D4");
-            _globalCommandCount = (_globalCommandCount + 1) % 10000;
-            byte[] h2 = EMS_Order.EMS_Return_Instruction(Order_no, new List<ReturnStepData> {
-                new ReturnStepData { SectionNo = section4, ActionMode = actionMode, EncoderValue = encoder }
-            });
-            if (h2 != null) await comm.SendData(Encoding.ASCII.GetString(h2));
-            await Task.Delay(500, cancelToken);
-            int targetVal = int.TryParse(section4, out int t) ? t : 0;
-            for (int i = 0; i < EmsTimeoutPollCount; i++)
-            {
-                if (cancelToken.IsCancellationRequested) return false;
-                if (!IsEmsRunStatusOk(proto?.Parser?.CurrentStatus)) return false;
-                if (int.TryParse(proto.Parser.CurrentStatus.CurrentSectionCount, out int current) && current == targetVal)
-                    return true;
-                await Task.Delay(EmsPollIntervalMs, cancelToken);
-            }
-            return false;
+            return await AutoSendH2StepAsync(form, form._emsProto, mainForm, AUTO_SECTION_101, "2", enc101, cancelToken);
         }
 
-        private async Task<bool> ReturnTo101AndUnload(Command_Form form, string enc101, System.Threading.CancellationToken cancelToken)
+        private void AutoH2StepFailed(Main mainForm, CancellationToken cancelToken)
         {
-            return await SendAndWaitArrival(form, AUTO_SECTION_101, "2", enc101, cancelToken);
+            if (!cancelToken.IsCancellationRequested && !mainForm.IsDisposed)
+                mainForm.Invoke(new Action(() =>
+                {
+                    LogSeqError("AUTO", "AUTO H2 스텝 실패", "AUTO", MessageBoxIcon.Error);
+                    TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
+                }));
+        }
+
+        private static void LogCycleStopFail(Main mainForm)
+        {
+            InvokeLogSeqError(mainForm, "AUTO", "사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxIcon.Warning);
         }
 
         /// <summary>모든 사이클 종료 시 H4 수동(0) 전송</summary>
@@ -506,76 +575,43 @@ namespace EMS_TEST_SIMULATOR
             {
                 TowerLamp.SetMode(TowerLampVisualMode.AutoAfterConfirmBlueBlink);
                 var proto = form._emsProto;
-                var comm = form._comm;
-                string enc101 = GetEncoderValueForSection(form, AUTO_SECTION_101) ?? "0000";
-                string enc110 = GetEncoderValueForSection(form, AUTO_SECTION_110) ?? "0000";
-                string enc113 = GetEncoderValueForSection(form, AUTO_SECTION_113) ?? "0000";
+                string enc101 = GetEncoderValueForSection(mainForm, form, AUTO_SECTION_101) ?? "0000";
+                string enc110 = GetEncoderValueForSection(mainForm, form, AUTO_SECTION_110) ?? "0000";
+                string enc113 = GetEncoderValueForSection(mainForm, form, AUTO_SECTION_113) ?? "0000";
 
-                // AUTO 시작 직후 2초 안에 (유효한) 현재 위치값이 변하지 않으면 EMS 동작이상 에러
-                // null과 "" 구분 시 null != "" 로 바로 break되는 것 방지: 유효한 값이 들어와서 달라질 때만 break
-                string initialSection = GetCurrentSection4(proto);
-                for (int i = 0; i < EmsTimeoutPollCount; i++)
-                {
-                    await Task.Delay(EmsPollIntervalMs, cancelToken);
-                    if (cancelToken.IsCancellationRequested) return;
-                    if (!IsEmsRunStatusOk(proto?.Parser?.CurrentStatus))
-                    {
-                        await SendH3ClearAsync(form);
-                        if (!mainForm.IsDisposed)
-                            mainForm.Invoke(new Action(() =>
-                            {
-                                TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
-                                MessageBox.Show("EMS 상태 이상", "AUTO", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }));
-                        return;
-                    }
-                    string current = GetCurrentSection4(proto);
-                    if (!string.IsNullOrEmpty(current) && current != initialSection)
-                        break;
-                    if (i == EmsTimeoutPollCount - 1)
-                    {
-                        await SendH3ClearAsync(form);
-                        if (!mainForm.IsDisposed)
-                            mainForm.Invoke(new Action(() =>
-                            {
-                                TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
-                                MessageBox.Show($"EMS 동작이상/원점 대기 시간 초과 ({EmsTimeoutSeconds}초).", "AUTO",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }));
-                        return;
-                    }
-                }
+                Start_position = DogCountToSectionNumber(form.currentData.Start_count);
+                End_position = DogCountToSectionNumber(form.currentData.End_count);
 
-                // AUTO 시 레일 8비트 센서 인터록: 기본은 충족까지 대기. Main 제목 비밀(1) 통과 시 생략 후 1초만 대기.
+                // AUTO 레일 8비트: 기본은 미검사. Main 개발 모드(BypassRailInterlockForAuto=false)일 때만 검사.
                 Rail_DIO.Instance.io_test_flag = false;
-                if (mainForm != null && mainForm.BypassRailInterlockForAuto)
-                {
-                    await Task.Delay(1000, cancelToken);
-                    if (cancelToken.IsCancellationRequested) return;
-                }
-                else
+                if (mainForm != null && !mainForm.BypassRailInterlockForAuto)
                 {
                     while (!Rail_DIO.Instance.Is8BitSensorInterlockOkForAuto())
                     {
-                        await Task.Delay(200, cancelToken);
+                        await Task.Delay(EmsPollIntervalMs, cancelToken);
                         if (cancelToken.IsCancellationRequested) return;
                     }
                 }
 
-                // AUTO 최초 1회만 H4 자동(1) 전송, 이후 스텝은 H2만 전송
-                byte[] h4Auto = EMS_Order.EMS_Item_order("1");
-                if (h4Auto != null) await comm.SendData(Encoding.ASCII.GetString(h4Auto));
-                TowerLamp.SetMode(TowerLampVisualMode.AutoH4WaitGreenBlink);
-                if (!await WaitForTransferCommandAcceptAfterH4Async(proto, cancelToken))
+                if (!await RunSemiAutoHomingAsync(form, proto, mainForm, cancelToken, "AUTO"))
                 {
-                    await SendH3ClearAsync(form);
-                    if (!mainForm.IsDisposed)
-                        mainForm.Invoke(new Action(() =>
-                        {
-                            TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
-                            MessageBox.Show("H4 후 반송지령 접수(1) 대기 시간이 초과되었습니다.", "AUTO", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }));
+                    if (!cancelToken.IsCancellationRequested)
+                        TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
                     return;
+                }
+
+                TowerLamp.SetMode(TowerLampVisualMode.AutoH4WaitGreenBlink);
+
+                // Command_Form 시작/목적 leg (반자동과 동일)
+                if (form.currentData.Start_count > 0 && form.currentData.End_count > 0
+                    && !SectionMatches(Start_position, End_position))
+                {
+                    if (!await RunSemiAutoLegsAfterHomingAsync(form, proto, mainForm, "0", "0000", cancelToken))
+                    {
+                        if (!cancelToken.IsCancellationRequested)
+                            TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
+                        return;
+                    }
                 }
 
                 TowerLamp.SetMode(TowerLampVisualMode.AutoH2RunGreenBlink);
@@ -585,37 +621,37 @@ namespace EMS_TEST_SIMULATOR
                     if (CycleStopRequested)
                     {
                         TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink);
-                        bool arrived = await ReturnTo101AndUnload(form, enc101, cancelToken);
+                        bool arrived = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken);
                         CycleStopRequested = false;
                         if (!arrived)
                         {
                             await SendH3ClearAsync(form);
                             if (!mainForm.IsDisposed)
-                                mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                                LogCycleStopFail(mainForm);
                         }
                         await SendH4ManualAsync(form);
                         return;
                     }
                     if (firstLoop)
                     {
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "1", enc101, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
-                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_110, "2", enc110, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
-                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_110, "1", enc110, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
-                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "2", enc113, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_101, "1", enc101, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) LogCycleStopFail(mainForm); await SendH4ManualAsync(form); return; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_110, "2", enc110, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) LogCycleStopFail(mainForm); await SendH4ManualAsync(form); return; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_110, "1", enc110, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) LogCycleStopFail(mainForm); await SendH4ManualAsync(form); return; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_113, "2", enc113, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
                         firstLoop = false;
                     }
                     else
                     {
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "1", enc113, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
-                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "2", enc101, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
-                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_101, "1", enc101, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
-                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) mainForm.Invoke(new Action(() => MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning))); await SendH4ManualAsync(form); return; }
-                        if (await SendAndWaitArrival(form, AUTO_SECTION_113, "2", enc113, cancelToken) == false) { await SendH3ClearAsync(form); if (!cancelToken.IsCancellationRequested) TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady); break; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_113, "1", enc113, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) LogCycleStopFail(mainForm); await SendH4ManualAsync(form); return; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_101, "2", enc101, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) LogCycleStopFail(mainForm); await SendH4ManualAsync(form); return; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_101, "1", enc101, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
+                        if (CycleStopRequested) { TowerLamp.SetMode(TowerLampVisualMode.AutoCycleStopYellowBlink); bool a = await ReturnTo101AndUnload(form, mainForm, enc101, cancelToken); CycleStopRequested = false; if (!a && !mainForm.IsDisposed) LogCycleStopFail(mainForm); await SendH4ManualAsync(form); return; }
+                        if (!await AutoSendH2StepAsync(form, proto, mainForm, AUTO_SECTION_113, "2", enc113, cancelToken)) { AutoH2StepFailed(mainForm, cancelToken); break; }
                     }
                 }
                 await SendH4ManualAsync(form);
@@ -653,7 +689,7 @@ namespace EMS_TEST_SIMULATOR
             }
             else
             {
-                MessageBox.Show("엔코더값 에러 (미설정이거나 범위 초과)");
+                LogSeqError("엔코더", "엔코더값 에러 (미설정이거나 범위 초과)", "엔코더", MessageBoxIcon.Warning);
                 return false;
             }
 

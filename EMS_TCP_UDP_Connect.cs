@@ -139,13 +139,13 @@ namespace EMS_TEST_SIMULATOR
             string ipAddress = $"{textBox1.Text}.{textBox2.Text}.{textBox3.Text}.{textBox4.Text}";
             if (!int.TryParse(textBox5.Text, out int port))
             {
-                MessageBox.Show("유효한 Port 번호를 입력해주세요.");
+                AppErrorLog.RaiseAndShow("EMS연결", "유효한 Port 번호를 입력해주세요.", "EMS 연결");
                 return;
             }
 
             if (radioButton1.Checked) _comm = new TcpComm();
             else if (radioButton2.Checked) _comm = new UdpComm();
-            else { MessageBox.Show("TCP 또는 UDP를 선택해주세요."); return; }
+            else { AppErrorLog.RaiseAndShow("EMS연결", "TCP 또는 UDP를 선택해주세요.", "EMS 연결"); return; }
 
             // 통신 로그: 래퍼가 CommLogBridge.Raise 호출 → Main이 Form_Load에서 구독한 이벤트로 수신
             var inner = _comm;
@@ -203,12 +203,12 @@ namespace EMS_TEST_SIMULATOR
                 {
                     _comm.Disconnect();
                     _isHostActive = false;
-                    MessageBox.Show("응답 없음: 데이터링크 확립 실패");
+                    AppErrorLog.RaiseAndShow("EMS연결", "응답 없음: 데이터링크 확립 실패", "EMS 연결", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"연결 오류: {ex.Message}");
+                AppErrorLog.RaiseAndShow("EMS연결", $"연결 오류: {ex.Message}", "EMS 연결", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

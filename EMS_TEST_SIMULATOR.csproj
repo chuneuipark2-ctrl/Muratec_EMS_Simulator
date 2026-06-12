@@ -149,6 +149,8 @@
     <Compile Include="LIB_EziMOTIONPlusE.cs" />
     <Compile Include="MOTION_DEFINE_PlusE.cs" />
     <Compile Include="CommLogBridge.cs" />
+    <Compile Include="AppErrorLog.cs" />
+    <Compile Include="EmsLogHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RailStatus.cs" />

@@ -50,6 +50,8 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>주요로그 에러 행 적시용: 직전 송신 데이터(내 프로그램)</summary>
         private string _lastSentHex = "";
         private string _lastSentDesc = "";
+        /// <summary>EMS 상태보고 동일 에러 반복 기록 방지 (H1 폴링)</summary>
+        private string _lastEmsStatusErrorSignature = "";
 
         /// <summary>EMO 버튼: 한번째 터치(초록띄+1번 시퀀스) / 두번째 터치(띄 제거+2번 시퀀스) 상태</summary>
         private bool _emoGreenBorderOn = false;
@@ -57,8 +59,8 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>AUTO 버튼: 클릭 시 초록 띄 토글만 (한번 누르면 띄, 두번째 누르면 띄 제거, 무한 반복)</summary>
         private bool _autoGreenBorderOn = false;
 
-        /// <summary>제목(SKY-RAV…) 비밀번호 1 통과 시: AUTO에서 레일 8비트 인터록 생략, 1초 대기 후 H4 진행.</summary>
-        public bool BypassRailInterlockForAuto { get; set; }
+        /// <summary>평상시 true: AUTO 레일 8비트 인터록 생략. 개발 모드(false)일 때만 8비트 검사.</summary>
+        public bool BypassRailInterlockForAuto { get; set; } = true;
 
         /// <summary>메인·비밀번호 대화상자용 가상 키보드 (한 번에 하나)</summary>
         private VirtualKeyboardForm _mainVirtualKeyboard;
@@ -188,6 +190,7 @@ namespace EMS_TEST_SIMULATOR
             InitializeCommLogGrid();
             InitializeMainLog();
             CommLogBridge.OnLog += (dir, data, desc) => this.AddCommLog(dir, data, desc);
+            AppErrorLog.OnError += (category, message) => AddErrorLog(category, message);
             FlatButtonPaintFix.ApplyToTree(this);
         }
 
@@ -369,8 +372,72 @@ namespace EMS_TEST_SIMULATOR
                     System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
                     MessageBox.Show("저장 완료: " + dlg.FileName);
                 }
-                catch (Exception ex) { MessageBox.Show("저장 실패: " + ex.Message); }
+                catch (Exception ex) { ShowAppError("저장", "저장 실패: " + ex.Message, "오류", MessageBoxIcon.Error); }
             }
+        }
+
+        /// <summary>주요로그(ListView) + 통신로그 그리드에 에러 1건 기록.</summary>
+        public void AddErrorLog(string category, string message, string sentInfo = "-", string recvInfo = "-")
+        {
+            if (string.IsNullOrWhiteSpace(message)) return;
+            string time = DateTime.Now.ToString("HH:mm:ss.fff");
+            string desc = $"[{category}] {message}";
+            void DoAdd()
+            {
+                if (event_log_listview != null && !event_log_listview.IsDisposed)
+                {
+                    try
+                    {
+                        var li = new ListViewItem(time);
+                        li.SubItems.Add(string.IsNullOrEmpty(sentInfo) ? "-" : sentInfo);
+                        li.SubItems.Add(string.IsNullOrEmpty(recvInfo) ? "-" : recvInfo);
+                        li.SubItems.Add(desc);
+                        li.Tag = true;
+                        event_log_listview.Items.Add(li);
+                        while (event_log_listview.Items.Count > _mainLogMaxItems)
+                            event_log_listview.Items.RemoveAt(0);
+                    }
+                    catch { }
+                }
+                if (!_commLogPaused && dgvCommLog != null && !dgvCommLog.IsDisposed && dgvCommLog.Columns.Count >= 4)
+                {
+                    try
+                    {
+                        dgvCommLog.Rows.Add(time, "에러", "-", desc);
+                        while (dgvCommLog.Rows.Count > _commLogMaxRows && dgvCommLog.Rows.Count > 0)
+                            dgvCommLog.Rows.RemoveAt(0);
+                    }
+                    catch { }
+                }
+            }
+            try
+            {
+                if (InvokeRequired)
+                    BeginInvoke(new Action(DoAdd));
+                else
+                    DoAdd();
+            }
+            catch { }
+        }
+
+        private void ShowAppError(string category, string message, string title = null, MessageBoxIcon icon = MessageBoxIcon.Warning)
+        {
+            AppErrorLog.Raise(category, message);
+            MessageBox.Show(this, message, title ?? category, MessageBoxButtons.OK, icon);
+        }
+
+        private void TryLogEmsStatusError(byte[] data, string recvHex)
+        {
+            if (!EmsLogHelper.TryParseStatus(data, out EmsStatusSnapshot st)) return;
+            if (!EmsLogHelper.HasReportedFault(st))
+            {
+                _lastEmsStatusErrorSignature = "";
+                return;
+            }
+            string sig = $"{st.ResponseCode}|{st.ErrorCode}|{st.CommandAcceptStatus}|{st.MachineMode}|{st.CurrentSectionCount}";
+            if (sig == _lastEmsStatusErrorSignature) return;
+            _lastEmsStatusErrorSignature = sig;
+            AddErrorLog("EMS", EmsLogHelper.BuildStatusErrorDescription(st), _lastSentHex ?? "-", recvHex);
         }
 
         /// <summary>통신 로그 추가. 통신 스레드에서 호출 가능(Invoke로 UI 스레드에서 갱신). 최대 행 수 초과 시 오래된 행 삭제.</summary>
@@ -409,23 +476,8 @@ namespace EMS_TEST_SIMULATOR
                     _lastSentHex = hex;
                     _lastSentDesc = desc;
                 }
-                bool isEmsError = direction == "수신" && IsEmsStatusResponse(data) && IsEmsStatusResponseError(data);
-                if (isEmsError && event_log_listview != null && !event_log_listview.IsDisposed)
-                {
-                    try
-                    {
-                        string errorDesc = GetEmsResponseCodeErrorDesc(data);
-                        var li = new ListViewItem(time);
-                        li.SubItems.Add(string.IsNullOrEmpty(_lastSentHex) ? "-" : _lastSentHex);
-                        li.SubItems.Add(hex);
-                        li.SubItems.Add(errorDesc);
-                        li.Tag = true;
-                        event_log_listview.Items.Add(li);
-                        while (event_log_listview.Items.Count > _mainLogMaxItems)
-                            event_log_listview.Items.RemoveAt(0);
-                    }
-                    catch { }
-                }
+                if (direction == "수신")
+                    TryLogEmsStatusError(data, hex);
             }
             try
             {
@@ -591,7 +643,7 @@ namespace EMS_TEST_SIMULATOR
                         TowerLamp.SetMode(TowerLampVisualMode.IdleRedSteady);
                 }
 
-                MessageBox.Show("일부 장비 연결에 실패했습니다. 텍스트박스를 확인하세요.");
+                ShowAppError("레일", "일부 장비 연결에 실패했습니다. 텍스트박스를 확인하세요.", "연결 실패");
             }
 
         }
@@ -1289,9 +1341,9 @@ namespace EMS_TEST_SIMULATOR
                     return;
                 if (tb.Text == "1")//패스워드 1
                 {
-                    BypassRailInterlockForAuto = true;
+                    BypassRailInterlockForAuto = false;
                     MessageBox.Show(this,
-                        "AUTO 실행 시 레일 8비트 인터록을 건너뜁니다. H4 전송 전 1초만 대기합니다.\r\n※ 해제: 프로그램 재시작",
+                        "AUTO 실행 시 레일 8비트 인터록을 사용합니다. 조건 충족까지 대기합니다.\r\n※ 해제: 프로그램 재시작",
                         "개발 모드",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
@@ -1319,25 +1371,25 @@ namespace EMS_TEST_SIMULATOR
             // 1) EMO 해제
             if (_emoGreenBorderOn)
             {
-                MessageBox.Show("EMO가 눌려 있습니다. 해제 후 반자동 명령을 실행하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("반자동", "EMO가 눌려 있습니다. 해제 후 반자동 명령을 실행하세요.", "경고");
                 return;
             }
             // 2) I.O 체크 완료
             if (!IOCheckSheetForm.IoCheckCompleted)
             {
-                MessageBox.Show("I.O 체크 성적서에서 옵션에 맞는 I.O 체크를 완료한 뒤 [상태저장]을 눌러 주세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("반자동", "I.O 체크 성적서에서 옵션에 맞는 I.O 체크를 완료한 뒤 [상태저장]을 눌러 주세요.", "반자동 명령 불가");
                 return;
             }
             // 3) 통신 연결
             if (GlobalComm == null)
             {
-                MessageBox.Show("먼저 연결을 완료해 주세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("반자동", "먼저 연결을 완료해 주세요.", "반자동 명령 불가");
                 return;
             }
             // 4) Line_Setup 호기 저장
             if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
             {
-                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("반자동", "저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "반자동 명령 불가");
                 return;
             }
             // 5) 엔코더 101·110·113
@@ -1347,7 +1399,7 @@ namespace EMS_TEST_SIMULATOR
             int v113 = _encManager.GetStoredValue(vehicleID, "113");
             if (v101 < 0 || v101 > 500 || v110 < 0 || v110 > 500 || v113 < 0 || v113 > 500)
             {
-                MessageBox.Show("Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "반자동 명령 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("반자동", "Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "반자동 명령 불가");
                 return;
             }
 
@@ -1407,25 +1459,25 @@ namespace EMS_TEST_SIMULATOR
             // 1) EMO 해제
             if (_emoGreenBorderOn)
             {
-                MessageBox.Show("EMO가 눌려 있습니다. 해제 후 자동모드를 실행하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("AUTO", "EMO가 눌려 있습니다. 해제 후 자동모드를 실행하세요.", "경고");
                 return;
             }
             // 2) I.O 체크 완료
             if (!IOCheckSheetForm.IoCheckCompleted)
             {
-                MessageBox.Show("I.O 체크 성적서에서 옵션에 맞는 I.O 체크를 완료한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("AUTO", "I.O 체크 성적서에서 옵션에 맞는 I.O 체크를 완료한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가");
                 return;
             }
             // 3) 통신 연결
             if (GlobalComm == null)
             {
-                MessageBox.Show("먼저 연결을 완료해 주세요.");
+                ShowAppError("AUTO", "먼저 연결을 완료해 주세요.", "AUTO 실행 불가");
                 return;
             }
             // 4) Line_Setup 호기 저장
             if (string.IsNullOrEmpty(Line_Setup.SavedVehicleNo))
             {
-                MessageBox.Show("저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("AUTO", "저장된 호기가 없습니다. Line_Setup에서 호기를 선택한 뒤 [상태저장]을 눌러 주세요.", "AUTO 실행 불가");
                 return;
             }
             // 5) 엔코더 101·110·113
@@ -1435,7 +1487,7 @@ namespace EMS_TEST_SIMULATOR
             int v113 = _encManager.GetStoredValue(vehicleID, "113");
             if (v101 < 0 || v101 > 500 || v110 < 0 || v110 > 500 || v113 < 0 || v113 > 500)
             {
-                MessageBox.Show("Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "AUTO 실행 불가", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowAppError("AUTO", "Line_Setup에서 저장한 호기(" + vehicleID + ")에 대한 엔코더값(101, 110, 113)이 엔코더설정에 저장되어 있어야 합니다. 해당 호기를 선택한 뒤 101·110·113 포지션을 0~500 범위로 저장하세요.", "AUTO 실행 불가");
                 return;
             }
             // 6) 자동모드 미실행 (실행 중이면 정지 요청 처리)
@@ -1462,15 +1514,24 @@ namespace EMS_TEST_SIMULATOR
             TowerLamp.SetMode(TowerLampVisualMode.AutoAfterConfirmBlueBlink);
             MessageBox.Show("레일 주변에 장애물이 없는지 확인한 후 진행하시기 바랍니다.");
 
-            _autoGreenBorderOn = true;
-            ApplyAutoButtonGreenBorder(true);
-
             Command_Form command_Form = new Command_Form();
             command_Form.Owner = this;
             command_Form._comm = GlobalComm;
             command_Form._emsProto = GlobalEmsProto ?? new EMS_Protocol();
-            command_Form.currentData.command_alloc = 3;
             command_Form.currentData.EMS_NO = Line_Setup.SavedVehicleNo ?? "1호기";
+            command_Form.currentData.rail_data = Line_Setup.SavedLineName ?? "";
+            command_Form.LaunchAsAuto = true;
+            command_Form.ShowDialog();
+        }
+
+        /// <summary>Command_Form START → AUTO (시작/목적 카운트는 Form에서 설정)</summary>
+        internal void BeginAutoSequenceFromCommandForm(Command_Form command_Form)
+        {
+            if (_autoRunning)
+                return;
+
+            _autoGreenBorderOn = true;
+            ApplyAutoButtonGreenBorder(true);
 
             _autoCts = new System.Threading.CancellationTokenSource();
             _autoRunning = true;
@@ -1489,12 +1550,12 @@ namespace EMS_TEST_SIMULATOR
                     if (_autoStoppedByEmo)
                     {
                         _autoStoppedByEmo = false;
-                        MessageBox.Show("사이클 정지 실패. 원점으로 이동하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        ShowAppError("AUTO", "사이클 정지 실패. 원점으로 이동하세요.", "경고");
                     }
                     else if (_cycleStopRequestedByUser)
                     {
                         _cycleStopRequestedByUser = false;
-                        IOCheckSheetForm.AutoCycleCompleted = true;  // 사이클 정지 완료 시점 → I.O 자동 체크 대상 반영용
+                        IOCheckSheetForm.AutoCycleCompleted = true;
                         MessageBox.Show("자동모드를 정지하였습니다. (101번 위치, 타이어 하차 완료)");
                     }
                     RefreshTowerLampAfterAutoOrRail();
