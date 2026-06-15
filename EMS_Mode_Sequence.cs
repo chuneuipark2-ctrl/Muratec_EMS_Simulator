@@ -347,11 +347,17 @@ namespace EMS_TEST_SIMULATOR
             }
 
             if (SectionMatches(GetCurrentSection4(proto), section4))
+            {
+                await SendH3ClearAsync(form);
                 return true;
+            }
 
             var (arrived, failReason) = await WaitSectionArrivalWithReasonAsync(proto, section4, cancelToken);
             if (arrived)
+            {
+                await SendH3ClearAsync(form);
                 return true;
+            }
 
             await SendH3ClearAsync(form);
             if (!mainForm.IsDisposed)
@@ -636,7 +642,7 @@ namespace EMS_TEST_SIMULATOR
             if (h4 != null) await form._comm.SendData(Encoding.ASCII.GetString(h4));
         }
 
-        /// <summary>H3 반송데이터 클리어 지시 전송 (2초 위치 미변화/타임아웃 시 호출)</summary>
+        /// <summary>H3 반송데이터 클리어 (H2 leg 성공·실패/타임아웃 후 EMS 반송 버퍼 정리)</summary>
         private async Task SendH3ClearAsync(Command_Form form)
         {
             if (form?._comm == null) return;
@@ -818,9 +824,13 @@ namespace EMS_TEST_SIMULATOR
             {
                 if (int.TryParse(proto.Parser.CurrentStatus.CurrentSectionCount, out int current) &&
                     int.TryParse(targetDest, out int target) && current == target)
+                {
+                    await SendH3ClearAsync(form);
                     return true;
+                }
                 await Task.Delay(EmsPollIntervalMs);
             }
+            await SendH3ClearAsync(form);
             return false;
         }
 
