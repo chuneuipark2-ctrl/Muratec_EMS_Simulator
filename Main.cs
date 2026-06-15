@@ -437,7 +437,27 @@ namespace EMS_TEST_SIMULATOR
             string sig = $"{st.ResponseCode}|{st.ErrorCode}|{st.CommandAcceptStatus}|{st.MachineMode}|{st.CurrentSectionCount}";
             if (sig == _lastEmsStatusErrorSignature) return;
             _lastEmsStatusErrorSignature = sig;
-            AddErrorLog("EMS", EmsLogHelper.BuildStatusErrorDescription(st), _lastSentHex ?? "-", recvHex);
+            string desc = EmsLogHelper.BuildStatusErrorDescription(st);
+            AddErrorLog("EMS", desc, _lastSentHex ?? "-", recvHex);
+
+            if (_autoRunning || EMS_Mode_Sequence.IsOperationActive)
+            {
+                void ShowEmsAlarm()
+                {
+                    MessageBox.Show(this,
+                        $"EMS 알람 (상태보고)\n{desc}",
+                        "EMS 알람", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    TowerLamp.SetMode(TowerLampVisualMode.EmsFaultRedSteady);
+                }
+                try
+                {
+                    if (InvokeRequired)
+                        BeginInvoke(new Action(ShowEmsAlarm));
+                    else
+                        ShowEmsAlarm();
+                }
+                catch { }
+            }
         }
 
         /// <summary>통신 로그 추가. 통신 스레드에서 호출 가능(Invoke로 UI 스레드에서 갱신). 최대 행 수 초과 시 오래된 행 삭제.</summary>
@@ -643,7 +663,9 @@ namespace EMS_TEST_SIMULATOR
                         TowerLamp.SetMode(TowerLampVisualMode.IdleRedSteady);
                 }
 
-                ShowAppError("레일", "일부 장비 연결에 실패했습니다. 텍스트박스를 확인하세요.", "연결 실패");
+                ShowAppError("레일",
+                    "레일 I/O 알람\n\n일부 슬레이브 연결에 실패했습니다.\n텍스트박스의 [실패] IP 목록을 확인하세요.",
+                    "레일 알람");
             }
 
         }
@@ -1550,7 +1572,9 @@ namespace EMS_TEST_SIMULATOR
                     if (_autoStoppedByEmo)
                     {
                         _autoStoppedByEmo = false;
-                        ShowAppError("AUTO", "사이클 정지 실패. 원점으로 이동하세요.", "경고");
+                        ShowAppError("AUTO",
+                            "사이클 정지 실패.\n101번 위치 복귀·타이어 이재(H2)가 완료되지 않았습니다.\n원점 상태를 확인하세요.",
+                            "AUTO 알람");
                     }
                     else if (_cycleStopRequestedByUser)
                     {
@@ -1582,6 +1606,9 @@ namespace EMS_TEST_SIMULATOR
                 ApplyEmoButtonGreenBorder(true);
                 _emoGreenBorderOn = true;
                 TowerLamp.SetMode(TowerLampVisualMode.EmoRedBlink);
+                ShowAppError("EMO",
+                    "EMO 알람이 활성화되었습니다.\n\n· 기체 이상정지(H4·05) 신호를 주기 전송합니다.\n· AUTO 동작 중이면 즉시 중단됩니다.\n· 해제(두 번째 터치) 후 반자동·AUTO를 사용하세요.",
+                    "EMO 알람", MessageBoxIcon.Warning);
                 EmoFirstTapSequence();
             }
             else
