@@ -541,6 +541,7 @@ namespace EMS_TEST_SIMULATOR
             lbl_transfer_command_Received_text.Text = FormatCommandAcceptStatus(status.CommandAcceptStatus);
             lbl_target_point_text.Text = string.IsNullOrEmpty(status.TargetSectionCount) ? na : status.TargetSectionCount;
             lbl_error_point_text.Text = string.IsNullOrEmpty(status.ErrorSectionCount) ? na : status.ErrorSectionCount;
+            RailStatus.SyncFromEmsStatus(status);
             SetPictureBox1ByTargetActionMode(status.TargetActionMode);
         }
 

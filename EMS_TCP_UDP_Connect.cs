@@ -156,6 +156,7 @@ namespace EMS_TEST_SIMULATOR
             {
                 _emsProto.ReceiveFromDevice(data);
                 _isSkyRavActive = true;
+                RailStatus.SyncFromEmsStatus(_emsProto.Parser?.CurrentStatus);
             };
 
             try
@@ -168,7 +169,7 @@ namespace EMS_TEST_SIMULATOR
                 {
                     _emsProto.ReceiveFromDevice(data);
                     _isSkyRavActive = true;
-                    RailStatus.CurrentSectionCount = _emsProto.Parser.CurrentStatus?.CurrentSectionCount ?? "";
+                    RailStatus.SyncFromEmsStatus(_emsProto.Parser?.CurrentStatus);
                     responseTcs.TrySetResult(true);
                 };
 

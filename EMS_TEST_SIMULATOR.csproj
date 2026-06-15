@@ -154,6 +154,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RailStatus.cs" />
+    <Compile Include="RailVisualMotion.cs" />
     <Compile Include="Rail_DIO.cs" />
     <Compile Include="TowerLamp.cs" />
     <Compile Include="SR50_RAIL.xaml.cs">

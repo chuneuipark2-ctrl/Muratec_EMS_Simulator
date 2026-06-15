@@ -11,14 +11,15 @@ namespace EMS_TEST_SIMULATOR
     public partial class UserControl2 : UserControl
     {
         private DispatcherTimer _timer;
-        private double _currentX = 50;   // 실제 표시 위치 (부드럽게 보간)
-        private double _targetX = 50;    // EMS 현재 섹션에 따른 목표 X
-        private const double LerpFactor = 0.14; // 0~1, 클수록 빠르게 따라감
+        private double _currentX = RailVisualMotion.StartPos;
+        private double _targetX = RailVisualMotion.StartPos;
+        private double _anchorX = RailVisualMotion.StartPos;
+        private const double LerpFactor = 0.11;
 
         private List<Rectangle> _sensors = new List<Rectangle>();
-        private const int SensorCount = 13;
-        private const double StartPos = 50;
-        private const double EndPos = 700;
+        private const int SensorCount = RailVisualMotion.SensorCount;
+        private const double StartPos = RailVisualMotion.StartPos;
+        private const double EndPos = RailVisualMotion.EndPos;
 
         // 센서 기본 이름 정의
         string[] sensorNames = { "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112", "113" };
@@ -81,20 +82,7 @@ namespace EMS_TEST_SIMULATOR
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // EMS 현재 위치로 목표 X만 갱신
-            if (!string.IsNullOrEmpty(RailStatus.CurrentSectionCount) && int.TryParse(RailStatus.CurrentSectionCount, out int sectionNum) && sectionNum >= 101 && sectionNum <= 113)
-            {
-                int index = sectionNum - 101;
-                double interval = (EndPos - StartPos) / (SensorCount - 1);
-                _targetX = StartPos + (index * interval);
-            }
-
-            // 현재 위치를 목표로 부드럽게 보간 (휙휙 점프 방지)
-            double diff = _targetX - _currentX;
-            if (Math.Abs(diff) < 0.5)
-                _currentX = _targetX;
-            else
-                _currentX += diff * LerpFactor;
+            RailVisualMotion.Tick(ref _currentX, ref _targetX, ref _anchorX, LerpFactor, anchorLerp: 0.2);
 
             if (RavTransform_SR150 != null) RavTransform_SR150.X = _currentX;
 
@@ -103,7 +91,7 @@ namespace EMS_TEST_SIMULATOR
 
         private void UpdateSensors()
         {
-            double interval = (EndPos - StartPos) / (SensorCount - 1);
+            double interval = RailVisualMotion.DogInterval;
 
             for (int i = 0; i < _sensors.Count; i++)
             {
