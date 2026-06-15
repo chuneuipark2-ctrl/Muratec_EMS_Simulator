@@ -47,6 +47,7 @@ namespace EMS_TEST_SIMULATOR
         /// <summary>통신 로그: 최대 행 수 제한(초과 시 오래된 행 삭제), 뻑남 방지</summary>
         private const int _commLogMaxRows = 3000;
         private bool _commLogPaused = false;
+        private bool _mainLogPaused = false;
         /// <summary>주요로그 에러 행 적시용: 직전 송신 데이터(내 프로그램)</summary>
         private string _lastSentHex = "";
         private string _lastSentDesc = "";
@@ -228,49 +229,186 @@ namespace EMS_TEST_SIMULATOR
 
         private const int _mainLogMaxItems = 1000;
 
-        /// <summary>주요로그(ListView): 에러 시에만 기록. EMS 상태보고 응답코드 != 00일 때 직전 송신+수신 데이터·해석 적시.</summary>
+        private static string FormatLogDirection(string direction)
+        {
+            if (direction == "송신") return "PC→EMS";
+            if (direction == "수신") return "EMS→PC";
+            return direction ?? "";
+        }
+
+        private static string FormatHexOrDash(string hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex) || hex == "(송신 없음)") return "-";
+            return hex;
+        }
+
+        private void SetupLogGridStyle(DataGridView dgv)
+        {
+            if (dgv == null) return;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.ReadOnly = true;
+            dgv.MultiSelect = false;
+            dgv.RowHeadersVisible = false;
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.AutoGenerateColumns = false;
+            dgv.ColumnHeadersVisible = true;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgv.ColumnHeadersHeight = 34;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgv.Font = new Font("맑은 고딕", 9F, FontStyle.Bold);
+            dgv.BackgroundColor = _darkPanel;
+            dgv.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = _darkPanel,
+                ForeColor = Color.White,
+                SelectionBackColor = Color.FromArgb(0, 122, 204),
+                SelectionForeColor = Color.White
+            };
+            dgv.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(45, 45, 48),
+                ForeColor = Color.White
+            };
+            if (dgv.Columns.Count == 0)
+            {
+                dgv.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTime", HeaderText = "시간", Width = 90, ReadOnly = true });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDirection", HeaderText = "방향", Width = 72, ReadOnly = true });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn { Name = "colData", HeaderText = "데이터(HEX)", Width = 220, ReadOnly = true });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc", HeaderText = "해석", Width = 200, ReadOnly = true });
+            }
+        }
+
+        /// <summary>GroupBox(버튼) + 그리드가 겹치지 않도록 TableLayoutPanel로 분리.</summary>
+        private void EnsureLogTabLayout(TabPage page, GroupBox bar, DataGridView grid)
+        {
+            if (page == null || bar == null || grid == null) return;
+            const string hostName = "tlpLogHost";
+            if (page.Controls.ContainsKey(hostName)) return;
+
+            page.Controls.Remove(bar);
+            page.Controls.Remove(grid);
+
+            var tlp = new TableLayoutPanel
+            {
+                Name = hostName,
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                BackColor = _darkPanel,
+                Margin = Padding.Empty,
+                Padding = Padding.Empty
+            };
+            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+
+            bar.Dock = DockStyle.Fill;
+            bar.Margin = Padding.Empty;
+            grid.Dock = DockStyle.Fill;
+            grid.Margin = Padding.Empty;
+
+            tlp.Controls.Add(bar, 0, 0);
+            tlp.Controls.Add(grid, 0, 1);
+            page.Controls.Add(tlp);
+        }
+
+        /// <summary>주요로그(DataGridView): EMS 통신 에러·프로그램 알람 기록 (통신로그와 동일 형식).</summary>
         private void InitializeMainLog()
         {
-            if (event_log_listview == null) return;
-            event_log_listview.View = View.Details;
-            event_log_listview.FullRowSelect = true;
-            if (event_log_listview.Columns.Count == 0)
+            if (dgvMainLog == null) return;
+            EnsureLogTabLayout(tabPage3, groupBox2, dgvMainLog);
+            SetupLogGridStyle(dgvMainLog);
+            dgvMainLog.Visible = true;
+
+            if (button4 != null)
             {
-                event_log_listview.Columns.Add("시간", 90);
-                event_log_listview.Columns.Add("직전 송신(내 프로그램)", 220);
-                event_log_listview.Columns.Add("수신 데이터(EMS)", 220);
-                event_log_listview.Columns.Add("해석", 200);
+                button4.Click -= Btn_main_log_stop_Click;
+                button4.Click += Btn_main_log_stop_Click;
             }
-            event_log_listview.OwnerDraw = true;
-            event_log_listview.DrawColumnHeader += Event_log_listview_DrawColumnHeader;
-            event_log_listview.DrawSubItem += Event_log_listview_DrawSubItem;
-            event_log_listview.DrawItem += Event_log_listview_DrawItem;
+            if (button3 != null)
+            {
+                button3.Click -= Btn_main_log_save_Click;
+                button3.Click += Btn_main_log_save_Click;
+            }
         }
 
-        private void Event_log_listview_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+        private void Communication_log_SelectedIndexChanged(object sender, EventArgs e)
         {
-            e.DrawBackground();
-            using (var sf = new StringFormat { Alignment = StringAlignment.Near })
-            using (var br = new SolidBrush(Color.White))
-                e.Graphics.DrawString(e.Header.Text, e.Font, br, e.Bounds, sf);
+            if (Communication_log == null) return;
+            if (Communication_log.SelectedTab == tabPage3 && dgvMainLog != null && !dgvMainLog.IsDisposed)
+                dgvMainLog.Invalidate();
+            else if (Communication_log.SelectedTab == tabPage4 && dgvCommLog != null && !dgvCommLog.IsDisposed)
+                dgvCommLog.Invalidate();
         }
 
-        private void Event_log_listview_DrawItem(object sender, DrawListViewItemEventArgs e)
+        private void Btn_main_log_stop_Click(object sender, EventArgs e)
         {
-            bool isError = e.Item.Tag is bool b && b;
-            Color fore = isError ? Color.Red : Color.White;
-            e.DrawBackground();
-            using (var br = new SolidBrush(fore))
-                e.Graphics.DrawString(e.Item?.Text ?? "", e.Item.Font ?? event_log_listview.Font, br, e.Bounds, StringFormat.GenericDefault);
+            _mainLogPaused = !_mainLogPaused;
+            if (button4 != null)
+                button4.Text = _mainLogPaused ? "Resume" : "Stop";
         }
 
-        private void Event_log_listview_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        private void Btn_main_log_save_Click(object sender, EventArgs e)
         {
-            bool isError = e.Item.Tag is bool b && b;
-            Color fore = isError ? Color.Red : Color.White;
-            e.DrawBackground();
-            using (var br = new SolidBrush(fore))
-                e.Graphics.DrawString(e.SubItem?.Text ?? "", e.Item.Font ?? event_log_listview.Font, br, e.Bounds, StringFormat.GenericDefault);
+            SaveLogGridToFile(dgvMainLog, "MainLog");
+        }
+
+        private void SaveLogGridToFile(DataGridView dgv, string defaultPrefix)
+        {
+            if (dgv == null || dgv.IsDisposed) return;
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "CSV 파일|*.csv|텍스트 파일|*.txt|모든 파일|*.*";
+                dlg.DefaultExt = "csv";
+                dlg.FileName = $"{defaultPrefix}_{DateTime.Now:yyyyMMdd_HHmmss}";
+                if (dlg.ShowDialog() != DialogResult.OK) return;
+                try
+                {
+                    var sb = new StringBuilder();
+                    sb.AppendLine("시간\t방향\t데이터(HEX)\t해석");
+                    foreach (DataGridViewRow row in dgv.Rows)
+                    {
+                        if (row.IsNewRow) continue;
+                        var c = row.Cells;
+                        sb.AppendLine($"{(c.Count > 0 ? c[0].Value : "")}\t{(c.Count > 1 ? c[1].Value : "")}\t{(c.Count > 2 ? c[2].Value : "")}\t{(c.Count > 3 ? c[3].Value : "")}");
+                    }
+                    File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
+                    MessageBox.Show("저장 완료: " + dlg.FileName);
+                }
+                catch (Exception ex) { ShowAppError("저장", "저장 실패: " + ex.Message, "오류", MessageBoxIcon.Error); }
+            }
+        }
+
+        private void AddMainLogRow(string direction, string hex, string interpret)
+        {
+            string time = DateTime.Now.ToString("HH:mm:ss.fff");
+            string dir = FormatLogDirection(direction);
+            string hx = FormatHexOrDash(hex);
+            string code = interpret ?? "";
+            void DoAdd()
+            {
+                if (_mainLogPaused) return;
+                if (dgvMainLog == null || dgvMainLog.IsDisposed) return;
+                if (dgvMainLog.Columns.Count < 4)
+                    SetupLogGridStyle(dgvMainLog);
+                try
+                {
+                    dgvMainLog.Rows.Add(time, dir, hx, code);
+                    while (dgvMainLog.Rows.Count > _mainLogMaxItems && dgvMainLog.Rows.Count > 0)
+                        dgvMainLog.Rows.RemoveAt(0);
+                }
+                catch { }
+            }
+            try
+            {
+                if (InvokeRequired)
+                    BeginInvoke(new Action(DoAdd));
+                else
+                    DoAdd();
+            }
+            catch { }
         }
 
         /// <summary>EMS 상태 응답 형식인지 (@TXT240 + body 26자 이상).</summary>
@@ -326,20 +464,15 @@ namespace EMS_TEST_SIMULATOR
         private void InitializeCommLogGrid()
         {
             if (dgvCommLog == null) return;
-            if (dgvCommLog.Columns.Count == 0)
-            {
-                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTime", HeaderText = "시간", Width = 90, ReadOnly = true });
-                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDirection", HeaderText = "방향", Width = 60, ReadOnly = true });
-                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colData", HeaderText = "데이터(HEX)", Width = 220, ReadOnly = true });
-                dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc", HeaderText = "해석", Width = 200, ReadOnly = true });
-            }
+            EnsureLogTabLayout(tabPage4, groupBox1, dgvCommLog);
+            SetupLogGridStyle(dgvCommLog);
             dgvCommLog.Visible = true;
-            dgvCommLog.BringToFront();
             btn_log_stop.Click += Btn_log_stop_Click;
             btn_log_save.Click += Btn_log_save_Click;
             if (Communication_log != null)
             {
-                Communication_log.SelectedIndexChanged += (s, ev) => { if (dgvCommLog != null && !dgvCommLog.IsDisposed) dgvCommLog.BringToFront(); };
+                Communication_log.SelectedIndexChanged -= Communication_log_SelectedIndexChanged;
+                Communication_log.SelectedIndexChanged += Communication_log_SelectedIndexChanged;
                 if (Communication_log.TabCount > 1) Communication_log.SelectedIndex = 1;
             }
         }
@@ -352,72 +485,19 @@ namespace EMS_TEST_SIMULATOR
 
         private void Btn_log_save_Click(object sender, EventArgs e)
         {
-            using (var dlg = new SaveFileDialog())
-            {
-                dlg.Filter = "CSV 파일|*.csv|텍스트 파일|*.txt|모든 파일|*.*";
-                dlg.DefaultExt = "csv";
-                dlg.FileName = $"CommLog_{DateTime.Now:yyyyMMdd_HHmmss}";
-                if (dlg.ShowDialog() != DialogResult.OK) return;
-                try
-                {
-                    var sb = new System.Text.StringBuilder();
-                    sb.AppendLine("시간\t방향\t데이터(HEX)\t해석");
-                    if (dgvCommLog.Rows != null)
-                        foreach (DataGridViewRow row in dgvCommLog.Rows)
-                        {
-                            if (row.IsNewRow) continue;
-                            var c = row.Cells;
-                            sb.AppendLine($"{(c.Count > 0 ? c[0].Value : "")}\t{(c.Count > 1 ? c[1].Value : "")}\t{(c.Count > 2 ? c[2].Value : "")}\t{(c.Count > 3 ? c[3].Value : "")}");
-                        }
-                    System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
-                    MessageBox.Show("저장 완료: " + dlg.FileName);
-                }
-                catch (Exception ex) { ShowAppError("저장", "저장 실패: " + ex.Message, "오류", MessageBoxIcon.Error); }
-            }
+            SaveLogGridToFile(dgvCommLog, "CommLog");
         }
 
-        /// <summary>주요로그(ListView) + 통신로그 그리드에 에러 1건 기록.</summary>
-        public void AddErrorLog(string category, string message, string sentInfo = "-", string recvInfo = "-")
+        /// <summary>주요로그에 에러 1건 기록 (시간·방향·HEX·해석).</summary>
+        public void AddErrorLog(string category, string message, string direction = null, string hex = null, string interpret = null)
         {
-            if (string.IsNullOrWhiteSpace(message)) return;
-            string time = DateTime.Now.ToString("HH:mm:ss.fff");
-            string desc = $"[{category}] {message}";
-            void DoAdd()
-            {
-                if (event_log_listview != null && !event_log_listview.IsDisposed)
-                {
-                    try
-                    {
-                        var li = new ListViewItem(time);
-                        li.SubItems.Add(string.IsNullOrEmpty(sentInfo) ? "-" : sentInfo);
-                        li.SubItems.Add(string.IsNullOrEmpty(recvInfo) ? "-" : recvInfo);
-                        li.SubItems.Add(desc);
-                        li.Tag = true;
-                        event_log_listview.Items.Add(li);
-                        while (event_log_listview.Items.Count > _mainLogMaxItems)
-                            event_log_listview.Items.RemoveAt(0);
-                    }
-                    catch { }
-                }
-                if (!_commLogPaused && dgvCommLog != null && !dgvCommLog.IsDisposed && dgvCommLog.Columns.Count >= 4)
-                {
-                    try
-                    {
-                        dgvCommLog.Rows.Add(time, "에러", "-", desc);
-                        while (dgvCommLog.Rows.Count > _commLogMaxRows && dgvCommLog.Rows.Count > 0)
-                            dgvCommLog.Rows.RemoveAt(0);
-                    }
-                    catch { }
-                }
-            }
-            try
-            {
-                if (InvokeRequired)
-                    BeginInvoke(new Action(DoAdd));
-                else
-                    DoAdd();
-            }
-            catch { }
+            if (string.IsNullOrWhiteSpace(message) && string.IsNullOrWhiteSpace(interpret)) return;
+            string dir = direction ?? MainLogText.ResolveAppDirection(category, message);
+            string hx = hex;
+            if (string.IsNullOrEmpty(hx))
+                hx = dir == "EMS→PC" ? "-" : _lastSentHex;
+            string code = interpret ?? MainLogText.ToInterpretCode(category, message);
+            AddMainLogRow(dir, hx, code);
         }
 
         private void ShowAppError(string category, string message, string title = null, MessageBoxIcon icon = MessageBoxIcon.Warning)
@@ -438,7 +518,7 @@ namespace EMS_TEST_SIMULATOR
             if (sig == _lastEmsStatusErrorSignature) return;
             _lastEmsStatusErrorSignature = sig;
             string desc = EmsLogHelper.BuildStatusErrorDescription(st);
-            AddErrorLog("EMS", desc, _lastSentHex ?? "-", recvHex);
+            AddErrorLog("EMS", desc, "EMS→PC", recvHex, EmsLogHelper.BuildInterpretCode(st));
 
             if (_autoRunning || EMS_Mode_Sequence.IsOperationActive)
             {
@@ -468,25 +548,16 @@ namespace EMS_TEST_SIMULATOR
             string hex = BitConverter.ToString(data).Replace("-", " ");
             if (hex.Length > 200) hex = hex.Substring(0, 200) + "...";
             string desc = description ?? "";
+            string dirLabel = FormatLogDirection(direction);
             void DoAdd()
             {
                 if (_commLogPaused) return;
                 if (dgvCommLog == null || dgvCommLog.IsDisposed) return;
                 if (dgvCommLog.Columns.Count < 4)
-                {
-                    try
-                    {
-                        dgvCommLog.Columns.Clear();
-                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTime", HeaderText = "시간", Width = 90, ReadOnly = true });
-                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDirection", HeaderText = "방향", Width = 60, ReadOnly = true });
-                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colData", HeaderText = "데이터(HEX)", Width = 220, ReadOnly = true });
-                        dgvCommLog.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc", HeaderText = "해석", Width = 200, ReadOnly = true });
-                    }
-                    catch { return; }
-                }
+                    SetupLogGridStyle(dgvCommLog);
                 try
                 {
-                    dgvCommLog.Rows.Add(time, direction, hex, desc);
+                    dgvCommLog.Rows.Add(time, dirLabel, hex, desc);
                     while (dgvCommLog.Rows.Count > _commLogMaxRows && dgvCommLog.Rows.Count > 0)
                         dgvCommLog.Rows.RemoveAt(0);
                 }
@@ -602,8 +673,20 @@ namespace EMS_TEST_SIMULATOR
             if (tableLayoutPanel1 != null) tableLayoutPanel1.BackColor = _darkPanel;
             if (tableLayoutPanel3 != null) tableLayoutPanel3.BackColor = _darkPanel;
             if (tBox1 != null) { tBox1.BackColor = _darkPanel; tBox1.ForeColor = Color.White; }
-            if (dgvCommLog != null) { dgvCommLog.BackgroundColor = _darkPanel; dgvCommLog.DefaultCellStyle = new DataGridViewCellStyle { BackColor = _darkPanel, ForeColor = Color.White }; dgvCommLog.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.White }; }
-            if (event_log_listview != null) { event_log_listview.BackColor = _darkPanel; event_log_listview.ForeColor = Color.White; }
+            if (dgvCommLog != null)
+            {
+                dgvCommLog.BackgroundColor = _darkPanel;
+                dgvCommLog.DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = _darkPanel,
+                    ForeColor = Color.White,
+                    SelectionBackColor = Color.FromArgb(0, 122, 204),
+                    SelectionForeColor = Color.White
+                };
+                dgvCommLog.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.White };
+            }
+            if (dgvMainLog != null)
+                SetupLogGridStyle(dgvMainLog);
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -1288,11 +1371,6 @@ namespace EMS_TEST_SIMULATOR
         }
 
         private void listView4_SelectedIndexChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void event_log_listview_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }

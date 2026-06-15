@@ -85,6 +85,51 @@ namespace EMS_TEST_SIMULATOR
             return string.Join("; ", parts);
         }
 
+        /// <summary>주요로그 해석 열: H1(RC04·EC21) 형식.</summary>
+        public static string BuildInterpretCode(EmsStatusSnapshot s)
+        {
+            var parts = new List<string>();
+            if ((s.ResponseCode ?? "00") != "00")
+                parts.Add("RC" + (s.ResponseCode ?? "??").Trim());
+            if (IsErrorCodeActive(s.ErrorCode))
+                parts.Add("EC" + (s.ErrorCode ?? "??").Trim());
+            if (parts.Count == 0)
+                return "H1(이상)";
+            return "H1(" + string.Join("·", parts) + ")";
+        }
+
+        /// <summary>주요로그용 짧은 EMS 상태 요약.</summary>
+        public static string BuildShortStatusErrorDescription(EmsStatusSnapshot s)
+        {
+            var parts = new List<string>();
+            if ((s.ResponseCode ?? "00") != "00")
+            {
+                string rc = (s.ResponseCode ?? "??").Trim();
+                ResponseNames.TryGetValue(rc, out string rn);
+                parts.Add(string.IsNullOrEmpty(rn) || rn == "-" ? $"응답{rc}" : $"응답{rc}({ShortName(rn)})");
+            }
+            if (IsErrorCodeActive(s.ErrorCode))
+            {
+                string ec = (s.ErrorCode ?? "??").Trim();
+                ErrorNames.TryGetValue(ec, out string en);
+                parts.Add(string.IsNullOrEmpty(en) || en == "-" ? $"EC{ec}" : $"EC{ec}({ShortName(en)})");
+            }
+            if (parts.Count == 0)
+                parts.Add("EMS 이상");
+            if (!string.IsNullOrEmpty(s.CurrentSectionCount))
+                parts.Add($"@{s.CurrentSectionCount.Trim()}");
+            return string.Join(" ", parts);
+        }
+
+        private static string ShortName(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return "";
+            int cut = name.IndexOf('(');
+            if (cut > 0) name = name.Substring(0, cut);
+            if (name.Length > 8) name = name.Substring(0, 8);
+            return name.Trim();
+        }
+
         private static Dictionary<string, string> BuildResponseNames()
         {
             var d = new Dictionary<string, string>(StringComparer.Ordinal);

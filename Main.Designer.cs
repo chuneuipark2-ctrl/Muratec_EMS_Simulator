@@ -48,12 +48,20 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.event_log_listview = new System.Windows.Forms.ListView();
+            this.dgvMainLog = new System.Windows.Forms.DataGridView();
+            this.colMainTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMainDirection = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMainData = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMainDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btn_log_save = new System.Windows.Forms.Button();
             this.btn_log_stop = new System.Windows.Forms.Button();
             this.dgvCommLog = new System.Windows.Forms.DataGridView();
+            this.colCommTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCommDirection = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCommData = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCommDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.코드리스트 = new System.Windows.Forms.TabPage();
             this.tabControl3 = new System.Windows.Forms.TabControl();
             this.응답코드 = new System.Windows.Forms.TabPage();
@@ -152,6 +160,7 @@ namespace EMS_TEST_SIMULATOR
             this.Communication_log.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMainLog)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCommLog)).BeginInit();
@@ -319,7 +328,7 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.tabPage3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.tabPage3.Controls.Add(this.groupBox2);
-            this.tabPage3.Controls.Add(this.event_log_listview);
+            this.tabPage3.Controls.Add(this.dgvMainLog);
             this.tabPage3.Location = new System.Drawing.Point(4, 34);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
@@ -338,7 +347,7 @@ namespace EMS_TEST_SIMULATOR
             this.groupBox2.Location = new System.Drawing.Point(3, 3);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(581, 36);
-            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "주요 로그";
             // 
@@ -368,21 +377,65 @@ namespace EMS_TEST_SIMULATOR
             this.button4.Text = "Stop";
             this.button4.UseVisualStyleBackColor = false;
             // 
-            // event_log_listview
+            // dgvMainLog
             // 
-            this.event_log_listview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.event_log_listview.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.event_log_listview.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.event_log_listview.ForeColor = System.Drawing.Color.White;
-            this.event_log_listview.HideSelection = false;
-            this.event_log_listview.Location = new System.Drawing.Point(-1, 33);
-            this.event_log_listview.Name = "event_log_listview";
-            this.event_log_listview.Size = new System.Drawing.Size(863, 157);
-            this.event_log_listview.TabIndex = 0;
-            this.event_log_listview.UseCompatibleStateImageBehavior = false;
-            this.event_log_listview.SelectedIndexChanged += new System.EventHandler(this.event_log_listview_SelectedIndexChanged);
+            this.dgvMainLog.AllowUserToAddRows = false;
+            this.dgvMainLog.AllowUserToDeleteRows = false;
+            this.dgvMainLog.AutoGenerateColumns = false;
+            this.dgvMainLog.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.dgvMainLog.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvMainLog.ColumnHeadersHeight = 34;
+            this.dgvMainLog.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.dgvMainLog.ColumnHeadersVisible = true;
+            this.dgvMainLog.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colMainTime,
+            this.colMainDirection,
+            this.colMainData,
+            this.colMainDesc});
+            this.dgvMainLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvMainLog.EnableHeadersVisualStyles = false;
+            this.dgvMainLog.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.dgvMainLog.Location = new System.Drawing.Point(3, 3);
+            this.dgvMainLog.MultiSelect = false;
+            this.dgvMainLog.Name = "dgvMainLog";
+            this.dgvMainLog.ReadOnly = true;
+            this.dgvMainLog.RowHeadersVisible = false;
+            this.dgvMainLog.RowHeadersWidth = 62;
+            this.dgvMainLog.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvMainLog.Size = new System.Drawing.Size(581, 188);
+            this.dgvMainLog.TabIndex = 2;
+            // 
+            // colMainTime
+            // 
+            this.colMainTime.HeaderText = "시간";
+            this.colMainTime.MinimumWidth = 8;
+            this.colMainTime.Name = "colMainTime";
+            this.colMainTime.ReadOnly = true;
+            this.colMainTime.Width = 90;
+            // 
+            // colMainDirection
+            // 
+            this.colMainDirection.HeaderText = "방향";
+            this.colMainDirection.MinimumWidth = 8;
+            this.colMainDirection.Name = "colMainDirection";
+            this.colMainDirection.ReadOnly = true;
+            this.colMainDirection.Width = 72;
+            // 
+            // colMainData
+            // 
+            this.colMainData.HeaderText = "데이터(HEX)";
+            this.colMainData.MinimumWidth = 8;
+            this.colMainData.Name = "colMainData";
+            this.colMainData.ReadOnly = true;
+            this.colMainData.Width = 220;
+            // 
+            // colMainDesc
+            // 
+            this.colMainDesc.HeaderText = "해석";
+            this.colMainDesc.MinimumWidth = 8;
+            this.colMainDesc.Name = "colMainDesc";
+            this.colMainDesc.ReadOnly = true;
+            this.colMainDesc.Width = 200;
             // 
             // tabPage4
             // 
@@ -441,10 +494,17 @@ namespace EMS_TEST_SIMULATOR
             // 
             this.dgvCommLog.AllowUserToAddRows = false;
             this.dgvCommLog.AllowUserToDeleteRows = false;
+            this.dgvCommLog.AutoGenerateColumns = false;
             this.dgvCommLog.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
             this.dgvCommLog.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvCommLog.ColumnHeadersHeight = 34;
             this.dgvCommLog.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.dgvCommLog.ColumnHeadersVisible = true;
+            this.dgvCommLog.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colCommTime,
+            this.colCommDirection,
+            this.colCommData,
+            this.colCommDesc});
             this.dgvCommLog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvCommLog.EnableHeadersVisualStyles = false;
             this.dgvCommLog.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -457,6 +517,38 @@ namespace EMS_TEST_SIMULATOR
             this.dgvCommLog.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvCommLog.Size = new System.Drawing.Size(581, 188);
             this.dgvCommLog.TabIndex = 2;
+            // 
+            // colCommTime
+            // 
+            this.colCommTime.HeaderText = "시간";
+            this.colCommTime.MinimumWidth = 8;
+            this.colCommTime.Name = "colCommTime";
+            this.colCommTime.ReadOnly = true;
+            this.colCommTime.Width = 90;
+            // 
+            // colCommDirection
+            // 
+            this.colCommDirection.HeaderText = "방향";
+            this.colCommDirection.MinimumWidth = 8;
+            this.colCommDirection.Name = "colCommDirection";
+            this.colCommDirection.ReadOnly = true;
+            this.colCommDirection.Width = 72;
+            // 
+            // colCommData
+            // 
+            this.colCommData.HeaderText = "데이터(HEX)";
+            this.colCommData.MinimumWidth = 8;
+            this.colCommData.Name = "colCommData";
+            this.colCommData.ReadOnly = true;
+            this.colCommData.Width = 220;
+            // 
+            // colCommDesc
+            // 
+            this.colCommDesc.HeaderText = "해석";
+            this.colCommDesc.MinimumWidth = 8;
+            this.colCommDesc.Name = "colCommDesc";
+            this.colCommDesc.ReadOnly = true;
+            this.colCommDesc.Width = 200;
             // 
             // 코드리스트
             // 
@@ -1630,6 +1722,7 @@ namespace EMS_TEST_SIMULATOR
             this.Communication_log.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMainLog)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvCommLog)).EndInit();
@@ -1698,12 +1791,20 @@ namespace EMS_TEST_SIMULATOR
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.ListView event_log_listview;
+        private System.Windows.Forms.DataGridView dgvMainLog;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMainTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMainDirection;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMainData;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMainDesc;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btn_log_save;
         private System.Windows.Forms.Button btn_log_stop;
         private System.Windows.Forms.DataGridView dgvCommLog;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCommTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCommDirection;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCommData;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCommDesc;
         private System.Windows.Forms.TabPage 코드리스트;
         private System.Windows.Forms.TabControl tabControl3;
         private System.Windows.Forms.TabPage 응답코드;
